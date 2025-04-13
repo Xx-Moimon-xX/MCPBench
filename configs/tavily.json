@@ -1,0 +1,8 @@
+{
+  "name":"Tavily",
+  "command":"npx -y tavily-mcp@0.1.4",
+  "args":"TAVILY_API_KEY=",
+  "port":8003,
+  "tool_name":"tavily-search",
+  "tool_keyword":"query"
+}

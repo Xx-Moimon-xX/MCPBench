@@ -1,0 +1,8 @@
+{
+  "name":"Brave",
+  "command":"npx -y @modelcontextprotocol/server-brave-search",
+  "args":"BRAVE_API_KEY=",
+  "port":8000,
+  "tool_name":"brave_web_search",
+  "tool_keyword":"query"
+}

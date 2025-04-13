@@ -1,0 +1,6 @@
+dspy>=2.6
+mcp
+uv
+dashscope
+shortuuid
+anthropic
