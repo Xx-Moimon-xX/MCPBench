@@ -96,7 +96,7 @@ If you find this work useful, please consider citing our project:
 
 ```bibtex
 @misc{mcpbench,
-  title={MCPBench: A Benchmark for Evaluating Multi-Chain Prompting},
+  title={MCPBench: A Benchmark for Evaluating MCP Servers},
   author={Zhiling Luo,Xiaorong Shi, Xuanrui Lin, Yang Jin,Bolin Ding},
   howpublished = {\url{https://github.com/modelscope/MCPBench}},
   year={2025}
