@@ -2,7 +2,7 @@
   "name":"Exa Search",
   "command":"",
   "args":"",
-  "url":"https://mcp-a11aaa67-0a82-40a2.api-inference.modelscope.cn/sse",
+  "url":"",
   "port":0,
   "tool_name":"web_search",
   "tool_keyword":"query"
