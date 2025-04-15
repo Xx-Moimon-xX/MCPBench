@@ -92,12 +92,13 @@ sh launch_mcp_as_sse.sh duckduckgo.json
   "name": "Exa Search",
   "command": "",
   "args": "",
-  "url": "https://mcp-a11aaa67-0a82-40a2.api-inference.modelscope.cn/sse",
+  "url": "https://mcp-xxxx.api-inference.modelscope.cn/sse",
   "port": 0,
   "tool_name": "web_search",
   "tool_keyword": "query"
 }
 ```
+其中url可以从ModelScope的mcp广场上获取。
 
 ## 启动评估
 要评估 MCP 服务器在网络搜索任务上的性能：
