@@ -137,7 +137,7 @@ If you find this work useful, please consider citing our project:
 ```
 
 [docs-image]: https://img.shields.io/badge/Documentation-EB3ECC
-[docs-url]: https://camel-ai.github.io/camel/index.html
+[docs-url]: https://github.com/modelscope/MCPBench/blob/main/mcpbench.pdf
 [package-license-image]: https://img.shields.io/badge/License-Apache_2.0-blue.svg
 [package-license-url]: https://github.com/modelscope/MCPBench/blob/main/LICENSE
 
