@@ -93,12 +93,13 @@ For SSE-supported MCP Server, write the config like:
   "name": "Exa Search",
   "command": "",
   "args": "",
-  "url": "https://mcp-a11aaa67-0a82-40a2.api-inference.modelscope.cn/sse",
+  "url": "https://mcp-xxxx.api-inference.modelscope.cn/sse",
   "port": 0,
   "tool_name": "web_search",
   "tool_keyword": "query"
 }
 ```
+where the url can be generated from the MCP market on ModelScope.
 
 ## Launch Evaluation
 To evaluate the MCP Server's performance on Web Search tasks:
