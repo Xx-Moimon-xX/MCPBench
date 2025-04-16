@@ -10,7 +10,7 @@
 
 </div>
 
-MCPBench is an evaluation framework for MCP Servers. It supports the evaluation of two types of servers: Web Search and Database Query, and is compatible with both local and remote MCP Servers. The framework primarily evaluates different MCP Servers (such as Brave Search, DuckDuckGo, etc.) in terms of task completion accuracy, latency, and token consumption under the same LLM and Agent configurations. Here is the [evaluation report](https://github.com/modelscope/MCPBench/blob/main/mcpbench.pdf).
+MCPBench is an evaluation framework for MCP Servers. It supports the evaluation of two types of servers: Web Search and Database Query, and is compatible with both local and remote MCP Servers. The framework primarily evaluates different MCP Servers (such as Brave Search, DuckDuckGo, etc.) in terms of task completion accuracy, latency, and token consumption under the same LLM and Agent configurations. Here is the [evaluation report](https://arxiv.org/abs/2504.11094).
 
 <img src="assets/figure1.png" alt="MCPBench Overview" width="600"/>
 
@@ -125,7 +125,7 @@ For the Database Query task, the dataset is located at `MCPBench/langProBe/DB/da
 }
 ```
 
-We have evaluated mainstream MCP Servers on both tasks. For detailed experimental results, please refer to [Documentation](https://github.com/modelscope/MCPBench/blob/main/mcpbench.pdf)
+We have evaluated mainstream MCP Servers on both tasks. For detailed experimental results, please refer to [Documentation](https://arxiv.org/abs/2504.11094)
 
 # 🚰 Cite
 If you find this work useful, please consider citing our project:
@@ -139,8 +139,20 @@ If you find this work useful, please consider citing our project:
 }
 ```
 
+Alternatively, you may reference our report.
+```bibtex
+@article{mcpbench_report,
+      title={Evaluation Report on MCP Servers}, 
+      author={Zhiling Luo, Xiaorong Shi, Xuanrui Lin, Jinyang Gao},
+      year={2025},
+      journal={arXiv preprint arXiv:2504.11094},
+      url={https://arxiv.org/abs/2504.11094},
+      primaryClass={cs.AI}
+}
+```
+
 [docs-image]: https://img.shields.io/badge/Documentation-EB3ECC
-[docs-url]: https://github.com/modelscope/MCPBench/blob/main/mcpbench.pdf
+[docs-url]: https://arxiv.org/abs/2504.11094
 [package-license-image]: https://img.shields.io/badge/License-Apache_2.0-blue.svg
 [package-license-url]: https://github.com/modelscope/MCPBench/blob/main/LICENSE
 
