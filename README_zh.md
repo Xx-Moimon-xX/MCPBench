@@ -151,6 +151,6 @@ sh evaluation_db.sh YOUR_CONFIG_FILE
 ```
 
 [docs-image]: https://img.shields.io/badge/Documentation-EB3ECC
-[docs-url]: https://github.com/modelscope/MCPBench/blob/main/mcpbench.pdf
+[docs-url]: https://arxiv.org/abs/2504.11094
 [package-license-image]: https://img.shields.io/badge/License-Apache_2.0-blue.svg
 [package-license-url]: https://github.com/modelscope/MCPBench/blob/main/LICENSE
