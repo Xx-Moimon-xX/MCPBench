@@ -10,7 +10,7 @@
 
 </div>
 
-MCPBench 是一个用于评估 MCP 服务器的评估框架。它支持评估两种类型的服务器：网络搜索和数据库查询，并且兼容本地和远程 MCP 服务器。该框架主要在相同的 LLM 和 Agent 配置下，从任务完成准确性、延迟和Token消耗等方面评估不同的 MCP 服务器（如 Brave Search、DuckDuckGo 等）。详见[评估报告](https://github.com/modelscope/MCPBench/blob/main/mcpbench.pdf)
+MCPBench 是一个用于评估 MCP 服务器的评估框架。它支持评估两种类型的服务器：网络搜索和数据库查询，并且兼容本地和远程 MCP 服务器。该框架主要在相同的 LLM 和 Agent 配置下，从任务完成准确性、延迟和Token消耗等方面评估不同的 MCP 服务器（如 Brave Search、DuckDuckGo 等）。详见[评估报告](https://arxiv.org/abs/2504.11094)
 
 <img src="assets/figure1.png" alt="MCPBench Overview" width="600"/>
 
@@ -124,7 +124,7 @@ sh evaluation_db.sh YOUR_CONFIG_FILE
 }
 ```
 
-我们已经在这两个任务上评估了主流的 MCP 服务器。有关详细的实验结果，请参阅[文档](https://github.com/modelscope/MCPBench/blob/main/mcpbench.pdf)
+我们已经在这两个任务上评估了主流的 MCP 服务器。有关详细的实验结果，请参阅[文档](https://arxiv.org/abs/2504.11094)
 
 # 🚰 引用
 如果您觉得这项工作有用，请考虑引用我们的项目：
@@ -135,6 +135,18 @@ sh evaluation_db.sh YOUR_CONFIG_FILE
   author={Zhiling Luo,Xiaorong Shi, Xuanrui Lin, Jinyang Gao},
   howpublished = {\url{https://github.com/modelscope/MCPBench}},
   year={2025}
+}
+```
+
+或者引用我们的报告
+```bibtex
+@article{mcpbench_report,
+      title={Evaluation Report on MCP Servers}, 
+      author={Zhiling Luo, Xiaorong Shi, Xuanrui Lin, Jinyang Gao},
+      year={2025},
+      journal={arXiv preprint arXiv:2504.11094},
+      url={https://arxiv.org/abs/2504.11094},
+      primaryClass={cs.AI}
 }
 ```
 
