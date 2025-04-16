@@ -3,11 +3,21 @@
 </h1>
 
 
+
 <div align="center">
 
 [![Documentation][docs-image]][docs-url]
 [![Package License][package-license-image]][package-license-url]
 
+</div>
+
+<div align="center">
+<h4 align="center">
+
+[中文](https://github.com/modelscope/MCPBench/blob/main/README_zh.md) |
+[English](https://github.com/modelscope/MCPBench/blob/main/README.md)
+
+</h4>
 </div>
 
 MCPBench is an evaluation framework for MCP Servers. It supports the evaluation of two types of servers: Web Search and Database Query, and is compatible with both local and remote MCP Servers. The framework primarily evaluates different MCP Servers (such as Brave Search, DuckDuckGo, etc.) in terms of task completion accuracy, latency, and token consumption under the same LLM and Agent configurations. Here is the [evaluation report](https://arxiv.org/abs/2504.11094).
@@ -18,14 +28,7 @@ The implementation is based on [LangProBe: a Language Programs Benchmark](https:
 
 <hr>
 
-<div align="center">
-<h4 align="center">
 
-[中文](https://github.com/modelscope/MCPBench/blob/main/README_zh.md) |
-[English](https://github.com/modelscope/MCPBench/blob/main/README.md)
-
-</h4>
-</div>
 
 # 📋 Table of Contents
 
