@@ -10,14 +10,6 @@
 
 </div>
 
-MCPBench 是一个用于评估 MCP 服务器的评估框架。它支持评估两种类型的服务器：网络搜索和数据库查询，并且兼容本地和远程 MCP 服务器。该框架主要在相同的 LLM 和 Agent 配置下，从任务完成准确性、延迟和Token消耗等方面评估不同的 MCP 服务器（如 Brave Search、DuckDuckGo 等）。详见[评估报告](https://arxiv.org/abs/2504.11094)
-
-<img src="assets/figure1.png" alt="MCPBench Overview" width="600"/>
-
-本项目基于 [LangProBe: a Language Programs Benchmark](https://arxiv.org/abs/2502.20315) 实现。
-
-<hr>
-
 <div align="center">
 <h4 align="center">
 
@@ -26,6 +18,16 @@ MCPBench 是一个用于评估 MCP 服务器的评估框架。它支持评估两
 
 </h4>
 </div>
+
+MCPBench 是一个用于评估 MCP 服务器的评估框架。它支持评估两种类型的服务器：网络搜索和数据库查询，并且兼容本地和远程 MCP 服务器。该框架主要在相同的 LLM 和 Agent 配置下，从任务完成准确性、延迟和Token消耗等方面评估不同的 MCP 服务器（如 Brave Search、DuckDuckGo 等）。详见[评估报告](https://arxiv.org/abs/2504.11094)
+
+<img src="assets/figure1.png" alt="MCPBench Overview" width="600"/>
+
+本项目基于 [LangProBe: a Language Programs Benchmark](https://arxiv.org/abs/2502.20315) 实现。
+
+<hr>
+
+
 
 # 📋 目录
 
