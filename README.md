@@ -8,6 +8,7 @@
 
 [![Documentation][docs-image]][docs-url]
 [![Package License][package-license-image]][package-license-url]
+[![paperwithcode](https://img.shields.io/badge/paperwithcode-blue)](https://paperswithcode.com/paper/evaluation-report-on-mcp-servers)
 
 </div>
 
