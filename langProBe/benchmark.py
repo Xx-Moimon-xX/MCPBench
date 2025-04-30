@@ -1,4 +1,4 @@
-import random
+import random, os
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
@@ -10,15 +10,13 @@ from dspy.teleprompt import Teleprompter
 
 import langProBe.optimizers as langprobe_optimizers
 from langProBe.dspy_program import LangProBeDSPyMetaProgram
+from langProBe.config_utils import read_json, read_jsonl
+from langProBe.program_utils import ProcessManager
 
 
-class DSPyFeatures(Enum):
-    BASELINE = 0
-    OPTIMIZER = 1
-    ASSERTION = 2
 
 
-dataset_size = {"full": None, "lite": 500, "tiny": 200, "test": 50}
+dataset_size = {"full": None, "lite": 500, "tiny": 200, "test": 2}
 
 
 class Benchmark(ABC):
@@ -94,6 +92,28 @@ class Benchmark(ABC):
         return self.test_set
 
 
+class MCPBench(Benchmark):
+    def __init__(self, dataset_mode="lite", dataset_path=None):
+        self.dataset_path = dataset_path
+        super().__init__(dataset_mode=dataset_mode)
+
+    def init_dataset(self):
+        self.dataset = []
+        self.test_set = []
+        test_raw_data = read_jsonl(self.dataset_path)
+        
+        for test_data in test_raw_data:
+            self.test_set.append(
+                dspy.Example(
+                    id=test_data["unique_id"],
+                    question=test_data["Prompt"],
+                    answer=test_data["Answer"],
+                ).with_inputs("id", "question", "answer", "config")
+            )
+
+
+
+
 @dataclass
 class EvaluationResult:
     benchmark: str
@@ -104,13 +124,15 @@ class EvaluationResult:
     input_tokens: int
     output_tokens: int
 
-    optimizer: str = None
-    optimized_program: dspy.Module = None
-    optimizer_input_tokens: int = None
-    optimizer_output_tokens: int = None
-    optimizer_cost: float = None
+    outputs_raw_data: List|None = None
 
-    optimizer_program_scores: list[float] = None
+    # optimizer: str = None
+    # optimized_program: dspy.Module = None
+    # optimizer_input_tokens: int = None
+    # optimizer_output_tokens: int = None
+    # optimizer_cost: float = None
+
+    # optimizer_program_scores: list[float] = None
 
 
 @dataclass
@@ -139,16 +161,26 @@ def setup_lm(dspy_config=None):
     return lm
 
 
-def calculate_stats(lm: dspy.LM) -> tuple[float, int, int]:
-    cost = 0
-    input_tokens = 0
-    output_tokens = 0
-    for i, trace in enumerate(lm.history):
-        cost += trace.get("cost", None) or 0
-        input_tokens += trace.get("usage", 0).get("prompt_tokens", 0)
-        output_tokens += trace.get("usage", 0).get("completion_tokens", 0)
+# def calculate_stats(lm: dspy.LM) -> tuple[float, int, int]:
+#     cost = 0
+#     input_tokens = 0
+#     output_tokens = 0
+#     for i, trace in enumerate(lm.history):
+#         cost += trace.get("cost", None) or 0
+#         input_tokens += trace.get("usage", 0).get("prompt_tokens", 0)
+#         output_tokens += trace.get("usage", 0).get("completion_tokens", 0)
 
-    return cost, input_tokens, output_tokens
+#     return cost, input_tokens, output_tokens
+
+def calculate_stats(manager: List[ProcessManager]) -> tuple[float, float, float]:
+    input_tokens = sum(usage["prompt_tokens"] for trace in manager for usage in trace.lm_usages)
+    output_tokens = sum(usage["completion_tokens"] for trace in manager for usage in trace.lm_usages)
+    
+    avg_input = input_tokens // len(manager)
+    avg_output = output_tokens // len(manager)
+    
+    return 0, avg_input, avg_output
+
 
 
 class EvaluateBench(ABC):
@@ -158,52 +190,33 @@ class EvaluateBench(ABC):
         program: dspy.Module,
         metric: Callable,
         lm: str,
-        optimizers: list[(Teleprompter, dict)] = None,
         benchmark_name: str = None,
-        has_assertions: bool = False,
         num_threads: int = 1,
-        use_devset: bool = False,
-        evaluate_baseline_flag=True,
         api_key: str = None,
         api_base: str = None,
     ):
-        self.evaluate_baseline_flag = evaluate_baseline_flag
-        self.features: list[DSPyFeatures] = (
-            [DSPyFeatures.BASELINE] if self.evaluate_baseline_flag else []
-        )
         self.benchmark = benchmark
         self.program = program
+
         self.program.setup_lm(lm, api_key=api_key, api_base=api_base)
         self.metric = metric
-        self.optimizers = optimizers
         self.num_threads = num_threads
-        if use_devset:
-            devset = benchmark.get_dev_set()
-            print(f"Using devset[{len(devset)}] for evaluation")
-        else:
-            devset = benchmark.get_test_set()
-            print(f"Using testset[{len(devset)}] for evaluation")
+        devset = benchmark.get_test_set()
         self.evaluate_prog = Evaluate(
             devset=devset,
             metric=self.metric,
             num_threads=self.num_threads,
             display_progress=True,
-            # FIXME(shangyin): find a more ergonomic way to set max_errors
             max_errors=5000,
-            provide_traceback=False,
+            return_outputs=True,
+            provide_traceback=True,
         )
 
         self.program_name = getattr(
             self.program, "_name", self.program.__class__.__name__
         )
         self.benchmark_name = benchmark_name or self.benchmark.__class__.__name__
-
         self.results: list[EvaluationResult] = []
-        if self.optimizers is not None:
-            self.features.append(DSPyFeatures.OPTIMIZER)
-
-        if has_assertions:
-            self.features.append(DSPyFeatures.ASSERTION)
 
     def get_empty_results(self):
         return EvaluationResult(
@@ -215,80 +228,21 @@ class EvaluateBench(ABC):
             output_tokens=0,
         )
 
-    def set_optimizer(self, optimizers: list[Teleprompter]) -> None:
-        self.optimizers = optimizers
 
-    def evaluate_baseline(self, dspy_config=None) -> list[EvaluationResult]:
+    def evaluate_baseline(self, dspy_config=None) -> EvaluationResult:
         with dspy.context(**dspy_config):
-            score = self.evaluate_prog(self.program)
+            score, info = self.evaluate_prog(self.program)
         result = self.get_empty_results()
-        result.score = score
-        if isinstance(self.program, LangProBeDSPyMetaProgram):
-            result.cost, result.input_tokens, result.output_tokens = calculate_stats(
-                self.program.lm
-            )
-        else:
-            # TODO(shangyin): support non-dspy usage.
-            result.cost, result.input_tokens, result.output_tokens = 0, 0, 0
+        datasets, outputs, _ = zip(*info)
+        managers = [one.process_report for one in outputs]
 
-        return [result]
+        result.score = score   
+        result.outputs_raw_data = outputs
+        result.cost, result.input_tokens, result.output_tokens = calculate_stats(managers)
 
-    def evaluate_optimizers(self, dspy_config=None) -> list[EvaluationResult]:
-        lm = self.program.get_lm()
-        self.program.set_lm(None)
-
-        return [
-            self.evaluate_with_optimizer(optimizer, optimizer_config, lm, dspy_config)
-            for optimizer, optimizer_config in self.optimizers
-        ]
-
-    def evaluate_with_optimizer(
-        self, optimizer: Teleprompter, optimizer_config, lm, dspy_config=None
-    ) -> float:
-        result = self.get_empty_results()
-        optimizer_lm = lm.copy()
-        dspy_config["lm"] = optimizer_lm
-        save_candidate_score = optimizer_config.get("save_candidate_score", False)
-        with dspy.context(**dspy_config):
-            if optimizer_config.get("use_valset", False):
-                optimized_program = optimizer(
-                    self.program,
-                    trainset=self.benchmark.train_set,
-                    valset=self.benchmark.val_set,
-                )
-            else:
-                optimized_program = optimizer(
-                    self.program, trainset=self.benchmark.train_set
-                )
-        (
-            result.optimizer_cost,
-            result.optimizer_input_tokens,
-            result.optimizer_output_tokens,
-        ) = calculate_stats(optimizer_lm)
-        # if save_candidate_score:
-        #     score_data = optimized_program.score_data
-        #     candidate_scores = [candidate["score"] for candidate in score_data]
-        #     result.optimizer_program_scores = candidate_scores
-
-        result.optimizer = optimizer_config.get("name", optimizer.__class__.__name__)
-        result.optimized_program = optimized_program
-
-        eval_lm = lm.copy()
-        dspy_config["lm"] = eval_lm
-        with dspy.context(**dspy_config):
-            score = self.evaluate_prog(optimized_program)
-        result.score = score
-        result.cost, result.input_tokens, result.output_tokens = calculate_stats(
-            eval_lm
-        )
         return result
 
-    def evaluate_assertion(self, dspy_config=None) -> list[EvaluationResult]:
-        self.program.activate_assertions()
-        # TODO (shangyin): Implement assertion evaluation with cost metric
-        return self.evaluate_prog(self.program)
-
-    def evaluate(self, dspy_config=None) -> list[EvaluationResult]:
+    def evaluate(self, dspy_config=None) -> EvaluationResult:
         """
         Args:
             dspy_config: A dictionary of configurations for dspy.context
@@ -297,18 +251,7 @@ class EvaluateBench(ABC):
         """
         if dspy_config is None:
             dspy_config = {}
-        result = []
-        if isinstance(self.program, LangProBeDSPyMetaProgram):
-            for feature in self.features:
-                match feature:
-                    case DSPyFeatures.BASELINE:
-                        result.extend(self.evaluate_baseline(dspy_config))
-                    case DSPyFeatures.OPTIMIZER:
-                        result.extend(self.evaluate_optimizers(dspy_config))
-                    case DSPyFeatures.ASSERTION:
-                        result.extend(self.evaluate_assertion(dspy_config))
-        else:
-            # For non-dspy pipelines, only baseline eval is supported for now
-            result.extend(self.evaluate_baseline(dspy_config))
+
+        result = self.evaluate_baseline(dspy_config)
         self.results = result
         return result

@@ -1,0 +1,30 @@
+{
+    "mcp_pool": [
+        {
+            "name": "mysql",
+            "description": "A Model Context Protocol (MCP) implementation that enables secure interaction with MySQL databases. This server component facilitates communication between AI applications (hosts/clients) and MySQL databases, making database exploration and analysis safer and more structured through a controlled interface.",
+            "tools": [
+                {
+                    "tool_name": "execute_sql",
+                    "tool_description": "Execute SQL queries with proper error handling.",
+                    "inputs": [
+                        {
+                            "name": "query",
+                            "type": "string",
+                            "required": true,
+                            "description": "your sql query"
+                        }
+                    ]
+                }
+            ],
+            "run_config": [
+                {
+                    "command": "uvx --from mysql-mcp-server mysql_mcp_server",
+                    "args": "MYSQL_HOST=localhost MYSQL_PORT=3306 MYSQL_USER=root MYSQL_PASSWORD=xxx MYSQL_DATABASE=car_bi",
+                    "port": 8005
+                }
+            ]
+        }
+    ],
+    "query_type": "SQL"
+}

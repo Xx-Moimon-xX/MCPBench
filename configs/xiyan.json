@@ -1,8 +1,0 @@
-{
-  "name":"Xiyan",
-  "command":"/opt/homebrew/Caskroom/miniforge/base/envs/mcp11/bin/python -m xiyan_mcp_server",
-  "args":"YML=/Users/bruce/config.yml",
-  "port":8010,
-  "tool_name":"get_data",
-  "tool_keyword":"query"
-}

@@ -23,10 +23,6 @@ def register_benchmark(benchmark: str):
         # 如果直接导入失败，尝试使用完整路径导入
         benchmark_metas = importlib.import_module(f"langProBe.{benchmark}", package=None)
     
-    # 处理WebSearch模块的特殊情况
-    if benchmark == "WebSearch" and hasattr(benchmark_metas, "get_websearch_benchmark"):
-        benchmark_metas.benchmark = benchmark_metas.get_websearch_benchmark()
-    
     if check_benchmark(benchmark_metas):
         registered_benchmarks.extend(benchmark_metas.benchmark)
     else:

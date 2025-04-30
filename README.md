@@ -8,7 +8,6 @@
 
 [![Documentation][docs-image]][docs-url]
 [![Package License][package-license-image]][package-license-url]
-[![paperwithcode](https://img.shields.io/badge/paperwithcode-blue)](https://paperswithcode.com/paper/evaluation-report-on-mcp-servers)
 
 </div>
 
@@ -21,11 +20,12 @@
 </h4>
 </div>
 
-MCPBench is an evaluation framework for MCP Servers. It supports the evaluation of two types of servers: Web Search and Database Query, and is compatible with both local and remote MCP Servers. The framework primarily evaluates different MCP Servers (such as Brave Search, DuckDuckGo, etc.) in terms of task completion accuracy, latency, and token consumption under the same LLM and Agent configurations. Here is the [evaluation report](https://arxiv.org/abs/2504.11094).
+MCPBench is an evaluation framework for MCP Servers. It supports the evaluation of three types of servers: Web Search, Database Query and GAIA, and is compatible with both local and remote MCP Servers. The framework primarily evaluates different MCP Servers (such as Brave Search, DuckDuckGo, etc.) in terms of task completion accuracy, latency, and token consumption under the same LLM and Agent configurations. Here is the [evaluation report](https://arxiv.org/abs/2504.11094).
 
 <img src="assets/figure1.png" alt="MCPBench Overview" width="600"/>
 
-The implementation is based on [LangProBe: a Language Programs Benchmark](https://arxiv.org/abs/2502.20315).
+> The implementation refers to [LangProBe: a Language Programs Benchmark](https://arxiv.org/abs/2502.20315).\
+> Big thanks to Qingxu Fu for the initial implementation!
 
 <hr>
 
@@ -43,6 +43,7 @@ The implementation is based on [LangProBe: a Language Programs Benchmark](https:
 - [🚰 Cite](#cite)
 
 # 🔥 News
++ `Apr. 29, 2025` 🌟 Update the code for evaluating the MCP Server Package within GAIA.
 + `Apr. 14, 2025` 🌟 We are proud to announce that MCPBench is now open-sourced.
 
 # 🛠️ Installation
@@ -56,36 +57,51 @@ pip install -r requirements.txt
 ```
 
 # 🚀 Quick Start
-## LLM Configuration
-Prepare the LLM key and endpoint in your environment variables:
-```bash
-export MODEL_KEY=your_api_key_here
-export MODEL_ENDPOINT=your_model_endpoint_here
-```
 
 ## Launch MCP Server
 ### Launch stdio MCP as SSE
 If the MCP does not support SSE, write the config like:
 ```json
 {
-  "name": "DuckDuckGo",
-  "command": "uvx duckduckgo-mcp-server",
-  "args": "",
-  "port": 8001,
-  "tool_name": "search",
-  "tool_keyword": "query"
+    "mcp_pool": [
+        {
+            "name": "FireCrawl",
+            "description": "A Model Context Protocol (MCP) server implementation that integrates with Firecrawl for web scraping capabilities.",
+            "tools": [
+                {
+                    "tool_name": "firecrawl_search",
+                    "tool_description": "Search the web and optionally extract content from search results.",
+                    "inputs": [
+                        {
+                            "name": "query",
+                            "type": "string",
+                            "required": true,
+                            "description": "your search query"
+                        }
+                    ]
+                }
+            ],
+            "run_config": [
+                {
+                    "command": "npx -y firecrawl-mcp",
+                    "args": "FIRECRAWL_API_KEY=xxx",
+                    "port": 8005
+                }
+            ]
+        }
+    ]
 }
 ```
 
 Save this config file in the `configs` folder and launch it using:
 
 ```bash
-sh launch_mcp_as_sse.sh YOUR_CONFIG_FILE
+sh launch_mcps_as_sse.sh YOUR_CONFIG_FILE
 ```
 
-For example, if the config file is duckduckgo.json, then run:
+For example, if the config file is mcp_config_websearch.json, then run:
 ```bash
-sh launch_mcp_as_sse.sh duckduckgo.json
+sh launch_mcps_as_sse.sh mcp_config_websearch.json
 ```
 
 ### Launch SSE MCP
@@ -94,16 +110,31 @@ If your server supports SSE, you can use it directly. The URL will be http://loc
 For SSE-supported MCP Server, write the config like:
 ```json
 {
-  "name": "Exa Search",
-  "command": "",
-  "args": "",
-  "url": "https://mcp-xxxx.api-inference.modelscope.cn/sse",
-  "port": 0,
-  "tool_name": "web_search",
-  "tool_keyword": "query"
+    "mcp_pool": [
+        {
+            "name": "browser_use",
+            "description": "AI-driven browser automation server implementing the Model Context Protocol (MCP) for natural language browser control and web research.",
+            "tools": [
+                {
+                    "tool_name": "browser_use",
+                    "tool_description": "Executes a browser automation task based on natural language instructions and waits for it to complete.",
+                    "inputs": [
+                        {
+                            "name": "query",
+                            "type": "string",
+                            "required": true,
+                            "description": "Your query"
+                        }
+                    ]
+                }
+            ],
+            "url": "http://0.0.0.0:8001/sse"
+        }
+    ]
 }
+
 ```
-where the url can be generated from the MCP market on ModelScope.
+where the url can be generated from the MCP market on [ModelScope](https://www.modelscope.cn/mcp).
 
 ## Launch Evaluation
 To evaluate the MCP Server's performance on Web Search tasks:
@@ -116,8 +147,13 @@ To evaluate the MCP Server's performance on Database Query tasks:
 sh evaluation_db.sh YOUR_CONFIG_FILE
 ```
 
-# 🧂 Datasets and Experiments
-Our framework provides two datasets for evaluation. For the WebSearch task, the dataset is located at `MCPBench/langProBe/WebSearch/data/frames_test.jsonl`, containing 200 QA pairs each from [Frames](https://arxiv.org/abs/2409.12941), news, and technology domains. Our framework for automatically constructing evaluation datasets will be open-sourced later.
+To evaluate the MCP Server's performance on GAIA tasks:
+```bash
+sh evaluation_gaia.sh YOUR_CONFIG_FILE
+```
+
+# Datasets and Experimental Results
+Our framework provides two datasets for evaluation. For the WebSearch task, the dataset is located at `MCPBench/langProBe/WebSearch/data/websearch_600.jsonl`, containing 200 QA pairs each from [Frames](https://arxiv.org/abs/2409.12941), news, and technology domains. Our framework for automatically constructing evaluation datasets will be open-sourced later.
 
 For the Database Query task, the dataset is located at `MCPBench/langProBe/DB/data/car_bi.jsonl`. You can add your own dataset in the following format:
 

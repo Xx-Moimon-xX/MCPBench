@@ -18,9 +18,8 @@ def read_evaluation_results(dir: str):
         # Split the filename to get benchmark, program, and optimizer
         file_name_parts = file.stem.split("_")
         if len(file_name_parts) >= 3:
-            benchmark = file_name_parts[0]
-            program = file_name_parts[1]
-            optimizer = file_name_parts[2]
+            benchmark = ''.join(file_name_parts[:-1])
+            program = file_name_parts[-1]
         else:
             raise ValueError(f"Invalid file name: {file.name}")
 
@@ -39,14 +38,10 @@ def read_evaluation_results(dir: str):
                         "file_name": file.name,
                         "benchmark": benchmark,
                         "program": program,
-                        "optimizer": optimizer,
                         "score": float(values[0]),
                         "cost": float(values[1]),
                         "input_tokens": int(values[2]),
                         "output_tokens": int(values[3]),
-                        "optimizer_cost": float(values[5]),
-                        "optimizer_input_tokens": int(values[6]),
-                        "optimizer_output_tokens": int(values[7]),
                     }
                 else:
                     # Extract values for file without optimizer
@@ -54,14 +49,10 @@ def read_evaluation_results(dir: str):
                         "file_name": file.name,
                         "benchmark": benchmark,
                         "program": program,
-                        "optimizer": optimizer,
                         "score": float(values[0]),
                         "cost": float(values[1]),
                         "input_tokens": int(values[2]),
                         "output_tokens": int(values[3]),
-                        "optimizer_cost": 0.0,
-                        "optimizer_input_tokens": 0,
-                        "optimizer_output_tokens": 0,
                     }
 
                 # Append the extracted data to the list
@@ -70,7 +61,6 @@ def read_evaluation_results(dir: str):
     # Convert the list of dictionaries to a pandas DataFrame
     # import pdb; pdb.set_trace()
     df = pd.DataFrame(extracted_data)
-    df["optimizer"] = df["optimizer"].replace("None", "Baseline")
     df = canonicalize_program(df)
     return df
 

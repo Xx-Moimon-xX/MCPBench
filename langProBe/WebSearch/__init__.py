@@ -1,21 +1,31 @@
-from langProBe.benchmark import BenchmarkMeta
-from .WebSearch_utils.websearch_metric import websearch_metric
-from .websearch_data import WebSearchBench
-from .websearch_program import WebSearchPredict
+from langProBe.benchmark import BenchmarkMeta, MCPBench
+from langProBe.mcp_program import MCPPredict
+from langProBe.evaluation_utils import mcp_metric
 
+MCP_SAMPLE_SYSTEM_PROMPT = """
+You are a helpful assistant. You are able to answer questions using different tools.  
+The content of your available tools begins with ## Available Tools, indicating the collection of usable tools.  
+Within the tool collection, each server is identified by ### server_name, where server_name represents the name of the server.  
+Under each server, there are multiple tools (tool), and each tool starts with - tool_name, where tool_name is the name of the tool.  
+The tool description includes:  
+A brief text description outlining the functionality of the tool.  
+Detailed information about input parameters, where each parameter includes: parameter name, parameter type, whether it is mandatory, and the purpose or description of the parameter.
+"""
 
-# 延迟初始化，避免在导入时创建实例
-def get_websearch_benchmark():
-    websearch_student = WebSearchPredict()
+def get_mcp_sample_benchmark():
+    mcp_sample_baseline = MCPPredict(
+        max_steps=5,
+        system_prompt=MCP_SAMPLE_SYSTEM_PROMPT,
+        task_name="websearch")
+
     return [
         BenchmarkMeta(
-            WebSearchBench,
-            [websearch_student],
-            websearch_metric,
+            MCPBench,
+            [mcp_sample_baseline],
+            mcp_metric,
             optimizers=[],
-            name="WebSearch"  # 添加显式名称
+            name="MCP_WEBSEARCH"  # 添加显式名称
         )
     ]
 
-# 初始化变量以供外部访问
-benchmark = get_websearch_benchmark()  # 直接调用get_websearch_benchmark初始化benchmark
+benchmark = get_mcp_sample_benchmark()

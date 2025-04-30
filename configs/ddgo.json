@@ -1,8 +1,0 @@
-{
-  "name":"DuckDuckGo",
-  "command":"uvx duckduckgo-mcp-server",
-  "args":"",
-  "port":8001,
-  "tool_name":"search",
-  "tool_keyword":"query"
-}
