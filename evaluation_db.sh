@@ -28,5 +28,6 @@ main()
 --lm=openai/qwen-max-2025-01-25 \
 --lm_api_base=https://dashscope.aliyuncs.com/compatible-mode/v1 \
 --lm_api_key=xxx \
+--missing_mode_file=path/to/logs/task_messages.jsonl \
 --num_threads=1 \
 --config=$CONFIG_FILE

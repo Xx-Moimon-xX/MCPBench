@@ -93,14 +93,18 @@ class Benchmark(ABC):
 
 
 class MCPBench(Benchmark):
-    def __init__(self, dataset_mode="lite", dataset_path=None):
+    def __init__(self, dataset_mode="lite", dataset_path=None, missing_data=[]):
         self.dataset_path = dataset_path
+        self.missing_data = missing_data
         super().__init__(dataset_mode=dataset_mode)
 
     def init_dataset(self):
         self.dataset = []
         self.test_set = []
-        test_raw_data = read_jsonl(self.dataset_path)
+        if self.missing_data:
+            test_raw_data = self.missing_data
+        else:
+            test_raw_data = read_jsonl(self.dataset_path)
         
         for test_data in test_raw_data:
             self.test_set.append(

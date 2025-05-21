@@ -5,7 +5,7 @@
 <div align="center">
 
 [![文档][docs-image]][docs-url]
-[![许可证][package-license-image]][package-license-url]
+[![软件包许可证][package-license-image]][package-license-url]
 
 </div>
 
@@ -20,61 +20,46 @@
 
 MCPBench 是一个用于评估 MCP Server的基准测试框架。它支持评估三种类型的服务器：网络搜索、数据库查询和GAIA任务，并且兼容本地和远程 MCP 服务器。该框架主要在相同的 LLM 和 Agent 配置下，从任务完成准确性、延迟和 Token 消耗等方面评估不同的 MCP 服务器（如 Brave Search、DuckDuckGo 等）。详见[评估报告](https://arxiv.org/abs/2504.11094)。
 
-<img src="assets/figure1.png" alt="MCPBench Overview" width="600"/>
+<img src="assets/figure1.png" alt="MCPBench 概览" width="600"/>
 
-> 本项目参考了 [LangProBe: a Language Programs Benchmark](https://arxiv.org/abs/2502.20315) 的实现。\
+> 实现参考了 [LangProBe: a Language Programs Benchmark](https://arxiv.org/abs/2502.20315)。\
 > 特别感谢 Qingxu Fu 的初始实现！
 
 <hr>
 
 # 📋 目录
 
-- [🔥 新闻](#新闻)
-- [🛠️ 安装](#安装)
-- [🚀 快速开始](#快速开始)
-  - [启动 MCP 服务器](#启动-mcp-服务器)
-  - [启动评估](#启动评估)
-- [🧂 数据集和实验结果](#数据集和实验结果)
-- [🚰 引用](#引用)
+- [🔥 最新动态](#news)
+- [🛠️ 安装](#installation)
+- [🚀 快速开始](#quick-start)
+  - [启动 MCP 服务器](#launch-mcp-server)
+  - [启动评测](#launch-evaluation)
+- [🧂 数据集与实验](#datasets-and-experiments)
+- [🚰 引用](#cite)
 
-# 🔥 新闻
-+ `2025年4月29日` 🌟 更新了用于评估 GAIA 中 MCP 服务器包的代码。
-+ `2025年4月14日` 🌟 我们很高兴地宣布 MCPBench 现已开源。
+# 🔥 最新动态
++ `2025年4月29日` 🌟 更新了GAIA内MCP Server Package的评测代码。
++ `2025年4月14日` 🌟 MCPBench 正式开源。
 
 # 🛠️ 安装
-本框架需要 Python 版本 >= 3.11，nodejs 和 jq。
+本框架需要 Python >= 3.11、nodejs 和 jq。
 
 ```bash
 conda create -n mcpbench python=3.11 -y
 conda activate mcpbench
 pip install -r requirements.txt
 ```
-
 # 🚀 快速开始
-
+请先确定你要使用的 MCP 服务器类型：
+- 若为远程主机（通过 **SSE** 访问，如 [ModelScope](https://modelscope.cn/mcp)、[Smithery](https://smithery.ai) 或 localhost），可直接进行[评测](#launch-evaluation)。
+- 若为本地启动（通过 npx 以 **STDIO** 访问），你需要启动MCP服务器。
 ## 启动 MCP 服务器
-### 将 stdio MCP 作为 SSE 启动
-如果 MCP 不支持 SSE，请按如下方式编写配置：
+首先，需要编写如下配置：
 ```json
 {
     "mcp_pool": [
         {
-            "name": "FireCrawl",
-            "description": "一个集成了 Firecrawl 网络爬虫功能的 Model Context Protocol (MCP) 服务器实现。",
-            "tools": [
-                {
-                    "tool_name": "firecrawl_search",
-                    "tool_description": "搜索网页并可选择性地提取搜索结果内容。",
-                    "inputs": [
-                        {
-                            "name": "query",
-                            "type": "string",
-                            "required": true,
-                            "description": "您的搜索查询"
-                        }
-                    ]
-                }
-            ],
+            "name": "firecrawl",
             "run_config": [
                 {
                     "command": "npx -y firecrawl-mcp",
@@ -82,73 +67,71 @@ pip install -r requirements.txt
                     "port": 8005
                 }
             ]
-        }
+        }  
     ]
 }
 ```
-
-将此配置文件保存在 `configs` 文件夹中，并使用以下命令启动：
+将该配置文件保存至 `configs` 文件夹，并通过如下命令启动：
 
 ```bash
 sh launch_mcps_as_sse.sh YOUR_CONFIG_FILE
 ```
 
-例如，如果配置文件是 mcp_config_websearch.json，则运行：
+例如，将上述配置保存为 `configs/firecrawl.json`，并通过如下命令启动：
+
 ```bash
-sh launch_mcps_as_sse.sh mcp_config_websearch.json
+sh launch_mcps_as_sse.sh firecrawl.json
 ```
 
-### 启动 SSE MCP
-如果您的服务器支持 SSE，您可以直接使用它。URL 将是 http://localhost:8001/sse
+## 启动评测
+要评测 MCP 服务器性能，需设置相关信息。代码会自动检测服务器中的工具和参数，无需手动配置。例如：
 
-对于支持 SSE 的 MCP 服务器，请按如下方式编写配置：
 ```json
 {
     "mcp_pool": [
         {
-            "name": "browser_use",
-            "description": "AI-driven browser automation server implementing the Model Context Protocol (MCP) for natural language browser control and web research.",
-            "tools": [
+            "name": "Remote MCP example",
+            "url": "url from https://modelscope.cn/mcp or https://smithery.ai"
+        },
+        {
+            "name": "firecrawl (Local run example)",
+            "run_config": [
                 {
-                    "tool_name": "browser_use",
-                    "tool_description": "Executes a browser automation task based on natural language instructions and waits for it to complete.",
-                    "inputs": [
-                        {
-                            "name": "query",
-                            "type": "string",
-                            "required": true,
-                            "description": "Your query"
-                        }
-                    ]
+                    "command": "npx -y firecrawl-mcp",
+                    "args": "FIRECRAWL_API_KEY=xxx",
+                    "port": 8005
                 }
-            ],
-            "url": "http://0.0.0.0:8001/sse"
-        }
+            ]
+        }  
     ]
 }
 ```
-其中 url 可以从 [ModelScope](https://www.modelscope.cn/mcp) 的 MCP 广场获取。
 
-## 启动评估
-要评估 MCP 服务器在网络搜索任务上的性能：
+评测 MCP 服务器在网页搜索任务上的表现：
 ```bash
 sh evaluation_websearch.sh YOUR_CONFIG_FILE
 ```
 
-要评估 MCP 服务器在数据库查询任务上的性能：
+评测 MCP 服务器在数据库查询任务上的表现：
 ```bash
 sh evaluation_db.sh YOUR_CONFIG_FILE
 ```
 
-要评估 MCP 服务器在 GAIA 任务上的性能：
+评测 MCP 服务器在 GAIA 任务上的表现：
 ```bash
 sh evaluation_gaia.sh YOUR_CONFIG_FILE
 ```
 
-# 🧂 数据集和实验结果
-我们的框架提供了两个用于评估的数据集。对于 WebSearch 任务，数据集位于 `MCPBench/langProBe/WebSearch/data/websearch_600.jsonl`，包含来自 [Frames](https://arxiv.org/abs/2409.12941)、新闻和技术领域的各 200 个问答对。我们用于自动构建评估数据集的框架将在之后开源。
+例如，将上述配置保存为 `configs/firecrawl.json`，并通过如下命令启动：
 
-对于数据库查询任务，数据集位于 `MCPBench/langProBe/DB/data/car_bi.jsonl`。您可以按以下格式添加自己的数据集：
+```bash
+sh evaluation_websearch.sh firecrawl.json
+```
+
+# 数据集与实验结果
+本框架提供了两类评测数据集：
+- 网页搜索任务数据集位于 `MCPBench/langProBe/WebSearch/data/websearch_600.jsonl`，包含来自 [Frames](https://arxiv.org/abs/2409.12941)、新闻、科技领域的各200组问答对。自动化构建评测数据集的工具后续也将开源。
+- 数据库查询任务数据集位于 `MCPBench/langProBe/DB/data/car_bi.jsonl`。你也可以按如下格式自定义数据集：
 
 ```json
 {
@@ -158,10 +141,10 @@ sh evaluation_gaia.sh YOUR_CONFIG_FILE
 }
 ```
 
-我们已经在这两个任务上评估了主流的 MCP 服务器。有关详细的实验结果，请参阅[文档](https://arxiv.org/abs/2504.11094)。
+我们已在主流 MCP 服务器上完成了上述任务的评测。详细实验结果请参考[文档](https://arxiv.org/abs/2504.11094)。
 
 # 🚰 引用
-如果您觉得这项工作有用，请考虑引用我们的项目：
+如果本项目对你有帮助，请引用我们的工作或是给我们一个🌟：
 
 ```bibtex
 @misc{mcpbench,
@@ -172,7 +155,7 @@ sh evaluation_gaia.sh YOUR_CONFIG_FILE
 }
 ```
 
-或者引用我们的报告：
+或引用我们的报告：
 ```bibtex
 @article{mcpbench_report,
       title={Evaluation Report on MCP Servers}, 
@@ -188,3 +171,4 @@ sh evaluation_gaia.sh YOUR_CONFIG_FILE
 [docs-url]: https://arxiv.org/abs/2504.11094
 [package-license-image]: https://img.shields.io/badge/License-Apache_2.0-blue.svg
 [package-license-url]: https://github.com/modelscope/MCPBench/blob/main/LICENSE
+

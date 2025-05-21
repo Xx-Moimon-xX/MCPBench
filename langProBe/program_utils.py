@@ -8,6 +8,7 @@ import re
 import os
 import langProBe.constants as constants
 import logging
+from .synced_mcp_client import SyncedMcpClient
 
 TOOL_PROMPT = """
 ## Tool Calling Rules
@@ -152,19 +153,47 @@ def call_lm(
         raise
 
 def build_system_content(base_system: str,
-                        mcps: List) -> str:
+                        mcps: List,
+                        ) -> str:
     tools_section = "## Available Tools\n"
     for mcp in mcps:
-        tools_section += f"### {mcp['name']}\n"
-        tools_section += f"{mcp['description']}\n\n"
+        tools_section += f"### Server '{mcp['name']}' include following tools\n"
+        if mcp['name'] in ['wuying-agentbay-mcp-server', 'Playwright']:
+            tools_section += f"当使用本server来执行搜索任务时，请以https://www.baidu.com为初始网站进行搜索。"
+        url = mcp.get("url")
+        if not url:
+            try:
+                port = mcp.get('run_config')[0]["port"]
+                url = f"http://localhost:{port}/sse"
+            except:
+                raise Exception("No url found")
+        client = SyncedMcpClient(server_url=url)
+        try:
+            result = client.list_tools()
+            tools = result.tools
+        except Exception as e:
+            raise Exception(f"Fail access to server: {mcp['name']}, error: {e}")
 
-        for t in mcp['tools']:
-            tools_section += f"- {t['tool_name']}: {t['tool_description']}\n"
-            tools_section += "  Input parameters:\n"
-            for inp in t['inputs']:
-                required = "Required" if inp['required'] else "Optional"
-                tools_section += f"    - {inp['name']} ({inp['type']}, {required}): {inp['description']}\n"
-            tools_section += "\n"
+        for t in tools:
+            tools_section += f"- {t.name}: {t.description}\n"
+            input_schema = t.inputSchema
+            required_params = input_schema.get("required", [])
+            params_desc = []
+
+            if "properties" in input_schema:
+                for param_name, param_info in input_schema["properties"].items():
+                    is_required = param_name in required_params
+                    param_type = param_info.get("type", "")
+                    param_desc = param_info.get("description", "")
+
+                    req_tag = "必填" if is_required else "可选"
+                    params_desc.append(
+                        f"- {param_name} ({param_type}, {req_tag}): {param_desc}"
+                    )
+
+            # 使用更丰富的描述
+            params_text = "\n".join(params_desc) if params_desc else "无参数"
+            tools_section += f"  参数:\n{params_text}\n\n"
 
     prompt = base_system + f"""{tools_section}""" + TOOL_PROMPT
 
@@ -174,7 +203,8 @@ def build_system_content(base_system: str,
 def build_init_messages(
         base_system: str,
         mcps: List,
-        user_question: str,) -> List[Dict]:
+        user_question: str,
+       ) -> List[Dict]:
     system_content = build_system_content(base_system, mcps)
     messages = [
         {
@@ -284,7 +314,6 @@ def mcp_calling(
             # Manage manager.mcp_rts and manager.mcp_retry_times
             from langProBe.evaluation import global_config
             try:
-                from .synced_mcp_client import SyncedMcpClient
                 parsed_data = global_config
 
                 target_name = mcp_server_name

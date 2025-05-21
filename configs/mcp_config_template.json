@@ -1,97 +1,11 @@
 {
     "mcp_pool": [
         {
-            "name": "hyperbrowser",
-            "description": "Scrape, extract structured data, and crawl webpages effortlessly. Enhance your applications with powerful web scraping capabilities and structured data extraction tools.",
-            "tools": [
-                {
-                    "tool_name": "browser_use_agent",
-                    "tool_description": "Fast, lightweight browser automation with the Browser Use agent.",
-                    "inputs": [
-                        {
-                            "name": "task",
-                            "type": "string",
-                            "required": true,
-                            "description": "The task to perform inside the browser"
-                        }
-                    ]
-                }
-            ],
-            "run_config": [
-                {
-                    "command": "npx -y hyperbrowser-mcp",
-                    "args": "HYPERBROWSER_API_KEY=xxx",
-                    "port": 8005
-                }
-            ]
+            "name": "Remote MCP example",
+            "url": "url from https://modelscope.cn/mcp or https://smithery.ai"
         },
         {
-            "name": "browser-use",
-            "description": "AI-driven browser automation server implementing the Model Context Protocol (MCP) for natural language browser control and web research.",
-            "tools": [
-                {
-                    "tool_name": "run_browser_agent",
-                    "tool_description": "Executes a browser automation task based on natural language instructions and waits for it to complete. Uses settings prefixed with MCP_ (e.g., MCP_HEADLESS, MCP_MAX_STEPS).",
-                    "inputs": [
-                        {
-                            "name": "task",
-                            "type": "string",
-                            "required": true,
-                            "description": "The primary task or objective."
-                        },
-                        {
-                            "name": "add_infos",
-                            "type": "string",
-                            "required": false,
-                            "description": "Additional context or hints for the agent (used by custom agent type)."
-                        }
-                    ]
-                }
-            ],
-            "run_config": [
-                {
-                    "command": "uvx mcp-server-browser-use",
-                    "args": "MCP_MODEL_PROVIDER=deepseek DEEPSEEK_API_KEY=xxx",
-                    "port": 8005
-                }
-            ]
-        },
-        {
-            "name": "browser_use",
-            "description": "AI-driven browser automation server implementing the Model Context Protocol (MCP) for natural language browser control and web research.",
-            "tools": [
-                {
-                    "tool_name": "browser_use",
-                    "tool_description": "Executes a browser automation task based on natural language instructions and waits for it to complete.",
-                    "inputs": [
-                        {
-                            "name": "query",
-                            "type": "string",
-                            "required": true,
-                            "description": "Your query"
-                        }
-                    ]
-                }
-            ],
-            "url": "http://0.0.0.0:9003/sse"
-        },
-        {
-            "name": "FireCrawl",
-            "description": "A Model Context Protocol (MCP) server implementation that integrates with Firecrawl for web scraping capabilities.",
-            "tools": [
-                {
-                    "tool_name": "firecrawl_search",
-                    "tool_description": "Search the web and optionally extract content from search results.",
-                    "inputs": [
-                        {
-                            "name": "query",
-                            "type": "string",
-                            "required": true,
-                            "description": "your search query"
-                        }
-                    ]
-                }
-            ],
+            "name": "Local run example",
             "run_config": [
                 {
                     "command": "npx -y firecrawl-mcp",
@@ -99,56 +13,6 @@
                     "port": 8005
                 }
             ]
-        },
-        {
-            "name": "BraveSearch",
-            "description": "An MCP server implementation that integrates the Brave Search API, providing both web and local search capabilities.",
-            "tools": [
-                {
-                    "tool_name": "brave_web_search",
-                    "tool_description": "Execute web searches with pagination and filtering",
-                    "inputs": [
-                        {
-                            "name": "query",
-                            "type": "string",
-                            "required": true,
-                            "description": "Search terms"
-                        }
-                    ]
-                }
-            ],
-            "run_config": [
-                {
-                    "command": "npx -y @modelcontextprotocol/server-brave-search",
-                    "args": "BRAVE_API_KEY=xxx",
-                    "port": 8005
-                }
-            ]
-        },
-        {
-            "name": "E2B MCP Server",
-            "description": "A Model Context Protocol server for running python code in a secure sandbox by E2B.",
-            "tools": [
-                {
-                    "tool_name": "Run_code",
-                    "tool_description": "Run python code in a secure sandbox by E2B. Using the Jupyter Notebook syntax.",
-                    "inputs": [
-                        {
-                            "name": "code",
-                            "type": "string",
-                            "required": true,
-                            "description": "Your Code"
-                        }
-                    ]
-                }
-            ],
-            "run_config": [
-                {
-                    "command": "uvx e2b-mcp-server",
-                    "args": "E2B_API_KEY=xxx",
-                    "port": 8005
-                }
-            ]
-        }
+        }  
     ]
 }

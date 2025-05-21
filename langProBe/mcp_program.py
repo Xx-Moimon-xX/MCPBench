@@ -90,6 +90,29 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         message_handler = logging.FileHandler(message_log_file, encoding='utf-8')
         self.message_logger.addHandler(message_handler)
 
+
+    def update_log_paths(self, new_log_dir):
+        # 确保新的日志目录存在
+        os.makedirs(new_log_dir, exist_ok=True)
+        
+        # 更新运行日志记录器
+        for handler in self.run_logger.handlers[:]:
+            self.run_logger.removeHandler(handler)
+        
+        run_log_file = f'{new_log_dir}/{self.task_name}_run_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
+        run_handler = logging.FileHandler(run_log_file, encoding='utf-8')
+        run_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        run_handler.setFormatter(run_formatter)
+        self.run_logger.addHandler(run_handler)
+
+        # 更新消息日志记录器
+        for handler in self.message_logger.handlers[:]:
+            self.message_logger.removeHandler(handler)
+        
+        message_log_file = f'{new_log_dir}/{self.task_name}_messages_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jsonl'
+        message_handler = logging.FileHandler(message_log_file, encoding='utf-8')
+        self.message_logger.addHandler(message_handler)
+
     def evaluate_prediction(self, question: str, ground_truth: str, prediction: str) -> Tuple[bool, Optional[str]]:
         answer_eval_manager = ProcessManager()
         answer_eval_manager.lm_api_key = self.lm.api_key
@@ -125,7 +148,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
         from langProBe.evaluation import global_config
         mcps = global_config['mcp_pool']
-            
+
         messages = build_init_messages(self.system_prompt, mcps, question)
         steps = 0
         all_completion_tokens = 0
@@ -139,6 +162,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             mcp_calls = response_parsing(response)
 
             new_messages = mcp_calling(mcp_calls, manager, self.run_logger)
+
             messages = build_messages(messages, new_messages)
             steps += 1
 
@@ -155,7 +179,6 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
         self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
         success = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
-        print(success)
         self.log_messages(messages, question, success, (end_time-start_time), all_prompt_tokens, all_completion_tokens)
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
         # self.run_logger.info("==" * 50)

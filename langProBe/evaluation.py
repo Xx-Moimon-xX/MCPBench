@@ -11,7 +11,7 @@ import dspy
 
 from langProBe.analysis import read_evaluation_results
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench, EvaluationResult
-from langProBe.config_utils import read_json
+from langProBe.config_utils import read_json, read_jsonl
 from langProBe.dspy_program import (
     GeneratorCriticFuser,
     GeneratorCriticRanker,
@@ -19,6 +19,7 @@ from langProBe.dspy_program import (
 )
 from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.register_benchmark import register_all_benchmarks, registered_benchmarks
+from langProBe.evaluation_utils import find_missing_entries, replace_logger_filehandler
 
 
 class CompareAnswerSignature(dspy.Signature):
@@ -140,7 +141,7 @@ def evaluate(
     suppress_dspy_output=True,
     dataset_mode=None,
     dataset_path=None,
-    missing_mode=False,
+    missing_mode_file="",
     api_key=None,
     api_base=None,
 ):
@@ -150,7 +151,15 @@ def evaluate(
     missing_mode: only evaluate experiments without a result file
     """
     dataset_mode = dataset_mode or benchmark_meta.dataset_mode
-    benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path)
+
+    if missing_mode_file:
+        origin_data = read_jsonl(dataset_path)
+        runed_data = read_jsonl(missing_mode_file)
+        missing_data = find_missing_entries(origin_data, runed_data)
+        benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, missing_data=missing_data)
+        replace_logger_filehandler(os.path.splitext(missing_mode_file)[0])
+    else:
+        benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path)
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     benchmark_name = benchmark_meta.name or benchmark.__class__.__name__
 
@@ -175,13 +184,6 @@ def evaluate(
 
     for program in benchmark_meta.program:
         program_name = getattr(program, "_name", program.__class__.__name__)
-        # if missing_mode:
-            # Only run missing experiments
-            # for optimizer in benchmark_meta.optimizers:
-            #     if (benchmark_name, program_name, optimizer.name) in evaluation_records:
-            #         optimizers.remove(optimizer)
-            # if (benchmark_name, program_name, "None") in evaluation_records:
-            #     evaluate_baseline_flag = False
 
         print(f"Program: {program_name}")
 
@@ -220,15 +222,14 @@ def evaluate_all(
     suppress_dspy_output=False,
     dataset_mode=None,
     dataset_path=None,
-    missing_mode=False,
+    missing_mode_file="",
     api_key=None,
     api_base=None,
 ):
     # 只有当benchmarks是字符串列表时才进行注册
     if benchmarks and isinstance(benchmarks[0], str):
         benchmarks = register_all_benchmarks(benchmarks)
-    if missing_mode:
-        generate_evaluation_records(file_path)
+
     for benchmark_meta in benchmarks:
         evaluate(
             benchmark_meta,
@@ -238,7 +239,7 @@ def evaluate_all(
             suppress_dspy_output,
             dataset_mode,
             dataset_path,
-            missing_mode,
+            missing_mode_file,
             api_key=api_key,
             api_base=api_base,
         )
@@ -280,9 +281,10 @@ def main():
         help="Suppress dspy output",
     )
     parser.add_argument(
-        "--missing_mode",
-        action="store_true",
-        help="Only run missing experiments (skip experiments that already have results)",
+        "--missing_mode_file",
+        type=str,
+        default="",
+        help="Only run missing experiments (skip experiments that already have results), value = path to log/jsonl",
     )
     parser.add_argument(
         "--config",
@@ -290,7 +292,7 @@ def main():
         default='ddgo.json',
         help="Configuration file for the benchmark",
     )
-    
+
     args = parser.parse_args()
 
     global global_config
@@ -316,7 +318,7 @@ def main():
         suppress_dspy_output=args.suppress_dspy_output,
         dataset_mode=args.dataset_mode,
         dataset_path=args.dataset_path,
-        missing_mode=args.missing_mode,
+        missing_mode_file=args.missing_mode_file,
         api_key=args.lm_api_key,
         api_base=args.lm_api_base,
     )

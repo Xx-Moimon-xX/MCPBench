@@ -7,7 +7,8 @@ import logging
 import re
 import string
 import warnings
-
+import os
+import logging
 import numpy as np
 
 
@@ -169,6 +170,77 @@ def question_scorer(
 
 def mcp_metric(example: dspy.Example, pred: dspy.Prediction):
     return pred.success
+
+
+
+def extract_questions(data, key):
+    """从数据中提取指定字段（如 Prompt 或 question）用于比较"""
+    questions = set()
+    for item in data:
+        questions.add(item[key])
+    return questions
+
+def find_missing_entries(data_a, data_b):
+    # data_a是原数据，data_b是已经跑了的数据
+ 
+    questions_in_b = extract_questions(data_b, 'question')
+
+    # 找出在B中不存在的A条目
+    missing_entries = [item for item in data_a if item['Prompt'] not in questions_in_b]
+
+    return missing_entries
+
+import logging
+
+import os
+import logging
+
+def replace_logger_filehandler(new_log_name):
+    """
+    替换 logger 中已有的 FileHandler，并为每个 logger 保留其原有的 formatter。
+    同时删除原有日志文件。
+
+    :param new_log_name: 新的日志文件名（不带后缀）
+    """
+
+    def update_handler(logger, file_suffix):
+        old_log_paths = []
+        formatter = None
+        for handler in logger.handlers:
+            if isinstance(handler, logging.FileHandler):
+                if formatter is None:
+                    formatter = handler.formatter
+                old_log_paths.append(handler.baseFilename)
+
+        for handler in list(logger.handlers):
+            if isinstance(handler, logging.FileHandler):
+                handler.close()
+                logger.removeHandler(handler)
+
+        for log_path in old_log_paths:
+            if os.path.exists(log_path):
+                try:
+                    os.remove(log_path)
+                except Exception as e:
+                    pass
+
+        if logger.name == 'MCPPredictRunLogger':
+            new_name = new_log_name.replace("message", "run")
+        else:
+            new_name = new_log_name 
+
+        new_handler = logging.FileHandler(f"{new_name}.{file_suffix}", mode='a', encoding='utf-8')
+        if formatter:
+            new_handler.setFormatter(formatter)
+        logger.addHandler(new_handler)
+
+    run_logger = logging.getLogger('MCPPredictRunLogger')
+    update_handler(run_logger, 'log')
+
+    message_logger = logging.getLogger('MCPPredictMessageLogger')
+    update_handler(message_logger, 'jsonl')
+
+
 
 if __name__ == "__main__":
     print(question_scorer("123", "123"))

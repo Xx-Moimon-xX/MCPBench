@@ -15,7 +15,7 @@ If you have obtained the final result. Please provide your final answer enclosed
 """
 def get_mcp_sample_benchmark():
     mcp_sample_baseline = GAIAPredict(
-                                max_steps=5, 
+                                max_steps=50, 
                                 system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, 
                                 task_name="gaia")
     

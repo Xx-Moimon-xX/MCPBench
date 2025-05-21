@@ -36,7 +36,6 @@ MCPBench is an evaluation framework for MCP Servers. It supports the evaluation 
 - [🔥 News](#news)
 - [🛠️ Installation](#installation)
 - [🚀 Quick Start](#quick-start)
-  - [LLM Configuration](#llm-configuration)
   - [Launch MCP Server](#launch-mcp-server)
   - [Launch Evaluation](#launch-evaluation)
 - [🧂 Datasets and Experiments](#datasets-and-experiments)
@@ -53,34 +52,19 @@ The framework requires Python version >= 3.11, nodejs and jq.
 conda create -n mcpbench python=3.11 -y
 conda activate mcpbench
 pip install -r requirements.txt
-
 ```
-
 # 🚀 Quick Start
+Please first determine the type of MCP server you want to use:
+- If it is a remote host (accessed via **SSE**, such as [ModelScope](https://modelscope.cn/mcp), [Smithery](https://smithery.ai), or localhost), you can directly conduct the [evaluation](#launch-evaluation).
+- If it is started locally (accessed via npx using **STDIO**), you need to launch it.
 
-## Launch MCP Server
-### Launch stdio MCP as SSE
-If the MCP does not support SSE, write the config like:
+## Launch MCP Server (optional for stdio)
+First, you need to write the following configuration:
 ```json
 {
     "mcp_pool": [
         {
-            "name": "FireCrawl",
-            "description": "A Model Context Protocol (MCP) server implementation that integrates with Firecrawl for web scraping capabilities.",
-            "tools": [
-                {
-                    "tool_name": "firecrawl_search",
-                    "tool_description": "Search the web and optionally extract content from search results.",
-                    "inputs": [
-                        {
-                            "name": "query",
-                            "type": "string",
-                            "required": true,
-                            "description": "your search query"
-                        }
-                    ]
-                }
-            ],
+            "name": "firecrawl",
             "run_config": [
                 {
                     "command": "npx -y firecrawl-mcp",
@@ -88,56 +72,46 @@ If the MCP does not support SSE, write the config like:
                     "port": 8005
                 }
             ]
-        }
+        }  
     ]
 }
 ```
-
 Save this config file in the `configs` folder and launch it using:
 
 ```bash
 sh launch_mcps_as_sse.sh YOUR_CONFIG_FILE
 ```
 
-For example, if the config file is mcp_config_websearch.json, then run:
+For example, save the above configuration in the `configs/firecrawl.json` file and launch it using:
+
 ```bash
-sh launch_mcps_as_sse.sh mcp_config_websearch.json
+sh launch_mcps_as_sse.sh firecrawl.json
 ```
 
-### Launch SSE MCP
-If your server supports SSE, you can use it directly. The URL will be http://localhost:8001/sse
-
-For SSE-supported MCP Server, write the config like:
+## Launch Evaluation
+To evaluate the MCP Server's performance, you need to set up the necessary MCP Server information. the code will automatically detect the tools and parameters in the Server, so you don't need to configure them manually, like:
 ```json
 {
     "mcp_pool": [
         {
-            "name": "browser_use",
-            "description": "AI-driven browser automation server implementing the Model Context Protocol (MCP) for natural language browser control and web research.",
-            "tools": [
+            "name": "Remote MCP example",
+            "url": "url from https://modelscope.cn/mcp or https://smithery.ai"
+        },
+        {
+            "name": "firecrawl (Local run example)",
+            "run_config": [
                 {
-                    "tool_name": "browser_use",
-                    "tool_description": "Executes a browser automation task based on natural language instructions and waits for it to complete.",
-                    "inputs": [
-                        {
-                            "name": "query",
-                            "type": "string",
-                            "required": true,
-                            "description": "Your query"
-                        }
-                    ]
+                    "command": "npx -y firecrawl-mcp",
+                    "args": "FIRECRAWL_API_KEY=xxx",
+                    "port": 8005
                 }
-            ],
-            "url": "http://0.0.0.0:8001/sse"
-        }
+            ]
+        }  
     ]
 }
-
 ```
-where the url can be generated from the MCP market on [ModelScope](https://www.modelscope.cn/mcp).
 
-## Launch Evaluation
-To evaluate the MCP Server's performance on Web Search tasks:
+To evaluate the MCP Server's performance on WebSearch tasks:
 ```bash
 sh evaluation_websearch.sh YOUR_CONFIG_FILE
 ```
@@ -150,6 +124,12 @@ sh evaluation_db.sh YOUR_CONFIG_FILE
 To evaluate the MCP Server's performance on GAIA tasks:
 ```bash
 sh evaluation_gaia.sh YOUR_CONFIG_FILE
+```
+
+For example, save the above configuration in the `configs/firecrawl.json` file and launch it using:
+
+```bash
+sh evaluation_websearch.sh firecrawl.json
 ```
 
 # Datasets and Experimental Results
@@ -168,7 +148,7 @@ For the Database Query task, the dataset is located at `MCPBench/langProBe/DB/da
 We have evaluated mainstream MCP Servers on both tasks. For detailed experimental results, please refer to [Documentation](https://arxiv.org/abs/2504.11094)
 
 # 🚰 Cite
-If you find this work useful, please consider citing our project:
+If you find this work useful, please consider citing our project or giving us a 🌟:
 
 ```bibtex
 @misc{mcpbench,

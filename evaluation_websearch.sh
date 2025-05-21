@@ -22,11 +22,12 @@ from langProBe.evaluation import main
 main()
 " \
 --benchmark=WebSearch \
---dataset_mode=test \
---dataset_path=langProBe/WebSearch/data/websearch_300.jsonl \
---file_path=evaluation_websearch_300 \
---lm=openai/qwen-max-2025-01-25 \
+--dataset_mode=full \
+--dataset_path=langProBe/WebSearch/data/websearch_test.jsonl \
+--file_path=evaluation_websearch_test \
+--lm=openai/deepseek-v3 \
 --lm_api_base=https://dashscope.aliyuncs.com/compatible-mode/v1 \
 --lm_api_key=xxx \
+--missing_mode_file=path/to/logs/task_messages.jsonl \
 --num_threads=1 \
 --config=$CONFIG_FILE

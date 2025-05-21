@@ -23,10 +23,10 @@ main()
 " \
 --benchmark=GAIA \
 --dataset_mode=full \
---dataset_path=langProBe/GAIA/data/gaia_dev_part.jsonl \
+--dataset_path=langProBe/GAIA/data/gaia_rest.jsonl \
 --file_path=evaluation_gaia \
 --lm=openai/qwen-max-2025-01-25 \
 --lm_api_base=https://dashscope.aliyuncs.com/compatible-mode/v1 \
---lm_api_key=xxx \
+--missing_mode_file=path/to/logs/task_messages.jsonl \
 --num_threads=1 \
 --config=$CONFIG_FILE

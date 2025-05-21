@@ -42,8 +42,9 @@ do
     echo "服务器 '$NAME' 已配置 URL: $URL，跳过运行命令。"
   else
     # 从 run_config 数组中提取 command、args 和 port
+    # 修改后的 args 提取逻辑：支持字符串或列表
     COMMAND=$(echo "$SERVER" | jq -r '.run_config[] | select(.command) | .command')
-    ARGS=$(echo "$SERVER" | jq -r '.run_config[] | select(.args) | .args')
+    ARGS=$(echo "$SERVER" | jq -r '.run_config[] | select(.args) | .args | if type == "array" then join(" ") else . end')
     PORT=$(echo "$SERVER" | jq -r '.run_config[] | select(.port) | .port')
 
     # 从 tools 数组中提取 tool_name（假设第一个工具）

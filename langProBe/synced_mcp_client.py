@@ -78,7 +78,7 @@ class SyncedMcpClient(Process):
         if kwargs is None:
             kwargs = {}
         self.request_queue.put(pickle.dumps((func_name, args, kwargs)))
-        response = self.response_queue.get(timeout=60000)
+        response = self.response_queue.get(timeout=900)
         status, result = pickle.loads(response)
         if status == 'error':
             raise Exception(result)
