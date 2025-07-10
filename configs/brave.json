@@ -1,0 +1,14 @@
+{
+  "mcp_pool": [
+    {
+      "name": "brave-search",
+      "run_config": [
+        {
+          "command": "docker",
+          "args": ["run", "-i", "--rm", "-e", "BRAVE_API_KEY=BSAorioJ_vpENwbiERtbhgIv7FphEe2", "-p", "8003:8000", "mcp/brave-search"],
+          "port": 8003
+        }
+      ]
+    }
+  ]
+} 

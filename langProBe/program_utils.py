@@ -9,6 +9,10 @@ import os
 import langProBe.constants as constants
 import logging
 from .synced_mcp_client import SyncedMcpClient
+try:
+    from anthropic import Anthropic
+except ImportError:
+    Anthropic = None
 
 TOOL_PROMPT = """
 ## Tool Calling Rules
@@ -57,6 +61,10 @@ class ProcessManager(BaseModel):
         default=[],
         description="Statistics for the MCP retries"
     )
+    anthropic_api_key: str = Field(
+        default=os.getenv("ANTHROPIC_API_KEY"),
+        description="Anthropic API Key"
+    )
 
 
 class MCPCall(BaseModel):
@@ -81,13 +89,43 @@ def call_lm(
             logger: logging.Logger, 
             temperature: float|None=None,
             ) -> tuple[str | None, int, int]:    
-    
+    response = None
     try:
+        prefix, model_name = manager.model.split('/')
+        if prefix == 'anthropic':
+            if Anthropic is None:
+                raise ImportError("The 'anthropic' package is required for Claude API support. Please install it via 'pip install anthropic'.")
+            # Anthropic Claude API
+            anthropic_api_key = manager.anthropic_api_key or os.getenv("ANTHROPIC_API_KEY")
+            client = Anthropic(api_key=anthropic_api_key)
+            # Convert OpenAI-style messages to Anthropic format
+            claude_messages = []
+            for m in messages:
+                if m.get("role") == "user":
+                    claude_messages.append({"role": "user", "content": m["content"]})
+                elif m.get("role") == "assistant":
+                    claude_messages.append({"role": "assistant", "content": m["content"]})
+            # Call Claude
+            completion = client.messages.create(
+                model=model_name,
+                max_tokens=1024,
+                messages=claude_messages,
+                temperature=temperature if temperature is not None else 0.7,
+            )
+            response_text = completion.content[0].text if completion.content else ""
+            # Anthropic does not return token usage in the same way
+            completion_tokens = getattr(completion, 'usage', {}).get('output_tokens', 0) if hasattr(completion, 'usage') else 0
+            prompt_tokens = getattr(completion, 'usage', {}).get('input_tokens', 0) if hasattr(completion, 'usage') else 0
+            manager.lm_usages.append({
+                "completion_tokens": completion_tokens,
+                "prompt_tokens": prompt_tokens,
+            })
+            return response_text, completion_tokens, prompt_tokens
+        # --- OpenAI logic as before ---
         oai = OpenAI(
             api_key=manager.lm_api_key,
             base_url=manager.lm_api_base,
         )
-        prefix, model_name = manager.model.split('/')
         assert prefix == 'openai'
 
         if model_name in ['deepseek-r1', 'qwq-plus', 'qwq-32b']: # qwen reasoning模型仅支持流式输出

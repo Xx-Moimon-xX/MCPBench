@@ -12,14 +12,14 @@ import logging
 import numpy as np
 
 
-EVALUATE_PROMPT = """对于以下问题：{question}
+EVALUATE_PROMPT = """For the following question: {question}
 
-请判断预测答案是否回答正确，回答对关键信息就算正确:
+Please determine whether the predicted answer is correct. Consider it correct if it addresses the key information:
 
-预测答案: {prediction}
-正确答案: {ground_truth}
+Predicted answer: {prediction}
+Correct answer: {ground_truth}
 
-只需要返回True或False。"""
+Return only True or False."""
 
 def evaluate_final_answer(
             question: str, 
