@@ -14,7 +14,7 @@
 <div align="center">
 <h4 align="center">
 
-[中文](https://github.com/modelscope/MCPBench/blob/main/README_zh.md) |
+[Chinese](https://github.com/modelscope/MCPBench/blob/main/README_zh.md) |
 [English](https://github.com/modelscope/MCPBench/blob/main/README.md)
 
 </h4>

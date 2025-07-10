@@ -128,10 +128,10 @@ def call_lm(
         )
         assert prefix == 'openai'
 
-        if model_name in ['deepseek-r1', 'qwq-plus', 'qwq-32b']: # qwen reasoning模型仅支持流式输出
-            reasoning_content = ""  # 定义完整思考过程
-            answer_content = ""     # 定义完整回复
-            is_answering = False   # 判断是否结束思考过程并开始回复
+        if model_name in ['deepseek-r1', 'qwq-plus', 'qwq-32b']: # qwen reasoning models only support streaming output
+            reasoning_content = ""  # Define complete reasoning process
+            answer_content = ""     # Define complete response
+            is_answering = False   # Determine if reasoning process is complete and response has started
 
             completion = oai.chat.completions.create(
                 model=model_name, 
@@ -142,7 +142,7 @@ def call_lm(
                 }
             )
             for chunk in completion:
-                # 如果chunk.choices为空，则打印usage
+                # If chunk.choices is empty, print usage
                 if not chunk.choices:
                     usage = chunk.usage
                 else:
@@ -150,7 +150,7 @@ def call_lm(
                     if hasattr(delta, 'reasoning_content') and delta.reasoning_content != None:
                         reasoning_content += delta.reasoning_content
                     else:
-                        # 开始回复
+                        # Start response
                         if delta.content != "" and is_answering is False:
                             is_answering = True
                         answer_content += delta.content
@@ -197,7 +197,7 @@ def build_system_content(base_system: str,
     for mcp in mcps:
         tools_section += f"### Server '{mcp['name']}' include following tools\n"
         if mcp['name'] in ['wuying-agentbay-mcp-server', 'Playwright']:
-            tools_section += f"当使用本server来执行搜索任务时，请以https://www.baidu.com为初始网站进行搜索。"
+            tools_section += f"When using this server to perform search tasks, please use https://www.baidu.com as the initial website for searching."
         url = mcp.get("url")
         if not url:
             try:
@@ -224,14 +224,14 @@ def build_system_content(base_system: str,
                     param_type = param_info.get("type", "")
                     param_desc = param_info.get("description", "")
 
-                    req_tag = "必填" if is_required else "可选"
+                    req_tag = "required" if is_required else "optional"
                     params_desc.append(
                         f"- {param_name} ({param_type}, {req_tag}): {param_desc}"
                     )
 
             # 使用更丰富的描述
-            params_text = "\n".join(params_desc) if params_desc else "无参数"
-            tools_section += f"  参数:\n{params_text}\n\n"
+            params_text = "\n".join(params_desc) if params_desc else "No parameters"
+            tools_section += f"  Parameters:\n{params_text}\n\n"
 
     prompt = base_system + f"""{tools_section}""" + TOOL_PROMPT
 
@@ -280,7 +280,7 @@ def build_messages(
             assert final_message[-1][constants.ROLE] in {constants.USER, constants.TOOL}
             final_message.extend(message_to_append)
     
-    # TODO: 超过最长上下文长度处理
+    # TODO: Handle exceeding maximum context length
 
     return final_message
 
@@ -291,7 +291,7 @@ def response_parsing(content: str) -> MCPCallList:
     matches = re.findall(pattern, content, re.DOTALL)
     mcps = []
     for match in matches:
-        # TODO: 错误处理
+        # TODO: Error handling
         data = json.loads(match)
         mcps.append(MCPCall(
             mcp_server_name=data['server_name'].strip(),

@@ -35,7 +35,7 @@ def evaluate_final_answer(
             constants.CONTENT: prompt
         }
     ]
-    logger.info(f"开始评测final answer")
+    logger.info(f"Starting evaluation of final answer")
     logger.info(f"question: {question}")
     logger.info(f"ground_truth: {ground_truth}")
     logger.info(f"prediction: {prediction}")
@@ -174,18 +174,18 @@ def mcp_metric(example: dspy.Example, pred: dspy.Prediction):
 
 
 def extract_questions(data, key):
-    """从数据中提取指定字段（如 Prompt 或 question）用于比较"""
+    """Extract specified field (such as Prompt or question) from data for comparison"""
     questions = set()
     for item in data:
         questions.add(item[key])
     return questions
 
 def find_missing_entries(data_a, data_b):
-    # data_a是原数据，data_b是已经跑了的数据
+    # data_a is the original data, data_b is the data that has been processed
  
     questions_in_b = extract_questions(data_b, 'question')
 
-    # 找出在B中不存在的A条目
+    # Find entries in A that do not exist in B
     missing_entries = [item for item in data_a if item['Prompt'] not in questions_in_b]
 
     return missing_entries
@@ -197,10 +197,10 @@ import logging
 
 def replace_logger_filehandler(new_log_name):
     """
-    替换 logger 中已有的 FileHandler，并为每个 logger 保留其原有的 formatter。
-    同时删除原有日志文件。
+    Replace existing FileHandler in logger and preserve the original formatter for each logger.
+    Also delete the original log files.
 
-    :param new_log_name: 新的日志文件名（不带后缀）
+    :param new_log_name: New log file name (without suffix)
     """
 
     def update_handler(logger, file_suffix):

@@ -95,7 +95,7 @@ class DBPredict(MCPPredict):
             self.run_logger.warning("Maximum steps reached without getting an answer")
             messages.append({
                 constants.ROLE: constants.ASSISTANT,
-                constants.CONTENT: "超过最长次数限制，该问题无法解决",
+                constants.CONTENT: "Maximum step limit exceeded, this problem cannot be solved",
             })
 
         self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")

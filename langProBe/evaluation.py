@@ -226,7 +226,7 @@ def evaluate_all(
     api_key=None,
     api_base=None,
 ):
-    # 只有当benchmarks是字符串列表时才进行注册
+    # Only register when benchmarks is a list of strings
     if benchmarks and isinstance(benchmarks[0], str):
         benchmarks = register_all_benchmarks(benchmarks)
 
@@ -297,12 +297,12 @@ def main():
 
     global global_config
     global_config= read_json(args.config)
-    # 处理benchmark参数
+    # Process benchmark parameter
     benchmark_path = args.benchmark
     if not benchmark_path.startswith("langProBe."):
         benchmark_path = f"langProBe.{benchmark_path}"
     
-    # 注册所有基准测试
+    # Register all benchmarks
     register_all_benchmarks([benchmark_path])
 
     benchmarks = [benchmark for benchmark in registered_benchmarks]

@@ -1,11 +1,18 @@
 #!/bin/bash
- # 检查是否提供了配置文件路径参数
+
+if [ -f local.env ]; then
+  set -a
+  source local.env
+  set +a
+fi
+
+ # Check if configuration file path parameter is provided
  if [ -z "$1" ]; then
    echo "Usage: $0 <config_file_path>"
    exit 1
  fi
 
- # 构造完整路径
+ # Construct full path
  CONFIG_FILE="$1"
  if [[ ! "$CONFIG_FILE" == /* ]]; then
    CONFIG_FILE="configs/$CONFIG_FILE"
@@ -13,7 +20,7 @@
 
 
 
-# 使用更直接的方法启动评估程序，确保多进程正确初始化
+# Use a more direct method to start the evaluation program, ensuring correct multiprocessing initialization
 DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 python -c "
 import multiprocessing as mp

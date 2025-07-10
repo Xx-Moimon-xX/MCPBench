@@ -1,4 +1,10 @@
 #!/bin/bash
+
+if [ -f local.env ]; then
+  set -a
+  source local.env
+  set +a
+fi
 # Check if the config file path parameter is provided
 if [ -z "$1" ]; then
   echo "Usage: $0 <config_file_path>"
