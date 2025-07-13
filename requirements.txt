@@ -4,3 +4,4 @@ uv
 dashscope
 shortuuid
 anthropic
+boto3

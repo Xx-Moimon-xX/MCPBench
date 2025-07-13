@@ -14,6 +14,12 @@ try:
 except ImportError:
     Anthropic = None
 
+try:
+    import boto3
+    from botocore.exceptions import ClientError, BotoCoreError
+except ImportError:
+    boto3 = None
+
 TOOL_PROMPT = """
 ## Tool Calling Rules
 When external tools are required, the call request must be strictly generated according to the following rules:
@@ -33,19 +39,19 @@ If no tool is called, provide the final answer directly.
 """
             
 class ProcessManager(BaseModel):
-    id: str = Field(
+    id: Optional[str] = Field(
         default=None,
         description="The ID of the process.",
     )
-    lm_api_key: str = Field(
+    lm_api_key: Optional[str] = Field(
         default=os.getenv("OPENAI_API_KEY"),
         description="OpenAI API Key"
     )
-    lm_api_base: str = Field(
+    lm_api_base: Optional[str] = Field(
         default=os.getenv("OPENAI_API_BASE"),
         description="OpenAI API Base URL"
     )
-    model: str = Field(
+    model: Optional[str] = Field(
         default=None,
         description="OpenAI Model Name, with prefix 'openai/'"
     )
@@ -61,9 +67,21 @@ class ProcessManager(BaseModel):
         default=[],
         description="Statistics for the MCP retries"
     )
-    anthropic_api_key: str = Field(
+    anthropic_api_key: Optional[str] = Field(
         default=os.getenv("ANTHROPIC_API_KEY"),
         description="Anthropic API Key"
+    )
+    aws_access_key_id: Optional[str] = Field(
+        default=os.getenv("AWS_ACCESS_KEY_ID"),
+        description="AWS Access Key ID for Bedrock"
+    )
+    aws_secret_access_key: Optional[str] = Field(
+        default=os.getenv("AWS_SECRET_ACCESS_KEY"),
+        description="AWS Secret Access Key for Bedrock"
+    )
+    aws_region: Optional[str] = Field(
+        default=os.getenv("AWS_REGION", "us-east-1"),
+        description="AWS Region for Bedrock"
     )
 
 
@@ -121,6 +139,68 @@ def call_lm(
                 "prompt_tokens": prompt_tokens,
             })
             return response_text, completion_tokens, prompt_tokens
+        elif prefix == 'bedrock':
+            if boto3 is None:
+                raise ImportError("The 'boto3' package is required for AWS Bedrock support. Please install it via 'pip install boto3'.")
+            # AWS Bedrock API
+            bedrock_client = boto3.client(
+                'bedrock-runtime',
+                aws_access_key_id=manager.aws_access_key_id or os.getenv("AWS_ACCESS_KEY_ID"),
+                aws_secret_access_key=manager.aws_secret_access_key or os.getenv("AWS_SECRET_ACCESS_KEY"),
+                region_name=manager.aws_region or os.getenv("AWS_REGION", "us-east-1")
+            )
+            
+            # Convert messages to format expected by Bedrock
+            bedrock_messages = []
+            for m in messages:
+                if m.get("role") == "system":
+                    continue  # System messages are handled separately in Bedrock
+                elif m.get("role") == "user":
+                    bedrock_messages.append({"role": "user", "content": [{"type": "text", "text": m["content"]}]})
+                elif m.get("role") == "assistant":
+                    bedrock_messages.append({"role": "assistant", "content": [{"type": "text", "text": m["content"]}]})
+            
+            # Extract system message if present
+            system_message = ""
+            for m in messages:
+                if m.get("role") == "system":
+                    system_message = m["content"]
+                    break
+            
+            # Prepare request body for Bedrock
+            request_body = {
+                "anthropic_version": "bedrock-2023-05-31",
+                "max_tokens": 1024,
+                "messages": bedrock_messages,
+                "temperature": temperature if temperature is not None else 0.7
+            }
+            
+            if system_message:
+                request_body["system"] = system_message
+            
+            try:
+                response = bedrock_client.invoke_model(
+                    modelId=model_name,
+                    body=json.dumps(request_body)
+                )
+                
+                response_body = json.loads(response['body'].read())
+                response_text = response_body.get('content', [{}])[0].get('text', '')
+                
+                # Extract token usage
+                usage = response_body.get('usage', {})
+                completion_tokens = usage.get('output_tokens', 0)
+                prompt_tokens = usage.get('input_tokens', 0)
+                
+                manager.lm_usages.append({
+                    "completion_tokens": completion_tokens,
+                    "prompt_tokens": prompt_tokens,
+                })
+                return response_text, completion_tokens, prompt_tokens
+                
+            except (ClientError, BotoCoreError) as e:
+                logger.error(f"ID: {manager.id}, AWS Bedrock error: {str(e)}")
+                raise
         # --- OpenAI logic as before ---
         oai = OpenAI(
             api_key=manager.lm_api_key,

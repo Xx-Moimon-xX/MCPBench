@@ -198,10 +198,13 @@ class EvaluateBench(ABC):
         num_threads: int = 1,
         api_key: str = None,
         api_base: str = None,
+        config=None,
     ):
         self.benchmark = benchmark
+        # Pass config to the program if it accepts it
+        if hasattr(program, 'config'):
+            program.config = config
         self.program = program
-
         self.program.setup_lm(lm, api_key=api_key, api_base=api_base)
         self.metric = metric
         self.num_threads = num_threads
@@ -215,7 +218,6 @@ class EvaluateBench(ABC):
             return_outputs=True,
             provide_traceback=True,
         )
-
         self.program_name = getattr(
             self.program, "_name", self.program.__class__.__name__
         )

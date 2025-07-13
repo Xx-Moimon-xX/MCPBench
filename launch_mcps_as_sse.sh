@@ -46,11 +46,14 @@ do
   if [[ -n "$URL" ]]; then
     # If url exists, do not run run_config, just output info
     echo "Server '$NAME' is configured with URL: $URL, skipping run command."
-  
+  else
     # Extract command, args, and port from run_config array
     COMMAND=$(echo "$SERVER" | jq -r '.run_config[] | select(.command) | .command')
     ARGS=$(echo "$SERVER" | jq -r '.run_config[] | select(.args) | .args | if type == "array" then join(" ") else . end')
     PORT=$(echo "$SERVER" | jq -r '.run_config[] | select(.port) | .port')
+
+    # Extract env from run_config array (if present)
+    ENV_VARS=$(echo "$SERVER" | jq -r '.run_config[] | select(.env) | .env | to_entries[]? | "export " + .key + "=\"" + .value + "\""')
 
     # Extract tool_name from tools array (assume first tool)
     TOOL_NAME=$(echo "$SERVER" | jq -r '.tools[0].tool_name')
@@ -60,9 +63,14 @@ do
 
     echo "Starting server: $NAME on port $PORT"
 
+    # Export env vars if present
+    if [[ -n "$ENV_VARS" ]]; then
+      eval "$ENV_VARS"
+    fi
+
     # Start the server in the background
     npx -y supergateway \
-      --stdio "$ARGS $COMMAND" \
+      --stdio "$COMMAND $ARGS" \
       --port "$PORT" \
       --baseUrl "http://localhost:$PORT" \
       --ssePath /sse \
@@ -72,24 +80,6 @@ do
 
     PID=$!
     echo "Server '$NAME' started, PID: $PID"
-  else
-    # Extract command, args, and env from run_config array
-    COMMAND=$(echo "$SERVER" | jq -r '.run_config[0].command')
-    ARGS=$(echo "$SERVER" | jq -r '.run_config[0].args | @sh')
-    ENV_VARS=$(echo "$SERVER" | jq -r '.run_config[0].env | to_entries[] | "-e " + .key + "=\"" + .value + "\""')
-
-    # Build the docker run command
-    if [[ "$COMMAND" == "docker" ]]; then
-      echo "Running Docker container for server '$NAME'..."
-      # shellcheck disable=SC2086
-      # Correct: Place all -e ... before the image name, and only the image name after
-      DOCKER_CMD="docker run -d --rm ${ENV_VARS} slack-mcp-server"
-      echo "$DOCKER_CMD"
-      eval $DOCKER_CMD
-    else
-      echo "Unknown command in run_config: $COMMAND"
-      exit 1
-    fi
   fi
 done
 

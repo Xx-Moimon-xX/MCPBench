@@ -144,6 +144,7 @@ def evaluate(
     missing_mode_file="",
     api_key=None,
     api_base=None,
+    config=None,
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
@@ -197,6 +198,7 @@ def evaluate(
                 num_threads=num_threads,
                 api_key=api_key if api_key else os.getenv("OPENAI_API_KEY", ""),
                 api_base=api_base if api_base else os.getenv("OPENAI_API_BASE", ""),
+                config=config,
             )
             evaluate_bench.evaluate()
         # print(f"Results: {evaluate_bench.results}")
@@ -225,6 +227,7 @@ def evaluate_all(
     missing_mode_file="",
     api_key=None,
     api_base=None,
+    config=None,
 ):
     # Only register when benchmarks is a list of strings
     if benchmarks and isinstance(benchmarks[0], str):
@@ -242,6 +245,7 @@ def evaluate_all(
             missing_mode_file,
             api_key=api_key,
             api_base=api_base,
+            config=config,
         )
 
     df = read_evaluation_results(file_path)
@@ -251,7 +255,7 @@ def evaluate_all(
     # generate evaluation records
     generate_evaluation_records(file_path)
 
-global_config=None
+
 def main():
     import multiprocessing
     multiprocessing.freeze_support()
@@ -295,8 +299,8 @@ def main():
 
     args = parser.parse_args()
 
-    global global_config
-    global_config= read_json(args.config)
+    config = read_json(args.config)
+    print('DEBUG: config after loading:', config)
     # Process benchmark parameter
     benchmark_path = args.benchmark
     if not benchmark_path.startswith("langProBe."):
@@ -321,6 +325,7 @@ def main():
         missing_mode_file=args.missing_mode_file,
         api_key=args.lm_api_key,
         api_base=args.lm_api_base,
+        config=config,
     )
 
 if __name__ == "__main__":

@@ -56,12 +56,13 @@ class LangProBeMCPMetaProgram(dspy.Module):
     
 
 class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
-    def __init__(self, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="mcp_sample"):
+    def __init__(self, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="mcp_sample", config=None):
         super().__init__()
         self.system_prompt = system_prompt
         self.task_name = task_name
         self.max_steps = max_steps
         self.max_length = 30000
+        self.config = config
 
         # 配置运行日志记录器
         self.run_logger = logging.getLogger('MCPPredictRunLogger')
@@ -118,6 +119,10 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         answer_eval_manager.lm_api_key = self.lm.api_key
         answer_eval_manager.lm_api_base = self.lm.api_base
         answer_eval_manager.model = "openai/deepseek-v3"
+        # Set AWS credentials if available
+        answer_eval_manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+        answer_eval_manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+        answer_eval_manager.aws_region = os.getenv("AWS_REGION", "us-east-1")
         return evaluate_final_answer(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
 
     def log_messages(self, messages, question, success, time_cost, prompt_tokens_cost, completion_tokens_cost):
@@ -142,12 +147,16 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         manager.lm_api_base = self.lm.api_base
         manager.model = self.lm.model
         manager.id = unique_id
+        # Set AWS credentials if available
+        manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+        manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+        manager.aws_region = os.getenv("AWS_REGION", "us-east-1")
 
         self.run_logger.info(f"ID: {manager.id}, Starting forward pass for question: {question}")
 
 
-        from langProBe.evaluation import global_config
-        mcps = global_config['mcp_pool']
+        # Use config passed to the instance
+        mcps = self.config['mcp_pool']
 
         messages = build_init_messages(self.system_prompt, mcps, question)
         steps = 0
