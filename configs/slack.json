@@ -8,10 +8,6 @@
                     "args": [
                         "/Users/cxnpl/cxnpl/thesis/servers/slack/dist/index.js"
                     ],
-                    "env": {
-                        "SLACK_BOT_TOKEN": "***REMOVED***",
-                        "SLACK_TEAM_ID": "***REMOVED***"
-                    },
                     "port": 8000
                 }
             ]
