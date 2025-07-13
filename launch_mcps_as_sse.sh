@@ -72,6 +72,24 @@ do
 
     PID=$!
     echo "Server '$NAME' started, PID: $PID"
+  else
+    # Extract command, args, and env from run_config array
+    COMMAND=$(echo "$SERVER" | jq -r '.run_config[0].command')
+    ARGS=$(echo "$SERVER" | jq -r '.run_config[0].args | @sh')
+    ENV_VARS=$(echo "$SERVER" | jq -r '.run_config[0].env | to_entries[] | "-e " + .key + "=\"" + .value + "\""')
+
+    # Build the docker run command
+    if [[ "$COMMAND" == "docker" ]]; then
+      echo "Running Docker container for server '$NAME'..."
+      # shellcheck disable=SC2086
+      # Correct: Place all -e ... before the image name, and only the image name after
+      DOCKER_CMD="docker run -d --rm ${ENV_VARS} slack-mcp-server"
+      echo "$DOCKER_CMD"
+      eval $DOCKER_CMD
+    else
+      echo "Unknown command in run_config: $COMMAND"
+      exit 1
+    fi
   fi
 done
 
