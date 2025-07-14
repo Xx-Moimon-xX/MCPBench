@@ -64,39 +64,39 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         self.max_length = 30000
         self.config = config
 
-        # 配置运行日志记录器
+        # Configure run logger
         self.run_logger = logging.getLogger('MCPPredictRunLogger')
         self.run_logger.setLevel(logging.INFO)
 
-        # 配置消息日志记录器
+        # Configure message logger
         self.message_logger = logging.getLogger('MCPPredictMessageLogger')
         self.message_logger.setLevel(logging.INFO)
 
-        # 创建日志目录
+        # Create log directory
         os.makedirs('logs', exist_ok=True)
         self.setup_loggers()
 
     def setup_loggers(self):
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        # 设置运行日志
+        # Set up run log
         run_log_file = f'logs/{self.task_name}_run_{timestamp}.log'
         run_handler = logging.FileHandler(run_log_file, encoding='utf-8')
         run_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         run_handler.setFormatter(run_formatter)
         self.run_logger.addHandler(run_handler)
 
-        # 设置消息日志
+        # Set up message log
         message_log_file = f'logs/{self.task_name}_messages_{timestamp}.jsonl'
         message_handler = logging.FileHandler(message_log_file, encoding='utf-8')
         self.message_logger.addHandler(message_handler)
 
 
     def update_log_paths(self, new_log_dir):
-        # 确保新的日志目录存在
+        # Ensure the new log directory exists
         os.makedirs(new_log_dir, exist_ok=True)
         
-        # 更新运行日志记录器
+        # Update run logger
         for handler in self.run_logger.handlers[:]:
             self.run_logger.removeHandler(handler)
         
@@ -106,7 +106,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         run_handler.setFormatter(run_formatter)
         self.run_logger.addHandler(run_handler)
 
-        # 更新消息日志记录器
+        # Update message logger
         for handler in self.message_logger.handlers[:]:
             self.message_logger.removeHandler(handler)
         
@@ -118,7 +118,11 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         answer_eval_manager = ProcessManager()
         answer_eval_manager.lm_api_key = self.lm.api_key
         answer_eval_manager.lm_api_base = self.lm.api_base
-        answer_eval_manager.model = "openai/deepseek-v3"
+        # Use the same model type as the main LM for evaluation
+        if self.lm.model.startswith("bedrock/"):
+            answer_eval_manager.model = "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0"
+        else:
+            answer_eval_manager.model = "openai/deepseek-v3"
         # Set AWS credentials if available
         answer_eval_manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
         answer_eval_manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
@@ -177,7 +181,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
         end_time = time.time()
 
-        # 如果达到最大步数仍未得到答案
+        # If the maximum number of steps is reached and there is still no answer
         if messages[-1][constants.ROLE] != constants.ASSISTANT:
             self.run_logger.warning("Maximum steps reached without getting an answer")
             messages.append({

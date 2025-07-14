@@ -5,3 +5,4 @@ dashscope
 shortuuid
 anthropic
 boto3
+pandas

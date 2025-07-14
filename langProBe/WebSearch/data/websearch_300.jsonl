@@ -1,5 +1,5 @@
 {"unique_id": 676, "Prompt": "What is the country of origin of the football coach with the first initial \"P\" for the Thailand national men's football team who coached 54 years after the country's name officially changed?", "Answer": "German.", "reasoning_types": "Numerical reasoning | Tabular reasoning | Post processing | Temporal reasoning", "wiki_links": "['https://en.wikipedia.org/wiki/Thailand', 'https://en.wikipedia.org/wiki/Thailand_national_football_team#Coaching_history']"}
-{"unique_id": 537, "Prompt": "I am thinking of a movie where Hans Zimmer won a Grammy Award for his work. He won the Grammy award the same year that he did his first musical score for film director Michael Bay. Can you please tell me the name of that movie?", "Answer": "Crimson Tide", "reasoning_types": "Multiple constraints", "wiki_links": "['https://en.wikipedia.org/wiki/Michael_Bay', 'https://en.wikipedia.org/wiki/Hans_Zimmer#Grammy_Awards', 'https://en.wikipedia.org/wiki/Bad_Boys_(1995_film)', 'https://en.wikipedia.org/wiki/The_Rock_(film)', 'https://en.wikipedia.org/wiki/Armageddon_(1998_film)', 'https://en.wikipedia.org/wiki/Pearl_Harbor_(film)', 'https://en.wikipedia.org/wiki/Bad_Boys_II', 'https://en.wikipedia.org/wiki/The_Island_(2005_film)', 'https://en.wikipedia.org/wiki/Transformers_(film)', 'https://en.wikipedia.org/wiki/Transformers:_Revenge_of_the_Fallen', 'https://en.wikipedia.org/wiki/Transformers:_Dark_of_the_Moon, https://en.wikipedia.org/wiki/Pain_%26_Gain, https://en.wikipedia.org/wiki/Transformers:_Age_of_Extinction, https://en.wikipedia.org/wiki/13_Hours:_The_Secret_Soldiers_of_Benghazi, https://en.wikipedia.org/wiki/Transformers:_The_Last_Knight, https://en.wikipedia.org/wiki/6_Underground_(film), https://en.wikipedia.org/wiki/Ambulance_(2022_film)']"}
+{"unique_id": 537, "Prompt": "I am thinking of a movie where Hans Zimmer won a Grammy Award for his work. He won the Grammy award the same year that he did his first musical score for film director Michael Bay. Can you please tell me the name of that movie?", "Answer": "Crimson Tide", "reasoning_types": "Multiple constraints", "wiki_links": "['https://en.wikipedia.org/wiki/Michael_Bay', 'https://en.wikipedia.org/wiki/Hans_Zimmer#Grammy_Awards', 'https://en.wikipedia.org/wiki/Bad_Boys_(1995_film)', 'https://en.wikipedia.org/wiki/The_Rock_(film)', 'https://en.wikipedia.org/wiki/Armageddon_(1998_film)', 'https://en.wikipedia.org/wiki/Pearl_Harbor_(film)', 'https://en.wikipedia.org/wiki/Bad_Boys_II', 'https://en.wikipedia.org/wiki/The_Island_(2005_film)', 'https://en.wikipedia.org/wiki/Transformers_(film)', 'https://en.wikipedia.org/wiki/Transformers:_Revenge_of_the_Fallen', 'https://en.wikipedia.org/wiki/Transformers:_Dark_of_the_Moon', 'https://en.wikipedia.org/wiki/Pain_%26_Gain', 'https://en.wikipedia.org/wiki/Transformers:_Age_of_Extinction', 'https://en.wikipedia.org/wiki/13_Hours:_The_Secret_Soldiers_of_Benghazi', 'https://en.wikipedia.org/wiki/Transformers:_The_Last_Knight', 'https://en.wikipedia.org/wiki/6_Underground_(film)', 'https://en.wikipedia.org/wiki/Ambulance_(2022_film)']"}
 {"unique_id": 340, "Prompt": "As of August 3, 2024, which band was nominated three times for the Grammy Award for Best Metal Performance and also headlined the Opus Stage at Download Festival 2023?", "Answer": "Ghost", "reasoning_types": "Tabular reasoning", "wiki_links": "['https://en.wikipedia.org/wiki/Grammy_Award_for_Best_Metal_Performance', 'https://en.wikipedia.org/wiki/Download_Festival']"}
 {"unique_id": 748, "Prompt": "Who is the male cousin, whose name begins with an L, of the actor who played the murderer in the ITV series White House Farm, and how old was he when he stood in the 2021 London mayoral election?", "Answer": "Laurence Fox, 42", "reasoning_types": "Numerical reasoning | Temporal reasoning", "wiki_links": "['https://en.wikipedia.org/wiki/White_House_Farm_murders', 'https://en.wikipedia.org/wiki/Freddie_Fox_(actor)', 'https://en.wikipedia.org/wiki/Laurence_Fox', 'https://en.wikipedia.org/wiki/2021_London_mayoral_election']"}
 {"unique_id": 381, "Prompt": "Milton Friedman won the Nobel Prize for Economics in 1976. What was the name of the Nobel Peace Prize winning wife of the economist who won the Nobel Prize for Economics two years before Friedman did?", "Answer": "Alva Myrdal", "reasoning_types": "Tabular reasoning | Temporal reasoning", "wiki_links": "['https://en.wikipedia.org/wiki/Milton_Friedman', 'https://en.wikipedia.org/wiki/List_of_Nobel_Memorial_Prize_laureates_in_Economic_Sciences', 'https://en.wikipedia.org/wiki/Gunnar_Myrdal']"}
@@ -23,7 +23,7 @@
 {"unique_id": 173, "Prompt": "In roman numerals, how many nations competed in the Olympic Games where the most gold medals was won by an athlete at a single Olympic Games, as of 1st July 2024?", "Answer": "CCIV", "reasoning_types": "Tabular reasoning | Post processing", "wiki_links": "['https://en.wikipedia.org/wiki/List_of_multiple_Olympic_gold_medalists_at_a_single_Games', 'https://en.wikipedia.org/wiki/2008_Summer_Olympics']"}
 {"unique_id": 445, "Prompt": "What number do you get when you add up the numbers in the postcode of the hospital John Lennon was born in?", "Answer": "14", "reasoning_types": "Numerical reasoning", "wiki_links": "['https://en.wikipedia.org/wiki/John_Lennon', 'https://en.wikipedia.org/wiki/Liverpool_Maternity_Hospital']"}
 {"unique_id": 798, "Prompt": "What genus does the animal that features in the upper left of the coat of arms of the area that the family of Jürgen Warnke moved to in 1945 belong to?", "Answer": "Panthera", "reasoning_types": "Multiple constraints", "wiki_links": "['https://en.wikipedia.org/wiki/J%C3%BCrgen_Warnke', 'https://en.wikipedia.org/wiki/Upper_Franconia#Coat_of_arms', 'https://en.wikipedia.org/wiki/Lion']"}
-{"unique_id": 644, "Prompt": "The incorporation of this company happened in the same year titled on Taylor Swift 5th studio album. It was incorporated by a man born in Setagaya, Tokyo, Japan that worked with the illustrator who largely designed the original 151 Pokémon.     What is “this company”? ", "Answer": "Game Freak", "reasoning_types": "Multiple constraints", "wiki_links": "['https://en.wikipedia.org/wiki/1989_(album)', 'https://en.wikipedia.org/wiki/Satoshi_Tajiri', 'https://en.wikipedia.org/wiki/Pok%C3%A9mon (NOT REQUIRED, BUT HELPFUL) ']"}
+{"unique_id": 644, "Prompt": "The incorporation of this company happened in the same year titled on Taylor Swift 5th studio album. It was incorporated by a man born in Setagaya, Tokyo, Japan that worked with the illustrator who largely designed the original 151 Pokémon.     What is "this company"? ", "Answer": "Game Freak", "reasoning_types": "Multiple constraints", "wiki_links": "['https://en.wikipedia.org/wiki/1989_(album)', 'https://en.wikipedia.org/wiki/Satoshi_Tajiri', 'https://en.wikipedia.org/wiki/Pok%C3%A9mon']"}
 {"unique_id": 800, "Prompt": "Which cities hosted the Olympics in 1988, and where were the opening ceremonies held in each city?", "Answer": "Calgary- Winter Olympics, opening ceremony held at McMahon Stadium. Seoul- Summer Olympics, opening ceremony held at Seoul Olympic Stadium.", "reasoning_types": "Tabular reasoning", "wiki_links": "['https://en.wikipedia.org/wiki/List_of_Olympic_Games_host_cities', 'https://en.wikipedia.org/wiki/1988_Summer_Olympics', 'https://en.wikipedia.org/wiki/1988_Winter_Olympics']"}
 {"unique_id": 411, "Prompt": "This author won the Popular Fiction Book of the Year award in 2009 at the Irish Book Awards. What is their astrological sign?", "Answer": "Virgo", "reasoning_types": "Tabular reasoning | Multiple constraints | Temporal reasoning", "wiki_links": "['https://en.wikipedia.org/wiki/Irish_Book_Awards', 'https://en.wikipedia.org/wiki/Marian_Keyes', 'https://en.wikipedia.org/wiki/Astrological_sign']"}
 {"unique_id": 76, "Prompt": "A united states island that is only 90 miles away from Cuba has been the home of several famous people. In what year did the famous author who owns a book store there first start writing?", "Answer": "1959", "reasoning_types": "Post processing | Temporal reasoning", "wiki_links": "['https://en.wikipedia.org/wiki/Key_West#:~:text=The%20southernmost%20location%20that%20the,apart%20at%20their%20closest%20points.', 'https://en.wikipedia.org/wiki/Judy_Blume']"}
@@ -105,7 +105,7 @@
 {"unique_id": 2140, "Prompt": "1965年12月15日启程并于次日返回的载人任务是哪个？", "Answer": "双子座6A号"}
 {"unique_id": 2154, "Prompt": "小松餐厅因何原因在1913年（大正2年）丧失了地处名胜的地理优势？", "Answer": "田户海岸因填海工程而消失。"}
 {"unique_id": 2086, "Prompt": "大西洋桥施工图设计项目的中标金额是多少美元？", "Answer": "4,662,352美元"}
-{"unique_id": 2075, "Prompt": "“福和号”TBM的整机重量是多少吨？", "Answer": "2500吨"}
+{"unique_id": 2075, "Prompt":""福和号"TBM的整机重量是多少吨？", "Answer": "2500吨"}
 {"unique_id": 2167, "Prompt": "卢冬在哪一年被辽宁省残联体训中心选入游泳队？", "Answer": "2004年"}
 {"unique_id": 2184, "Prompt": "根据出埃及记记载，上帝命令摩西让以色列人用什么动物的血标记门框？", "Answer": "羔羊"}
 {"unique_id": 2095, "Prompt": "金翅鸟翼龙属的正模标本现收藏于哪所大学的哪个中心？", "Answer": "玛哈沙拉堪大学的古生物学研究与教育中心"}
@@ -115,13 +115,13 @@
 {"unique_id": 2080, "Prompt": "莱茵兰号战列舰及其姊妹舰威斯特法伦号奉命前往芬兰为德国陆军部队提供支援的具体日期是什么时候？", "Answer": "1918年2月22日"}
 {"unique_id": 2159, "Prompt": "Titiek Puspa在哪一年前往麦加朝圣？", "Answer": "2000年代初期"}
 {"unique_id": 2064, "Prompt": "斯坦利杯在哪一年因为西班牙流感大流行而没有颁发？", "Answer": "1919年"}
-{"unique_id": 2017, "Prompt": "丘秀芷在哪一天中午将“冬官第”匾购回家中？", "Answer": "1983年3月25日"}
+{"unique_id": 2017, "Prompt": "丘秀芷在哪一天中午将"冬官第"匾购回家中？", "Answer": "1983年3月25日"}
 {"unique_id": 2060, "Prompt": "第一位在斯坦利杯上刻上名字的女性是谁，她在哪两年作为底特律红翼队总裁刻上了名字？", "Answer": "玛格丽特·诺里斯，1954年和1955年"}
 {"unique_id": 2020, "Prompt": "截至2025年1月20日，Channels Television报道的尼日尔州油罐车爆炸事件死亡人数是多少？", "Answer": "98人。"}
 {"unique_id": 2122, "Prompt": "带状糖蚁的模式标本是什么类型，采集自哪里，目前保存在哪？", "Answer": "模式标本是蚁后，采集自塔斯马尼亚，保存在柏林自然博物馆"}
 {"unique_id": 2022, "Prompt": "根据2025年1月19日Radio France Internationale的报道，尼日利亚油罐车爆炸事件的死亡人数上升至多少？", "Answer": "86人。"}
 {"unique_id": 2097, "Prompt": "西塔·玛尼康等人在哪一年哪本期刊上正式描述并命名了金翅鸟翼龙属及其模式种比氏金翅鸟翼龙？", "Answer": "2025年9月1日，《白垩纪研究》"}
-{"unique_id": 2079, "Prompt": "“福和号”TBM的整机长度是多少米？", "Answer": "190米"}
+{"unique_id": 2079, "Prompt": ""福和号"TBM的整机长度是多少米？", "Answer": "190米"}
 {"unique_id": 2130, "Prompt": "For which film did Manoj Kumar win his first Filmfare Best Director Award?", "Answer": "Upkar"}
 {"unique_id": 2169, "Prompt": "卢冬在第七届全国残运会上获得了什么成绩？", "Answer": "两铜"}
 {"unique_id": 2162, "Prompt": "During which years did Petro Georgiou work as a senior tutor in politics at La Trobe University?", "Answer": "1970 to 1973."}
@@ -132,7 +132,7 @@
 {"unique_id": 2174, "Prompt": "What happened to the personal letter sent by Montgomery to Carleton on December 6, 1775?", "Answer": "Carleton burned it unread"}
 {"unique_id": 2190, "Prompt": "1925年2月10日，谁代表众议院铸币和度量衡委员会向众议院报告支持发行挪威裔美国人勋章？", "Answer": "奥莱·朱尔逊·卡维尔"}
 {"unique_id": 2192, "Prompt": "1925年3月2日，哪位总统签字使授权发行挪威裔美国人勋章的法案正式成为法律？", "Answer": "卡尔文·柯立芝"}
-{"unique_id": 2018, "Prompt": "丘秀芷在哪一天与《民生报》陈小凌联系并去戚维义家商量购买“冬官第”匾事宜？", "Answer": "1983年3月24日"}
+{"unique_id": 2018, "Prompt": "丘秀芷在哪一天与《民生报》陈小凌联系并去戚维义家商量购买"冬官第"匾事宜？", "Answer": "1983年3月24日"}
 {"unique_id": 2028, "Prompt": "德安鱼兼具了哪两类鱼类的镶嵌演化特征？", "Answer": "修水鱼类和真盔甲鱼类"}
 {"unique_id": 2033, "Prompt": "《反重力赛车3》在欧洲的发行日期是什么时候？", "Answer": "1999年9月8日"}
 {"unique_id": 2191, "Prompt": "1925年2月27日，众议院审议并通过的是哪个版本的挪威裔美国人勋章法案？", "Answer": "参议院版本"}
@@ -147,7 +147,7 @@
 {"unique_id": 2063, "Prompt": "哪一年温尼伯维多利亚队开始了从斯坦利杯喝香槟的传统？", "Answer": "1896年"}
 {"unique_id": 2168, "Prompt": "卢冬在2010年广州亚残运会上获得了哪些奖项？", "Answer": "一银二铜"}
 {"unique_id": 2115, "Prompt": "1986年摄制的电影《美人之死》的销售成本是多少？", "Answer": "约67万元人民币"}
-{"unique_id": 2141, "Prompt": "哪一枚纪念奖章背面刻有“1969年7月20日”这一日期？", "Answer": "阿波罗11号太空飞行银质奖章"}
+{"unique_id": 2141, "Prompt": "哪一枚纪念奖章背面刻有"1969年7月20日"这一日期？", "Answer": "阿波罗11号太空飞行银质奖章"}
 {"unique_id": 2147, "Prompt": "《免于匮乏的自由》目前收藏于哪个博物馆？", "Answer": "马萨诸塞州伯克夏县斯托克布里奇的诺曼·洛克威尔博物馆"}
 {"unique_id": 2066, "Prompt": "Which team won their first Stanley Cup championship in the 2023-24 season?", "Answer": "The Florida Panthers."}
 {"unique_id": 2143, "Prompt": "Fliteline公司从哪一年开始为每次载人任务制作纪念奖章？", "Answer": "1965年"}
@@ -164,11 +164,11 @@
 {"unique_id": 2024, "Prompt": "2025年1月20日，Channels Television报道中提到的尼日尔州油罐车爆炸事件中受伤人数是多少？", "Answer": "69人。"}
 {"unique_id": 2027, "Prompt": "修水鱼科和德安鱼科可能代表了哪类鱼的原始类型？", "Answer": "盔甲鱼"}
 {"unique_id": 2091, "Prompt": "1972年9月，日本煉鎳業界決定從哪一天開始每噸價格提高15萬日圓？", "Answer": "21日"}
-{"unique_id": 2077, "Prompt": "“福和号”TBM的最大推力是多少千牛？", "Answer": "156728千牛"}
+{"unique_id": 2077, "Prompt": ""福和号"TBM的最大推力是多少千牛？", "Answer": "156728千牛"}
 {"unique_id": 2074, "Prompt": "截至2015年11月，美国因火山喷发遇难的两名火山学家是谁？", "Answer": "哈利·格里肯和大卫·A·约翰斯顿"}
 {"unique_id": 2034, "Prompt": "《反重力赛车3》的续作《反重力赛车融合》是在哪一年发行的？", "Answer": "2002年"}
 {"unique_id": 2170, "Prompt": "What action did Daniel Morgan take to escape the bayonets of the defenders during the assault on the barricade in Quebec City on December 31, 1775?", "Answer": "He rolled under one of the cannons"}
-{"unique_id": 2136, "Prompt": "1979年，珠海市政府拨款将‘万人坟’迁至哪个地方重建？", "Answer": "圣堂村竹沥的山坡。"}
+{"unique_id": 2136, "Prompt": "1979年，珠海市政府拨款将'万人坟'迁至哪个地方重建？", "Answer": "圣堂村竹沥的山坡。"}
 {"unique_id": 2121, "Prompt": "在2017年12月上旬，昆士兰东南部观察到带状糖蚁的哪种行为？", "Answer": "婚飞"}
 {"unique_id": 2040, "Prompt": "空铁黝银矿在哪一天正式获得国际矿物学协会新矿物命名及分类委员会批准？", "Answer": "2022年4月28日"}
 {"unique_id": 2135, "Prompt": "1938年4月13日，日军在三灶岛实行三光政策时屠杀了哪些乡村的村民？", "Answer": "月堂、鱼弄、雅塾等乡村民共400人。"}
@@ -178,8 +178,8 @@
 {"unique_id": 2010, "Prompt": "羅馬尼亞球員參加1930年國際足協世界盃時乘坐的船叫什麼名字？", "Answer": "綠色伯爵號"}
 {"unique_id": 2114, "Prompt": "松野泰己在哪一年从Level-5公司离职？", "Answer": "2012年10月"}
 {"unique_id": 2002, "Prompt": "When and where did the 2024 Sundance Film Festival take place?", "Answer": "The 2024 Sundance Film Festival took place from January 18 to 28, 2024 in Park City, Utah."}
-{"unique_id": 2019, "Prompt": "光绪十五年，丘逢甲在殿试后回台湾建立了什么建筑，并以宅中柏树为名取了什么名字？", "Answer": "建立了进士第，取名为“柏庄”"}
-{"unique_id": 2015, "Prompt": "1980年6月，“冬官第”匾被以多少新台币转卖给福君市场的王姓商人？", "Answer": "两万五千元"}
+{"unique_id": 2019, "Prompt": "光绪十五年，丘逢甲在殿试后回台湾建立了什么建筑，并以宅中柏树为名取了什么名字？", "Answer": "建立了进士第，取名为"柏庄""}
+{"unique_id": 2015, "Prompt": "1980年6月，"冬官第"匾被以多少新台币转卖给福君市场的王姓商人？", "Answer": "两万五千元"}
 {"unique_id": 2107, "Prompt": "Which Pope invited Peter Stuhlmacher to the 2008 meeting of the Ratzinger Circle of Alumni?", "Answer": "Pope Benedict XVI"}
 {"unique_id": 2133, "Prompt": "Manoj Kumar won the Filmfare Award for Best Actor in which year for his performance in Be-Imaan?", "Answer": "1973"}
 {"unique_id": 2199, "Prompt": "哪一个术语是指中东地区一条大多数人皈依什叶派，或国内存在具影响力的什叶派少数群体的新月形地带？", "Answer": "什叶派新月带（阿拉伯语：الهلال الشيعي，英语：Shia Crescent或Shiite Crescent）"}
@@ -190,9 +190,9 @@
 {"unique_id": 2178, "Prompt": "飓风艾格尼丝在哪一天达到其最高强度，强度是多少？", "Answer": "6月19日，最大持续风速每小时140公里。"}
 {"unique_id": 2152, "Prompt": "小松餐厅在1923年（大正12年）11月迁至何处重新开业？", "Answer": "米滨地区。"}
 {"unique_id": 2088, "Prompt": "大西洋桥于哪一年正式竣工通车？", "Answer": "2019年"}
-{"unique_id": 2070, "Prompt": "加利福尼亚大学圣巴巴拉分校地质系每年颁发的‘哈利·格里肯纪念研究生奖学金’的资金来源是什么？", "Answer": "哈利·格里肯基金"}
+{"unique_id": 2070, "Prompt": "加利福尼亚大学圣巴巴拉分校地质系每年颁发的'哈利·格里肯纪念研究生奖学金'的资金来源是什么？", "Answer": "哈利·格里肯基金"}
 {"unique_id": 2057, "Prompt": "臺東線完成軌道拓寬工程至1,067mm軌距是在哪一年哪一月？", "Answer": "1982年7月"}
-{"unique_id": 2078, "Prompt": "“福和号”TBM的设计开挖直径是多少米？", "Answer": "10.23米"}
+{"unique_id": 2078, "Prompt": ""福和号"TBM的设计开挖直径是多少米？", "Answer": "10.23米"}
 {"unique_id": 2006, "Prompt": "On March 2, 1921, which women's ice hockey team defeated the Seattle Vamps 1-0?", "Answer": "Victoria Kewpies"}
 {"unique_id": 2061, "Prompt": "斯坦利杯的高度和重量分别是多少？", "Answer": "高度89.5厘米，重量15.6公斤"}
 {"unique_id": 2092, "Prompt": "1973年春季時，壹圓鎳幣的估計數量是多少？", "Answer": "5億2000萬枚"}
@@ -204,7 +204,7 @@
 {"unique_id": 1064, "Prompt": "2024年，全国检察机关共办理了多少件案件？", "Answer": "409.96万件"}
 {"unique_id": 1047, "Prompt": "2025年前两个月，我国服务贸易进出口总额是多少，同比增长了多少？", "Answer": "13095.6亿元人民币，9.9%"}
 {"unique_id": 1239, "Prompt": "加拿大财政部宣布对美国汽车征收25%关税的措施何时生效？", "Answer": "美国东部时间2025年4月9日零时1分"}
-{"unique_id": 1042, "Prompt": "人力资源社会保障部等八部门启动的2025年“春风行动”将持续多长时间？", "Answer": "从1月中旬持续到3月中旬"}
+{"unique_id": 1042, "Prompt": "人力资源社会保障部等八部门启动的2025年"春风行动"将持续多长时间？", "Answer": "从1月中旬持续到3月中旬"}
 {"unique_id": 1073, "Prompt": "2024年2月28日发布的《2024年国民经济和社会发展统计公报》中，我国国内生产总值是多少？", "Answer": "1349084亿元。"}
 {"unique_id": 1086, "Prompt": "2025年2月11日，人工智能行动峰会在哪个城市闭幕？", "Answer": "法国巴黎"}
 {"unique_id": 1156, "Prompt": "国际奥委会第144次全会选举谁为国际奥委会第十任主席？", "Answer": "津巴布韦奥运冠军柯丝蒂·考文垂"}
@@ -215,7 +215,7 @@
 {"unique_id": 1070, "Prompt": "2025年春节大年初一票房是多少亿元？", "Answer": "15.82亿元"}
 {"unique_id": 1249, "Prompt": "2025年3月18日，也门胡塞武装宣布袭击了以色列的哪个空军基地？", "Answer": "内瓦提姆空军基地"}
 {"unique_id": 1218, "Prompt": "黑龙江省冰雪季从2023年11月8日至2024年2月28日实现的游客花费总额是多少？", "Answer": "2117.2亿元"}
-{"unique_id": 1096, "Prompt": "2025年1月10日，美国纽约州高等法院法官梅尔尚在‘封口费’案中裁决特朗普犯有何种罪行？", "Answer": "重罪。"}
+{"unique_id": 1096, "Prompt": "2025年1月10日，美国纽约州高等法院法官梅尔尚在'封口费'案中裁决特朗普犯有何种罪行？", "Answer": "重罪。"}
 {"unique_id": 1093, "Prompt": "2025年3月30日，国产大飞机C919在哪两条航线上迎来首航？", "Answer": "上海—沈阳、西安—广州。"}
 {"unique_id": 1065, "Prompt": "2024年，全国粮食产量首次达到多少？", "Answer": "1.4万亿斤"}
 {"unique_id": 1079, "Prompt": "兰州中川国际机场三期新建的T3航站楼将于何时正式启用？", "Answer": "2025年3月20日0时"}
@@ -252,7 +252,7 @@
 {"unique_id": 1014, "Prompt": "2025年2月7日，以色列国防军在过去的一周内在约旦河西岸抓捕了多少名巴勒斯坦人？", "Answer": "超过60名"}
 {"unique_id": 1084, "Prompt": "2024年社会物流总费用与国内生产总值的比率是多少？", "Answer": "14.1%"}
 {"unique_id": 1035, "Prompt": "2024年中国与非洲的进出口总额是多少，同比增长率如何？", "Answer": "2.1万亿元，同比增长6.1%。"}
-{"unique_id": 1217, "Prompt": "截至2025年3月2日，“十四五”102项重大工程中完成规划目标的比例是多少？", "Answer": "98%以上"}
+{"unique_id": 1217, "Prompt": "截至2025年3月2日，"十四五"102项重大工程中完成规划目标的比例是多少？", "Answer": "98%以上"}
 {"unique_id": 1097, "Prompt": "截至2025年1月11日中午12时，西藏定日6.8级地震中累计收治的伤员人数是多少？", "Answer": "338人。"}
 {"unique_id": 1147, "Prompt": "庆阳数据中心集群在2025年2月18日已建成投运的标准机架数量是多少？", "Answer": "3.1万个"}
 {"unique_id": 1114, "Prompt": "2025年是哪个规划的收官之年？", "Answer": "'十四五'规划"}
@@ -262,7 +262,7 @@
 {"unique_id": 1005, "Prompt": "德国新型运载火箭'光谱'发射失败的具体时间和地点是什么？", "Answer": "2024年3月30日在挪威安岛航天中心发射升空后不久坠毁爆炸。"}
 {"unique_id": 1118, "Prompt": "2025年1月，广义货币M2余额是多少？", "Answer": "318.52万亿元"}
 {"unique_id": 1133, "Prompt": "2025年3月22日发生故障并在中断约3小时后恢复运行的是哪个系统？", "Answer": "美国联邦航空管理局系统"}
-{"unique_id": 1040, "Prompt": "海军“和平方舟”号医院船完成的“和谐使命-2024”任务返回的具体地点是哪里？", "Answer": "舟山某军港"}
+{"unique_id": 1040, "Prompt": "海军"和平方舟"号医院船完成的"和谐使命-2024"任务返回的具体地点是哪里？", "Answer": "舟山某军港"}
 {"unique_id": 1223, "Prompt": "在世界知识产权组织发布的最新全球创新指数排名中，我国位居第几位？", "Answer": "第11位"}
 {"unique_id": 1122, "Prompt": "2025年，北京计划新建绿道多少公里？", "Answer": "1000公里"}
 {"unique_id": 1015, "Prompt": "2025年2月7日，国际奥委会主席巴赫在哈尔滨为哪个团队授牌？", "Answer": "中央广播电视总台2026年米兰冬奥会国际公用信号制作团队"}
@@ -270,7 +270,7 @@
 {"unique_id": 1069, "Prompt": "截至2025年1月29日8时，总台《2025年春节联欢晚会》全媒体累计触达多少人次？", "Answer": "168亿人次"}
 {"unique_id": 1182, "Prompt": "2024年我国对中东欧国家进出口总额是多少？", "Answer": "1.01万亿元"}
 {"unique_id": 1060, "Prompt": "2024年11月，习近平主席与石破茂首相在哪个城市会晤并一致同意全面推进中日战略互惠关系？", "Answer": "利马"}
-{"unique_id": 1179, "Prompt": "浙江杭州上城区小营巷社区的“小雨馒头”项目启动于何时？", "Answer": "2023年7月"}
+{"unique_id": 1179, "Prompt": "浙江杭州上城区小营巷社区的"小雨馒头"项目启动于何时？", "Answer": "2023年7月"}
 {"unique_id": 1049, "Prompt": "文化和旅游部在2025年3月13日公布的最新一批国家级旅游休闲街区有多少家？", "Answer": "40家"}
 {"unique_id": 1102, "Prompt": "2025年2月10日起，哪些国家的旅游团可免签入境云南西双版纳？", "Answer": "马来西亚、印度尼西亚等10个东盟国家。"}
 {"unique_id": 1209, "Prompt": "吉尔吉斯斯坦总统扎帕罗夫应谁的邀请于2025年2月4日至7日对中国进行国事访问？", "Answer": "应国家主席习近平的邀请。"}
@@ -280,10 +280,10 @@
 {"unique_id": 1125, "Prompt": "2025年新春伊始，杭州平均每天诞生多少家企业？", "Answer": "280多家"}
 {"unique_id": 1031, "Prompt": "俄罗斯国防部2025年3月16日称，过去一天俄军在哪些方向发动多次攻势？", "Answer": "哈尔科夫、顿涅茨克等方向"}
 {"unique_id": 1010, "Prompt": "中共中央政治局常务委员会在哪一天召开会议研究部署西藏定日抗震救灾工作？", "Answer": "2025年1月9日"}
-{"unique_id": 1011, "Prompt": "全球首座300兆瓦级压气储能电站“能储一号”在哪一天实现全容量并网发电？", "Answer": "2025年1月9日"}
+{"unique_id": 1011, "Prompt": "全球首座300兆瓦级压气储能电站"能储一号"在哪一天实现全容量并网发电？", "Answer": "2025年1月9日"}
 {"unique_id": 1164, "Prompt": "2025年春节档电影票房冠军是哪部影片？", "Answer": "《哪吒之魔童闹海》"}
 {"unique_id": 1212, "Prompt": "2025年3月21日到22日，以军袭击了加沙地带哪些主要地区？", "Answer": "拉法、汗尤尼斯、加沙城、代尔拜拉赫"}
-{"unique_id": 1206, "Prompt": "2025年2月19日，中国社会科学院公布的六项“2024年中国考古新发现”中，甘肃临洮县寺洼遗址发现了什么重要成果？", "Answer": "史前三重近方形大型“围壕”"}
+{"unique_id": 1206, "Prompt": "2025年2月19日，中国社会科学院公布的六项"2024年中国考古新发现"中，甘肃临洮县寺洼遗址发现了什么重要成果？", "Answer": "史前三重近方形大型"围壕""}
 {"unique_id": 1219, "Prompt": "政协第十四届全国委员会常务委员会第十次会议在哪一天闭幕？", "Answer": "2025年3月2日"}
 {"unique_id": 1184, "Prompt": "2025年1月20日，我国首次出台的关于公共数据资源开发利用的政策由哪两个部门发布？", "Answer": "国家发展改革委、国家数据局"}
 {"unique_id": 1222, "Prompt": "2025年1月23日，国务院新闻办公室举行的新闻发布会介绍了哪个实施方案？", "Answer": "《关于推动中长期资金入市工作的实施方案》"}

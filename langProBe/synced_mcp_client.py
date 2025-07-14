@@ -7,6 +7,7 @@ from multiprocessing import Process, Queue, Lock
 from typing import Any, Tuple, Dict
 
 # 全局客户端实例和锁，确保全局唯一的客户端实例
+# Global client instance and lock to ensure a globally unique client instance
 _CLIENT_INSTANCE = None
 _CLIENT_LOCK = Lock()
 

@@ -23,12 +23,11 @@ DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
 python3 -m langProBe.evaluation \
   --benchmark=WebSearch \
-  --dataset_mode=full \
-  --dataset_path=langProBe/WebSearch/data/websearch_600.jsonl \
+  --dataset_mode=test \
+  --dataset_path=langProBe/WebSearch/data/websearch_10.jsonl \
   --file_path=evaluation_websearch_test \
-  --lm=anthropic/claude-3-opus-20240229 \
-  --lm_api_base=https://api.anthropic.com/v1 \
-  --lm_api_key=$ANTHROPIC_API_KEY \
+  --lm=bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0 \
+  --lm_api_key=$AWS_ACCESS_KEY_ID \
   --num_threads=1 \
   --config=$CONFIG_FILE
 

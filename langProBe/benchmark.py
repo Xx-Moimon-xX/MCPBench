@@ -20,6 +20,9 @@ dataset_size = {"full": None, "lite": 500, "tiny": 200, "test": 2}
 
 
 class Benchmark(ABC):
+    '''
+    Has splitting dataset code and stuff. Mainly about the datasets used.
+    '''
     def __init__(self, dataset_mode="lite"):
         # dataset for training and validation
         self.dataset = None
@@ -240,7 +243,8 @@ class EvaluateBench(ABC):
             score, info = self.evaluate_prog(self.program)
         result = self.get_empty_results()
         datasets, outputs, _ = zip(*info)
-        managers = [one.process_report for one in outputs]
+        managers = [getattr(one, 'process_report', None) for one in outputs]
+        managers = [m for m in managers if m is not None]
 
         result.score = score   
         result.outputs_raw_data = outputs

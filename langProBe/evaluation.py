@@ -21,6 +21,9 @@ from langProBe.optimizers import create_optimizer, DEFAULT_OPTIMIZERS
 from langProBe.register_benchmark import register_all_benchmarks, registered_benchmarks
 from langProBe.evaluation_utils import find_missing_entries, replace_logger_filehandler
 
+# Global configuration variable that can be accessed by other modules
+global_config = None
+
 
 class CompareAnswerSignature(dspy.Signature):
     """
@@ -301,6 +304,10 @@ def main():
 
     config = read_json(args.config)
     print('DEBUG: config after loading:', config)
+    
+    # Set global config for use by other modules
+    global global_config
+    global_config = config
     # Process benchmark parameter
     benchmark_path = args.benchmark
     if not benchmark_path.startswith("langProBe."):

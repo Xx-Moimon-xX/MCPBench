@@ -4,9 +4,9 @@
       "name": "brave-search",
       "run_config": [
         {
-          "command": "docker",
-          "args": ["run", "-i", "--rm", "-e", "$BRAVE_API_KEY", "-p", "8003:8000", "mcp/brave-search"],
-          "port": 8003
+          "command": "node",
+          "args": ["/Users/cxnpl/cxnpl/thesis/servers/brave-search/dist/index.js"],
+          "port": 8100
         }
       ]
     }

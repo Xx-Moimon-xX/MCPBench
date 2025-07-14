@@ -147,6 +147,7 @@ def call_lm(
                 'bedrock-runtime',
                 aws_access_key_id=manager.aws_access_key_id or os.getenv("AWS_ACCESS_KEY_ID"),
                 aws_secret_access_key=manager.aws_secret_access_key or os.getenv("AWS_SECRET_ACCESS_KEY"),
+                aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
                 region_name=manager.aws_region or os.getenv("AWS_REGION", "us-east-1")
             )
             
@@ -185,7 +186,11 @@ def call_lm(
                 )
                 
                 response_body = json.loads(response['body'].read())
-                response_text = response_body.get('content', [{}])[0].get('text', '')
+                content_list = response_body.get('content', [])
+                if content_list:
+                    response_text = content_list[0].get('text', '')
+                else:
+                    response_text = ''
                 
                 # Extract token usage
                 usage = response_body.get('usage', {})
@@ -310,6 +315,7 @@ def build_system_content(base_system: str,
                     )
 
             # 使用更丰富的描述
+            # Use a more detailed description
             params_text = "\n".join(params_desc) if params_desc else "No parameters"
             tools_section += f"  Parameters:\n{params_text}\n\n"
 
