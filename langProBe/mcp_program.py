@@ -66,11 +66,11 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
         # Configure run logger
         self.run_logger = logging.getLogger('MCPPredictRunLogger')
-        self.run_logger.setLevel(logging.INFO)
+        self.run_logger.setLevel(logging.DEBUG)
 
         # Configure message logger
         self.message_logger = logging.getLogger('MCPPredictMessageLogger')
-        self.message_logger.setLevel(logging.INFO)
+        self.message_logger.setLevel(logging.DEBUG)
 
         # Create log directory
         os.makedirs('logs', exist_ok=True)
@@ -115,6 +115,9 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         self.message_logger.addHandler(message_handler)
 
     def evaluate_prediction(self, question: str, ground_truth: str, prediction: str) -> Tuple[bool, Optional[str]]:
+        '''
+        Main function to evaluate the prediction.
+        '''
         answer_eval_manager = ProcessManager()
         answer_eval_manager.lm_api_key = self.lm.api_key
         answer_eval_manager.lm_api_base = self.lm.api_base
@@ -126,7 +129,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         # Set AWS credentials if available
         answer_eval_manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
         answer_eval_manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-        answer_eval_manager.aws_region = os.getenv("AWS_REGION", "us-east-1")
+        answer_eval_manager.aws_region = os.getenv("AWS_REGION")
         return evaluate_final_answer(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
 
     def log_messages(self, messages, question, success, time_cost, prompt_tokens_cost, completion_tokens_cost):
@@ -142,6 +145,9 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
 
     def forward(self, **kwargs) -> dspy.Prediction:
+        '''
+        Forward pass for the MCP program.
+        '''
         unique_id = kwargs.get('id')
         question = kwargs.get('question')
         gt = kwargs.get('answer')
@@ -168,15 +174,18 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         all_prompt_tokens = 0
         start_time = time.time()
 
+        # Iterative processing loop until the last message is an assistant message or the maximum number of steps is reached
         while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
             response, completion_tokens, prompt_tokens= call_lm(messages, manager, self.run_logger)
             all_completion_tokens += completion_tokens
             all_prompt_tokens += prompt_tokens
             mcp_calls = response_parsing(response)
 
-            new_messages = mcp_calling(mcp_calls, manager, self.run_logger)
+            new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
 
+            self.run_logger.info(f"New messages from MCP calling: {new_messages}")
             messages = build_messages(messages, new_messages)
+            self.run_logger.info(f"Messages concatenated with new messages: {messages}")
             steps += 1
 
         end_time = time.time()
@@ -189,8 +198,8 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
                 constants.CONTENT: "Maximum step limit exceeded, this problem cannot be solved",
             })
 
-
         self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
+        self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {messages[-1][constants.CONTENT]}")
         success = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
         self.log_messages(messages, question, success, (end_time-start_time), all_prompt_tokens, all_completion_tokens)
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")

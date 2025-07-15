@@ -120,6 +120,10 @@ def add_to_evaluation_records(file_path, evaluation_results: list[EvaluationResu
 
 
 def read_evaluation_records(file_path):
+    '''
+    Reads the evaluation records from the file path.
+    If the file does not exist, it creates an empty file with a header, otherwise it reads the file and returns each record as a tuple.
+    '''
     file_path = pathlib.Path(file_path)
     records = []
 
@@ -154,8 +158,11 @@ def evaluate(
     lm: Language model to use, should be an instance of dspy.LM
     missing_mode: only evaluate experiments without a result file
     """
+
+    # If the dataset mode is not provided, use the dataset mode from the benchmark meta
     dataset_mode = dataset_mode or benchmark_meta.dataset_mode
 
+    # If the missing mode file is provided, we use it to find the missing data
     if missing_mode_file:
         origin_data = read_jsonl(dataset_path)
         runed_data = read_jsonl(missing_mode_file)
@@ -167,17 +174,19 @@ def evaluate(
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     benchmark_name = benchmark_meta.name or benchmark.__class__.__name__
 
+    # If the number of threads is not provided, use the number of threads from the benchmark meta
     num_threads = benchmark_meta.num_threads or num_threads
     print(f"Evaluating {benchmark_name}")
     print(f"num_threads: {num_threads}")
     print(f"Test set size: {len(benchmark.test_set)}")
 
-
+    # Create the file path for the evaluation results if it does not exist
     Path(file_path).mkdir(parents=True, exist_ok=True)
 
+    # Read the evaluation records from the file path or if no file creates a new one
     evaluation_records = read_evaluation_records(file_path)
 
-    # create a stats file for each experiment
+    # create a stats file for each experiment and writes into it all the metadata for the experiment
     stats_file = os.path.join(file_path, f"{benchmark_name}.stat")
     with open(stats_file, "w") as f:
         f.write(
@@ -186,10 +195,13 @@ def evaluate(
             f"test_set_size: {len(benchmark.test_set)}\n"
         )
 
+    
+    print(f"Programs in the benchmark: {benchmark_meta.program}")
+    # For each program in the benchmark, we evaluate it
     for program in benchmark_meta.program:
         program_name = getattr(program, "_name", program.__class__.__name__)
 
-        print(f"Program: {program_name}")
+        print(f"Program we're using to evaluate: {program_name}")
 
         with suppress_output(suppress=suppress_dspy_output):
             evaluate_bench = EvaluateBench(
@@ -251,18 +263,20 @@ def evaluate_all(
             config=config,
         )
 
+    # After all the evaluations are done, we read the evaluation results and save them to a csv file
     df = read_evaluation_results(file_path)
     df.to_csv(f"{file_path}/evaluation_results.csv", index=False)
     df["model"] = lm
 
-    # generate evaluation records
+    # generate evaluation records 
     generate_evaluation_records(file_path)
 
 
 def main():
     import multiprocessing
     multiprocessing.freeze_support()
-    
+
+    ## Exctracting all the arguments from the command line
     parser = argparse.ArgumentParser(description="LangProbe benchmark evaluation")
     parser.add_argument("--benchmark", type=str, required=True, help="Benchmark to evaluate")
     parser.add_argument("--lm", type=str, required=True, help="Language model to use")
@@ -308,14 +322,17 @@ def main():
     # Set global config for use by other modules
     global global_config
     global_config = config
+
     # Process benchmark parameter
     benchmark_path = args.benchmark
     if not benchmark_path.startswith("langProBe."):
         benchmark_path = f"langProBe.{benchmark_path}"
     
     # Register all benchmarks
+    # Basically just importing the websearch/DB/GAIA python modules
     register_all_benchmarks([benchmark_path])
 
+    
     benchmarks = [benchmark for benchmark in registered_benchmarks]
     if not benchmarks:
         print(f"No benchmark registered with name {args.benchmark}")

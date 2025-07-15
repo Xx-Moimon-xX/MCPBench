@@ -23,6 +23,9 @@ class SyncedMcpClient(Process):
         # turn off logging from the logger of 'httpx'
         httpx_logger = logging.getLogger("httpx")
         httpx_logger.setLevel(logging.WARNING)
+        
+        # Create logger instance for this class
+        self.logger = logging.getLogger(__name__)
 
         self.server_url = server_url
         self.request_queue = Queue()
@@ -66,7 +69,7 @@ class SyncedMcpClient(Process):
                 await asyncio.sleep(0.01)
 
         except Exception as e:
-            self.httpx_logger.exception(e)
+            self.logger.exception(e)
             self.response_queue.put(pickle.dumps(('error', f"Client initialization error: {str(e)}")))
 
         finally:
@@ -108,8 +111,6 @@ class SyncedMcpClient(Process):
 
     def list_prompts(self) -> Any:
         return self._send_request('list_prompts', args=(), kwargs={})
-
-
 
     def list_tools(self) -> Any:
         """

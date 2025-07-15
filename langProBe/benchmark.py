@@ -203,6 +203,9 @@ class EvaluateBench(ABC):
         api_base: str = None,
         config=None,
     ):
+        '''
+        This class is used to evaluate a program on a benchmark.
+        '''
         self.benchmark = benchmark
         # Pass config to the program if it accepts it
         if hasattr(program, 'config'):
@@ -237,8 +240,10 @@ class EvaluateBench(ABC):
             output_tokens=0,
         )
 
-
     def evaluate_baseline(self, dspy_config=None) -> EvaluationResult:
+        '''
+        This function is used to evaluate the program on the benchmark.
+        '''
         with dspy.context(**dspy_config):
             score, info = self.evaluate_prog(self.program)
         result = self.get_empty_results()
