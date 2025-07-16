@@ -22,7 +22,7 @@ fi
 
 # Use a more direct method to start the evaluation program, ensuring correct multiprocessing initialization
 DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
-python -c "
+python3 -c "
 import multiprocessing as mp
 mp.set_start_method('spawn', True)
 from langProBe.evaluation import main
@@ -32,9 +32,18 @@ main()
 --dataset_mode=test \
 --dataset_path=langProBe/DB/data/car_bi.jsonl \
 --file_path=evaluation_db \
---lm=openai/qwen-max-2025-01-25 \
---lm_api_base=https://dashscope.aliyuncs.com/compatible-mode/v1 \
---lm_api_key=xxx \
---missing_mode_file=path/to/logs/task_messages.jsonl \
+--lm=bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0 \
+--lm_api_key=$AWS_ACCESS_KEY_ID \
 --num_threads=1 \
 --config=$CONFIG_FILE
+
+
+# python3 -m langProBe.evaluation \
+#   --benchmark=WebSearch \
+#   --dataset_mode=tiny \
+#   --dataset_path=langProBe/WebSearch/data/websearch_10_foratlassian.jsonl \
+#   --file_path=evaluation_websearch_test \
+#   --lm=bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0 \
+#   --lm_api_key=$AWS_ACCESS_KEY_ID \
+#   --num_threads=1 \
+#   --config=$CONFIG_FILE

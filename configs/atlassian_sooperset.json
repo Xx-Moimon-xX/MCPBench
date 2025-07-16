@@ -1,0 +1,22 @@
+{
+    "mcp_pool": [
+        {
+            "name": "atlassian",
+            "run_config": [
+                {
+                    "command": "/Users/cxnpl/cxnpl/thesis/servers/mcp-atlassian/.venv/bin/mcp-atlassian",
+                    "args": [
+                        "--transport", "stdio",
+                        "--confluence-url", "$CONFLUENCE_URL",
+                        "--confluence-username", "$CONFLUENCE_USERNAME",
+                        "--confluence-token", "$CONFLUENCE_TOKEN",
+                        "--jira-url", "$JIRA_URL",
+                        "--jira-username", "$JIRA_USERNAME",
+                        "--jira-token", "$JIRA_TOKEN"
+                    ],
+                    "port": 8006
+                }
+            ]
+        }
+    ]
+}
