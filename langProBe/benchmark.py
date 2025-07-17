@@ -118,9 +118,6 @@ class MCPBench(Benchmark):
                 ).with_inputs("id", "question", "answer", "config")
             )
 
-
-
-
 @dataclass
 class EvaluationResult:
     benchmark: str

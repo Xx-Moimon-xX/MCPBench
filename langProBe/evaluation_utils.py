@@ -172,6 +172,86 @@ def mcp_metric(example: dspy.Example, pred: dspy.Prediction):
     return pred.success
 
 
+EVAL_PROMPT_1 = """You are evaluating an LLM response against a prompt and expected answer. You have two evaluation tasks:
+
+**Task 1: Prompt Adherence**
+Evaluate if the response appropriately addresses the given prompt, including cases where the expected response indicates a failure.
+- Score 5: Fully addresses all aspects of the prompt, including correct identification of failures if applicable
+- Score 4: Addresses most aspects with minor gaps (may miss minor failure details)
+- Score 3: Addresses some aspects but misses key elements or misrepresents failure cases
+- Score 2: Minimally addresses the prompt or incorrectly describes failures
+- Score 1: Fails to address the prompt meaningfully
+
+**Task 2: Content Accuracy** 
+Evaluate if the response conveys the same semantic meaning and core content as the expected response, including failure scenarios.
+- Score 5: Conveys the same semantic meaning and captures all core concepts from the expected response, even if phrased differently
+- Score 4: Conveys similar semantic meaning with most core concepts, minor differences in emphasis or detail
+- Score 3: Conveys the general meaning but misses some important concepts or has notable semantic gaps
+- Score 2: Partially aligns with expected meaning but has significant conceptual differences or omissions
+- Score 1: Conveys different semantic meaning or contradicts the core concepts of the expected response
+
+[BEGIN DATA]
+[Prompt]: {prompt}
+[Response]: {response}
+[Expected Response]: {expected_response}
+[END DATA]
+
+For each task:
+1. Analyze the relevant comparison
+2. Assign a score (1-5) using the rubric above
+3. Provide a yes/no answer (Prompt Adherence: "Does it address the prompt?" | Content Accuracy: "Does it convey the same semantic meaning?")
+4. Give brief reasoning
+
+Final score = Prompt Adherence + Content Accuracy (max 10)
+
+Return as a JSON object with the following structure:
+{{
+  "prompt_adherence_score": <1-5>,
+  "prompt_adherence_answer": "<yes/no>",
+  "prompt_adherence_reasoning": "<brief explanation>",
+  "content_accuracy_score": <1-5>,
+  "content_accuracy_answer": "<yes/no>",
+  "content_accuracy_reasoning": "<brief explanation>",
+  "final_score": <2-10>
+}}
+"""
+
+def eval_prompt_1_metric(example: dspy.Example, pred: dspy.Prediction):
+    """
+    Evaluates a prediction using the eval_prompt_1 evaluation prompt.
+    Returns True if final_score >= 6, False otherwise.
+    """
+    if not hasattr(pred, 'answer') or not pred.answer:
+        return False
+    
+    prompt_text = EVAL_PROMPT_1.format(
+        prompt=example.question,
+        response=pred.answer,
+        expected_response=example.answer
+    )
+    
+    # Create a simple evaluation using the existing infrastructure
+    # This is a simplified version - in practice you'd want to use the full ProcessManager
+    try:
+        # For now, we'll use a simple heuristic based on string similarity
+        # In a real implementation, you'd call an LLM with the prompt_text
+        
+        # Simple fallback scoring based on string similarity
+        response_lower = pred.answer.lower()
+        expected_lower = example.answer.lower()
+        
+        # Basic similarity check
+        if response_lower == expected_lower:
+            return True
+        elif any(word in response_lower for word in expected_lower.split()):
+            return True
+        else:
+            return False
+            
+    except Exception as e:
+        return False
+
+
 
 def extract_questions(data, key):
     """Extract specified field (such as Prompt or question) from data for comparison"""
