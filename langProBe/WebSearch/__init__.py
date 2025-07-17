@@ -24,7 +24,7 @@ def get_mcp_sample_benchmark():
             [mcp_sample_baseline],
             mcp_metric,
             optimizers=[],
-            name="MCP_WEBSEARCH"  # 添加显式名称
+            name="MCP_WEBSEARCH"  # Add explicit name
         )
     ]
 

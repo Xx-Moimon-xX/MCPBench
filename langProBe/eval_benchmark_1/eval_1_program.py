@@ -37,12 +37,24 @@ Detailed information about input parameters, where each parameter includes: para
 If you have obtained the final result. Please provide your final answer enclosed within <answer></answer> tags. Ensure that only the final answer is included, without any additional explanations or commentary.
 """
 
-class GAIAPredict(MCPPredict):
-    def __init__(self, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="gaia"):
+class Eval1Predict(MCPPredict):
+    def __init__(self, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="eval1"):
         super().__init__(max_steps, system_prompt, task_name)
 
     def evaluate_prediction(self, question: str, ground_truth: str, prediction: str) -> Tuple[bool, Optional[str]]:
-        return question_scorer(prediction, ground_truth, self.run_logger)
+        # This is mainly for gaia (not used anywhere else), probably not needed for eval1.
+        answer_eval_manager = ProcessManager()
+        answer_eval_manager.lm_api_key = self.lm.api_key
+        answer_eval_manager.lm_api_base = self.lm.api_base
+        # Use the same model type as the main LM for evaluation
+        if self.lm.model.startswith("bedrock/"):
+            answer_eval_manager.model = "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0"
+        else:
+            answer_eval_manager.model = "openai/deepseek-v3"
+
+        return evaluate_final_answer(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
+
+        # return question_scorer(prediction, ground_truth, self.run_logger)
 
     def extract_last_answer(self, text):
         pattern = re.compile(r'<answer>(.*?)</answer>', re.DOTALL)
@@ -54,6 +66,10 @@ class GAIAPredict(MCPPredict):
             return None
 
     def forward(self, **kwargs) -> dspy.Prediction:
+        '''
+        This is the forward pass for the eval1 program.
+        '''
+
         unique_id = kwargs.get('id')
         question = kwargs.get('question')
         gt = kwargs.get('answer')
@@ -87,6 +103,7 @@ class GAIAPredict(MCPPredict):
 
         end_time = time.time()
 
+        # If the maximum number of steps is reached and there is still no answer
         if messages[-1][constants.ROLE] != constants.ASSISTANT:
             self.run_logger.warning("Maximum steps reached without getting an answer")
             messages.append({
@@ -95,6 +112,9 @@ class GAIAPredict(MCPPredict):
             })
 
         self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
+        self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {messages[-1][constants.CONTENT]}")
+
+        ## Everything till here is the same as the forward() in mcp_program.py
 
         ## Evaluation is done here!!!
         success = self.evaluate_prediction(question, gt, self.extract_last_answer(messages[-1][constants.CONTENT]))

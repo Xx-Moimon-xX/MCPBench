@@ -4,6 +4,9 @@ import pandas as pd
 
 
 def read_evaluation_results(dir: str):
+    '''
+    Reads evaluation result .txt files from the specified directory, extracts benchmark/program/score/cost/token data from each, and returns a canonicalized pandas DataFrame of the results.
+    '''
     # Define the path to the directory
     file_path = pathlib.Path(dir)
 
@@ -103,6 +106,9 @@ program_mapping = {
 
 
 def canonicalize_program(data_df):
+    '''
+    Standardizes (canonicalizes) program and benchmark names in the given DataFrame using predefined mappings, for consistent analysis and reporting.
+    '''
     # Update the benchmark names based on the program
     data_df.loc[
         data_df["program"].isin(

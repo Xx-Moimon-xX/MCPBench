@@ -80,6 +80,10 @@ def suppress_output(suppress=True):
 
 
 def generate_evaluation_records(file_path):
+    '''
+    Generate the evaluation records from the result files. 
+    This doesn't seem to really work, idk what it's doing.
+    '''
     file_path = pathlib.Path(file_path)
 
     # if the records file already exists, do not overwrite it
@@ -110,6 +114,10 @@ def generate_evaluation_records(file_path):
 
 
 def add_to_evaluation_records(file_path, evaluation_results: list[EvaluationResult]):
+    '''
+    Add the evaluation results to the evaluation records file.
+    Also not really working properly.
+    '''
     file_path = pathlib.Path(file_path)
 
     with open(f"{file_path}/evaluation_records.csv", "a") as f:
@@ -171,6 +179,8 @@ def evaluate(
         replace_logger_filehandler(os.path.splitext(missing_mode_file)[0])
     else:
         benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path)
+
+    print(f"Initialised benchmark: {benchmark}")
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     benchmark_name = benchmark_meta.name or benchmark.__class__.__name__
 
@@ -196,14 +206,23 @@ def evaluate(
         )
 
     
-    print(f"Programs in the benchmark: {benchmark_meta.program}")
-    # For each program in the benchmark, we evaluate it
+
+    # print(f"Programs in the benchmark: {benchmark_meta.program}")
+    # # For each program in the benchmark, we evaluate it
+    # print("Type of benchmark_meta.program:", type(benchmark_meta.program), "Type of benchmark_meta.program[0]:", type(benchmark_meta.program[0]))
+    # print("Value of benchmark_meta.program:", benchmark_meta.program[0])
+    # # print("Value of benchmark_meta.program[0]._name:", benchmark_meta.program[0]._name)
+    # print("Length of benchmark_meta.program:", len(benchmark_meta.program))
     for program in benchmark_meta.program:
+        # print(f"DEBUG: program: {program}")
         program_name = getattr(program, "_name", program.__class__.__name__)
 
-        print(f"Program we're using to evaluate: {program_name}")
+        # print(f"Program we're using to evaluate: {program_name}")
 
+        ## suppress_output is a context manager that suppresses the output of the program.
         with suppress_output(suppress=suppress_dspy_output):
+
+            # Initialising the evaluation benchmark.
             evaluate_bench = EvaluateBench(
                 benchmark=benchmark,
                 program=program,
@@ -215,6 +234,7 @@ def evaluate(
                 api_base=api_base if api_base else os.getenv("OPENAI_API_BASE", ""),
                 config=config,
             )
+            print(f"Evaluating benchmark: {evaluate_bench}")
             evaluate_bench.evaluate()
         # print(f"Results: {evaluate_bench.results}")
 
@@ -248,7 +268,9 @@ def evaluate_all(
     if benchmarks and isinstance(benchmarks[0], str):
         benchmarks = register_all_benchmarks(benchmarks)
 
+    print(f"Benchmarks (len: {len(benchmarks)}): {benchmarks}")
     for benchmark_meta in benchmarks:
+        print(f"Evaluating benchmark: {benchmark_meta}")
         evaluate(
             benchmark_meta,
             lm,
@@ -317,7 +339,7 @@ def main():
     args = parser.parse_args()
 
     config = read_json(args.config)
-    print('DEBUG: config after loading:', config)
+    # print('DEBUG: config after loading:', config)
     
     # Set global config for use by other modules
     global global_config

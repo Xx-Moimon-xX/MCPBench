@@ -126,10 +126,10 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             answer_eval_manager.model = "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0"
         else:
             answer_eval_manager.model = "openai/deepseek-v3"
-        # Set AWS credentials if available
-        answer_eval_manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
-        answer_eval_manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-        answer_eval_manager.aws_region = os.getenv("AWS_REGION")
+        # # Set AWS credentials if available
+        # answer_eval_manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+        # answer_eval_manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+        # answer_eval_manager.aws_region = os.getenv("AWS_REGION")
         return evaluate_final_answer(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
 
     def log_messages(self, messages, question, success, time_cost, prompt_tokens_cost, completion_tokens_cost):
@@ -146,7 +146,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
     def forward(self, **kwargs) -> dspy.Prediction:
         '''
-        Forward pass for the MCP program.
+        Forward pass for the MCP program. EVERYTHING IS BEING DONE IN HERE!!!
         '''
         unique_id = kwargs.get('id')
         question = kwargs.get('question')
@@ -157,10 +157,11 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         manager.lm_api_base = self.lm.api_base
         manager.model = self.lm.model
         manager.id = unique_id
-        # Set AWS credentials if available
-        manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
-        manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-        manager.aws_region = os.getenv("AWS_REGION", "us-east-1")
+
+        # # Set AWS credentials if available
+        # manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
+        # manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+        # manager.aws_region = os.getenv("AWS_REGION", "us-east-1")
 
         self.run_logger.info(f"ID: {manager.id}, Starting forward pass for question: {question}")
 
@@ -200,6 +201,8 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
         self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
         self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {messages[-1][constants.CONTENT]}")
+        
+        # IMPORTANT: This is where the evaluation is done !!!!!!
         success = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
         self.log_messages(messages, question, success, (end_time-start_time), all_prompt_tokens, all_completion_tokens)
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
