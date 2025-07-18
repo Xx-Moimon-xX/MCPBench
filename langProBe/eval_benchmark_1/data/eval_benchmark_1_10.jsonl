@@ -1,10 +1,1 @@
-{"unique_id": 1, "Prompt": "What is the capital of France?", "Answer": "Paris", "reasoning_types": "Factual recall"}
-{"unique_id": 2, "Prompt": "Calculate 25 * 4", "Answer": "100", "reasoning_types": "Arithmetic"}
-{"unique_id": 3, "Prompt": "What color do you get when you mix red and blue?", "Answer": "Purple", "reasoning_types": "Factual recall"}
-{"unique_id": 4, "Prompt": "Who wrote the novel '1984'?", "Answer": "George Orwell", "reasoning_types": "Factual recall"}
-{"unique_id": 5, "Prompt": "What is the largest planet in our solar system?", "Answer": "Jupiter", "reasoning_types": "Factual recall"}
-{"unique_id": 6, "Prompt": "Convert 100 degrees Celsius to Fahrenheit", "Answer": "212", "reasoning_types": "Mathematical conversion"}
-{"unique_id": 7, "Prompt": "What is the chemical symbol for gold?", "Answer": "Au", "reasoning_types": "Factual recall"}
-{"unique_id": 8, "Prompt": "How many sides does a hexagon have?", "Answer": "6", "reasoning_types": "Geometric knowledge"}
-{"unique_id": 9, "Prompt": "What year did World War II end?", "Answer": "1945", "reasoning_types": "Historical knowledge"}
-{"unique_id": 10, "Prompt": "What is the square root of 64?", "Answer": "8", "reasoning_types": "Mathematical calculation"}
+{"unique_id": 1, "Prompt": "Get slack channels in the workspace", "Answer": "General, Announcements, Random, etc."}

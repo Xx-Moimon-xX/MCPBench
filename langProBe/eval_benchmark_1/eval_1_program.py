@@ -6,7 +6,7 @@ import time
 import traceback
 from datetime import datetime
 from typing import List, Tuple, Optional
-from langProBe.evaluation_utils import question_scorer
+from langProBe.evaluation_utils import question_scorer, evaluate_final_answer_eval1
 
 from langProBe.mcp_program import MCPPredict
 
@@ -39,8 +39,8 @@ If you have obtained the final result. Please provide your final answer enclosed
 
 class Eval1Predict(MCPPredict):
     def __init__(self, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="eval1"):
-        super().__init__(max_steps, system_prompt, task_name)
-
+        super().__init__(max_steps, system_prompt, task_name)    
+    
     def evaluate_prediction(self, question: str, ground_truth: str, prediction: str) -> Tuple[bool, Optional[str]]:
         # This is mainly for gaia (not used anywhere else), probably not needed for eval1.
         answer_eval_manager = ProcessManager()
@@ -52,7 +52,12 @@ class Eval1Predict(MCPPredict):
         else:
             answer_eval_manager.model = "openai/deepseek-v3"
 
-        return evaluate_final_answer(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
+        print(f"DEBUG: prediction in evaluate_prediction: {prediction}")
+
+        is_success, scores_data = evaluate_final_answer_eval1(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
+        self.run_logger.info(f"ID: {answer_eval_manager.id}, Evaluation completed successfully")
+        self.run_logger.info(f"ID: {answer_eval_manager.id}, scores_data: {scores_data}")
+        return is_success, scores_data
 
         # return question_scorer(prediction, ground_truth, self.run_logger)
 
@@ -82,8 +87,11 @@ class Eval1Predict(MCPPredict):
 
         self.run_logger.info(f"ID: {manager.id}, Starting forward pass for question: {question}")
 
-        from langProBe.evaluation import global_config
-        mcps = global_config['mcp_pool']
+        # The config is passed to the program instance by the EvaluateBench constructor.
+        # We should use self.config instead of a global import.
+        print(f"DEBUG: self.config: {self.config}")
+        mcps = self.config['mcp_pool']
+
 
         messages = build_init_messages(self.system_prompt, mcps, question)
         steps = 0
@@ -92,12 +100,14 @@ class Eval1Predict(MCPPredict):
         start_time = time.time()
 
         while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
+            print(f"DEBUG: messages: {messages}")
+            print(f"DEBUG: manager before call_lm: {manager}")
             response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger)
             all_completion_tokens += completion_tokens
             all_prompt_tokens += prompt_tokens
             mcp_calls = response_parsing(response)
 
-            new_messages = mcp_calling(mcp_calls, manager, self.run_logger)
+            new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
             messages = build_messages(messages, new_messages)
             steps += 1
 
@@ -112,12 +122,14 @@ class Eval1Predict(MCPPredict):
             })
 
         self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
+        print(f"DEBUG: messages: {messages}")
         self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {messages[-1][constants.CONTENT]}")
 
         ## Everything till here is the same as the forward() in mcp_program.py
 
         ## Evaluation is done here!!!
-        success = self.evaluate_prediction(question, gt, self.extract_last_answer(messages[-1][constants.CONTENT]))
+        
+        success, scores_data = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
         self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
                           all_completion_tokens)
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")

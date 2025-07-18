@@ -223,6 +223,7 @@ def calculate_stats(manager: List[ProcessManager]) -> tuple[float, float, float]
     '''
     Calculates and returns (dummy cost, average input tokens, average output tokens) from a list of ProcessManager objects.
     '''
+    print(f"DEBUG: manager: {manager}")
     input_tokens = sum(usage["prompt_tokens"] for trace in manager for usage in trace.lm_usages)
     output_tokens = sum(usage["completion_tokens"] for trace in manager for usage in trace.lm_usages)
     

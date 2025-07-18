@@ -40,7 +40,7 @@ def evaluate_final_answer(
     logger.info(f"Starting evaluation of final answer")
     logger.info(f"question: {question}")
     logger.info(f"ground_truth: {ground_truth}")
-    logger.info(f"prediction: {prediction}")
+    logger.info(f"Prediction: {prediction}")
     response_content, _, _ = call_lm(messages, manager, logger, temperature=0.01)
     return "true" in response_content.lower()
 
@@ -356,19 +356,59 @@ def evaluate_final_answer_eval1(
             manager: ProcessManager,
             logger: logging.Logger,
             ) -> Tuple[bool, Optional[str]]:
-    prompt = EVAL_PROMPT_1.format(question=question, response=prediction, expected_response=ground_truth)
+    prompt = EVAL_PROMPT_1.format(prompt=question, response=prediction, expected_response=ground_truth)
     messages = [
         {
             constants.ROLE: constants.USER,
             constants.CONTENT: prompt
         }
     ]
-    logger.info(f"Starting evaluation of final answer")
+    logger.info(f"Starting evaluation of final answer with rubric")
     logger.info(f"question: {question}")
     logger.info(f"expected_response: {ground_truth}")
-    logger.info(f"prediction: {prediction}")
+    logger.info(f"Prediction: {prediction}")
     response_content, _, _ = call_lm(messages, manager, logger, temperature=0.01)
-    return "true" in response_content.lower()
+    
+    json_str = ""
+    try:
+        # Try to extract JSON from markdown code block if present
+        json_match = re.search(r'```json\s*(\{.*?\})\s*```', response_content, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(1)
+        else:
+            # Fallback for raw JSON possibly with leading/trailing text
+            json_start = response_content.find('{')
+            json_end = response_content.rfind('}')
+            if json_start != -1 and json_end != -1:
+                json_str = response_content[json_start:json_end+1]
+            else:
+                raise json.JSONDecodeError("No JSON object found in response", response_content, 0)
+
+        scores_data = json.loads(json_str)
+        
+        prompt_adherence_score = scores_data.get("prompt_adherence_score")
+        content_accuracy_score = scores_data.get("content_accuracy_score")
+        final_score = scores_data.get("final_score")
+
+        logger.info(f"Extracted scores: Prompt Adherence={prompt_adherence_score}, Content Accuracy={content_accuracy_score}, Final={final_score}")
+
+        if final_score is None:
+            logger.error("Could not find 'final_score' in the LLM response.")
+            return False, "Missing 'final_score' in response"
+
+        # Success is defined as final_score >= 6 (based on eval_prompt_1_metric docstring)
+        is_success = int(final_score) >= 6
+        
+        return is_success, json.dumps(scores_data)
+
+    except json.JSONDecodeError:
+        error_msg = f"Failed to decode JSON from LLM response: {response_content}"
+        logger.error(error_msg)
+        return False, error_msg
+    except (KeyError, TypeError) as e:
+        error_msg = f"Error accessing scores from parsed JSON: {e}. Data: {json_str}"
+        logger.error(error_msg)
+        return False, error_msg
 
 
 

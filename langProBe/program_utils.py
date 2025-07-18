@@ -465,7 +465,7 @@ def mcp_calling(
         mcp_call_list: MCPCallList,
         manager: ProcessManager,
         logger: logging.Logger,
-        config=None,
+        config: dict,
 ) -> List[Dict]:
     '''
     Processes each tool call in the MCP call list.

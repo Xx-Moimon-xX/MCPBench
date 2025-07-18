@@ -1,6 +1,7 @@
 from langProBe.benchmark import BenchmarkMeta, MCPBench
 from langProBe.mcp_program import MCPPredict
-from langProBe.evaluation_utils import eval_prompt_1_metric
+from langProBe.evaluation_utils import mcp_metric
+from .eval_1_program import Eval1Predict
 
 MCP_SAMPLE_SYSTEM_PROMPT = """
 You are a helpful assistant. You are able to answer questions using different tools.  
@@ -13,7 +14,7 @@ Detailed information about input parameters, where each parameter includes: para
 """
 
 def get_eval_benchmark_1():
-    eval_benchmark_1_baseline = MCPPredict(
+    eval_benchmark_1_baseline = Eval1Predict(
         max_steps=5,
         system_prompt=MCP_SAMPLE_SYSTEM_PROMPT,
         task_name="eval_benchmark_1")
@@ -22,7 +23,7 @@ def get_eval_benchmark_1():
         BenchmarkMeta(
             MCPBench,
             [eval_benchmark_1_baseline],
-            eval_prompt_1_metric,
+            mcp_metric,
             optimizers=[],
             name="EVAL_BENCHMARK_1"
         )
