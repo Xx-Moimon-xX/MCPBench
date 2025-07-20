@@ -2,6 +2,11 @@ import pathlib
 
 import pandas as pd
 
+"""
+This file has the read_evaluation_results and canonicalize_program functions.
+
+Also includes the program_mapping dictionary.
+"""
 
 def read_evaluation_results(dir: str):
     '''

@@ -9,7 +9,7 @@ from typing import Callable, List, Type
 
 import dspy
 from dspy.evaluate import Evaluate
-from dspy.teleprompt import Teleprompter
+# from dspy.teleprompt import Teleprompter
 
 import langProBe.optimizers as langprobe_optimizers
 from langProBe.dspy_program import LangProBeDSPyMetaProgram
@@ -17,6 +17,14 @@ from langProBe.config_utils import read_json, read_jsonl
 from langProBe.program_utils import ProcessManager
 
 
+"""
+Main class for benchmark evaluation and starting it with the DSPy Evaluate class.
+
+This file has: 
+- Benchmark, EvaluateBench, MCPBench classes.
+- BenchmarkMeta, EvaluationResult are the data classes.
+- Individual functions setup_lm and calculate_stats
+"""
 
 
 dataset_size = {"full": None, "lite": 500, "tiny": 200, "test": 2}
@@ -223,7 +231,6 @@ def calculate_stats(manager: List[ProcessManager]) -> tuple[float, float, float]
     '''
     Calculates and returns (dummy cost, average input tokens, average output tokens) from a list of ProcessManager objects.
     '''
-    print(f"DEBUG: manager: {manager}")
     input_tokens = sum(usage["prompt_tokens"] for trace in manager for usage in trace.lm_usages)
     output_tokens = sum(usage["completion_tokens"] for trace in manager for usage in trace.lm_usages)
     
@@ -266,7 +273,6 @@ class EvaluateBench(ABC):
 
 
         # Everything is done inside here!!
-        print(f"DEBUG: devset: {devset}")
         # Devset is just the json file with given input and output. Example below::
 
         # DEBUG: devset: [Example({'id': 676, 'question': 'What is the country of origin of the football coach with the first initial "P" for the Thailand national men\'s football team who coached 54 years after the country\'s name officially changed?', 'answer': 'German.'}) (input_keys={'question', 'config', 'answer', 'id'}), Example({'id': 537, 'question': 'I am thinking of a movie where Hans Zimmer won a Grammy Award for his work. He won the Grammy award the same year that he did his first musical score for film director Michael Bay. Can you please tell me the name of that movie?', 'answer': 'Crimson Tide'}) (input_keys={'question', 'config', 'answer', 'id'})]
@@ -276,6 +282,7 @@ class EvaluateBench(ABC):
         # Response generation is done by your program/model (e.g., MCPPredict), not by the metric or the high-level evaluate function.
         # The Evaluate class orchestrates the process: for each example, it calls your program to generate a response, then calls the metric to score it.
         
+        # Black box, does it all for you, this is the DSPy Evaluate class, I understand how it works now.
         self.evaluate_prog = Evaluate(
             devset=devset,
             metric=self.metric,
@@ -320,11 +327,14 @@ class EvaluateBench(ABC):
 
         ## Everything is not done here, it's further in evaluate_prog(self.program)
         with dspy.context(**dspy_config):
+            # Program is passed to Evaluate class here.
+            # info containe tuple: (example, prediction, score)
             score, info = self.evaluate_prog(self.program)
-            print(f"DEBUG: score: {score} info: {info}")
+            # print(f"DEBUG: score: {score} info: {info}")
+
         result = self.get_empty_results()
         datasets, outputs, _ = zip(*info)
-        print(f"DEBUG: datasets: {datasets} outputs: {outputs}")
+        # print(f"DEBUG: datasets: {datasets} outputs: {outputs}")
         managers = [getattr(one, 'process_report', None) for one in outputs]
         managers = [m for m in managers if m is not None]
 
@@ -332,7 +342,7 @@ class EvaluateBench(ABC):
         result.outputs_raw_data = outputs
         result.cost, result.input_tokens, result.output_tokens = calculate_stats(managers)
 
-        print(f"DEBUG: result: {result}")
+        # print(f"DEBUG: result: {result}")
         return result
 
     def evaluate(self, dspy_config=None) -> EvaluationResult:

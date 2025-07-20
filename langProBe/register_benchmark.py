@@ -22,11 +22,9 @@ def register_benchmark(benchmark: str):
     '''
 
     try:
-        # 尝试直接导入模块
         # Try to import the module directly
         benchmark_metas = importlib.import_module(benchmark, package="langProBe")
     except ModuleNotFoundError:
-        # 如果直接导入失败，尝试使用完整路径导入
         # If direct import fails, try importing with full path
         benchmark_metas = importlib.import_module(f"langProBe.{benchmark}", package=None)
     

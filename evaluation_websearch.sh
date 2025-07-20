@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Refresh AWS credentials before running the evaluation
+# if [ -f "../../refresh_aws_token.sh" ]; then
+#     ../../refresh_aws_token.sh
+#     if [ $? -ne 0 ]; then
+#         echo "Failed to refresh AWS token. Please check your AWS login."
+#         exit 1
+#     fi
+# fi
+
 if [ -f local.env ]; then
   set -a
   source local.env
@@ -23,12 +32,12 @@ DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
 python3 -m langProBe.evaluation \
   --benchmark=WebSearch \
-  --dataset_mode=test \
-  --dataset_path=langProBe/WebSearch/data/websearch_10.jsonl \
+  --dataset_mode=tiny \
+  --dataset_path=langProBe/WebSearch/data/websearch_10_forslack.jsonl \
   --file_path=evaluation_websearch_test \
   --lm=bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0 \
   --lm_api_key=$AWS_ACCESS_KEY_ID \
-  --num_threads=1 \
+  --num_threads=8 \
   --config=$CONFIG_FILE
 
 

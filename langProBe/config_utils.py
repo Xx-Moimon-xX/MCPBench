@@ -1,4 +1,9 @@
 import json
+
+"""
+This file has the read_json and read_jsonl functions.
+"""
+
 def read_json(file_path):
     """
     Read a JSON file and return the content as a dictionary.

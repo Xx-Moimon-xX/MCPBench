@@ -39,8 +39,8 @@ def evaluate_final_answer(
     ]
     logger.info(f"Starting evaluation of final answer")
     logger.info(f"question: {question}")
-    logger.info(f"ground_truth: {ground_truth}")
-    logger.info(f"Prediction: {prediction}")
+    logger.info(f"expected_response: {ground_truth[:50]}")
+    logger.info(f"Prediction: {prediction[:50]}")
     response_content, _, _ = call_lm(messages, manager, logger, temperature=0.01)
     return "true" in response_content.lower()
 
@@ -192,92 +192,92 @@ def question_scorer(
 
 def mcp_metric(example: dspy.Example, pred: dspy.Prediction):
     '''
-    Evaluates a prediction using the MCP metric.
+    Given a prediction, returns the success of the prediction. In this format because the DSPy Evaluate class expects it.
     Returns True if the prediction is successful, False otherwise.
     '''
     return pred.success
 
 
-EVAL_PROMPT_1 = """You are evaluating an LLM response against a prompt and expected answer. You have two evaluation tasks:
+# EVAL_PROMPT_1 = """You are evaluating an LLM response against a prompt and expected answer. You have two evaluation tasks:
 
-**Task 1: Prompt Adherence**
-Evaluate if the response appropriately addresses the given prompt, including cases where the expected response indicates a failure.
-- Score 5: Fully addresses all aspects of the prompt, including correct identification of failures if applicable
-- Score 4: Addresses most aspects with minor gaps (may miss minor failure details)
-- Score 3: Addresses some aspects but misses key elements or misrepresents failure cases
-- Score 2: Minimally addresses the prompt or incorrectly describes failures
-- Score 1: Fails to address the prompt meaningfully
+# **Task 1: Prompt Adherence**
+# Evaluate if the response appropriately addresses the given prompt, including cases where the expected response indicates a failure.
+# - Score 5: Fully addresses all aspects of the prompt, including correct identification of failures if applicable
+# - Score 4: Addresses most aspects with minor gaps (may miss minor failure details)
+# - Score 3: Addresses some aspects but misses key elements or misrepresents failure cases
+# - Score 2: Minimally addresses the prompt or incorrectly describes failures
+# - Score 1: Fails to address the prompt meaningfully
 
-**Task 2: Content Accuracy** 
-Evaluate if the response conveys the same semantic meaning and core content as the expected response, including failure scenarios.
-- Score 5: Conveys the same semantic meaning and captures all core concepts from the expected response, even if phrased differently
-- Score 4: Conveys similar semantic meaning with most core concepts, minor differences in emphasis or detail
-- Score 3: Conveys the general meaning but misses some important concepts or has notable semantic gaps
-- Score 2: Partially aligns with expected meaning but has significant conceptual differences or omissions
-- Score 1: Conveys different semantic meaning or contradicts the core concepts of the expected response
+# **Task 2: Content Accuracy** 
+# Evaluate if the response conveys the same semantic meaning and core content as the expected response, including failure scenarios.
+# - Score 5: Conveys the same semantic meaning and captures all core concepts from the expected response, even if phrased differently
+# - Score 4: Conveys similar semantic meaning with most core concepts, minor differences in emphasis or detail
+# - Score 3: Conveys the general meaning but misses some important concepts or has notable semantic gaps
+# - Score 2: Partially aligns with expected meaning but has significant conceptual differences or omissions
+# - Score 1: Conveys different semantic meaning or contradicts the core concepts of the expected response
 
-[BEGIN DATA]
-[Prompt]: {prompt}
-[Response]: {response}
-[Expected Response]: {expected_response}
-[END DATA]
+# [BEGIN DATA]
+# [Prompt]: {prompt}
+# [Response]: {response}
+# [Expected Response]: {expected_response}
+# [END DATA]
 
-For each task:
-1. Analyze the relevant comparison
-2. Assign a score (1-5) using the rubric above
-3. Provide a yes/no answer (Prompt Adherence: "Does it address the prompt?" | Content Accuracy: "Does it convey the same semantic meaning?")
-4. Give brief reasoning
+# For each task:
+# 1. Analyze the relevant comparison
+# 2. Assign a score (1-5) using the rubric above
+# 3. Provide a yes/no answer (Prompt Adherence: "Does it address the prompt?" | Content Accuracy: "Does it convey the same semantic meaning?")
+# 4. Give brief reasoning
 
-Final score = Prompt Adherence + Content Accuracy (max 10)
+# Final score = Prompt Adherence + Content Accuracy (max 10)
 
-Return as a JSON object with the following structure:
-{{
-  "prompt_adherence_score": <1-5>,
-  "prompt_adherence_answer": "<yes/no>",
-  "prompt_adherence_reasoning": "<brief explanation>",
-  "content_accuracy_score": <1-5>,
-  "content_accuracy_answer": "<yes/no>",
-  "content_accuracy_reasoning": "<brief explanation>",
-  "final_score": <2-10>
-}}
-"""
+# Return as a JSON object with the following structure:
+# {{
+#   "prompt_adherence_score": <1-5>,
+#   "prompt_adherence_answer": "<yes/no>",
+#   "prompt_adherence_reasoning": "<brief explanation>",
+#   "content_accuracy_score": <1-5>,
+#   "content_accuracy_answer": "<yes/no>",
+#   "content_accuracy_reasoning": "<brief explanation>",
+#   "final_score": <2-10>
+# }}
+# """
 
-def eval_prompt_1_metric(example: dspy.Example, pred: dspy.Prediction):
-    """
-    Evaluates a prediction using the eval_prompt_1 evaluation prompt.
-    Returns True if final_score >= 6, False otherwise.
+# def eval_prompt_1_metric(example: dspy.Example, pred: dspy.Prediction):
+#     """
+#     Evaluates a prediction using the eval_prompt_1 evaluation prompt.
+#     Returns True if final_score >= 6, False otherwise.
 
-    I DONT REALLY KNOW HOW TO USE THIS FUNCTION.
-    """
-    if not hasattr(pred, 'answer') or not pred.answer:
-        return False
+#     I DONT REALLY KNOW HOW TO USE THIS FUNCTION.
+#     """
+#     if not hasattr(pred, 'answer') or not pred.answer:
+#         return False
     
-    prompt_text = EVAL_PROMPT_1.format(
-        prompt=example.question,
-        response=pred.answer,
-        expected_response=example.answer
-    )
+    # prompt_text = EVAL_PROMPT_1.format(
+    #     prompt=example.question,
+    #     response=pred.answer,
+    #     expected_response=example.answer
+    # )
     
     # Create a simple evaluation using the existing infrastructure
     # This is a simplified version - in practice you'd want to use the full ProcessManager
-    try:
-        # For now, we'll use a simple heuristic based on string similarity
-        # In a real implementation, you'd call an LLM with the prompt_text
+    # try:
+    #     # For now, we'll use a simple heuristic based on string similarity
+    #     # In a real implementation, you'd call an LLM with the prompt_text
         
-        # Simple fallback scoring based on string similarity
-        response_lower = pred.answer.lower()
-        expected_lower = example.answer.lower()
+    #     # Simple fallback scoring based on string similarity
+    #     response_lower = pred.answer.lower()
+    #     expected_lower = example.answer.lower()
         
-        # Basic similarity check
-        if response_lower == expected_lower:
-            return True
-        elif any(word in response_lower for word in expected_lower.split()):
-            return True
-        else:
-            return False
+    #     # Basic similarity check
+    #     if response_lower == expected_lower:
+    #         return True
+    #     elif any(word in response_lower for word in expected_lower.split()):
+    #         return True
+    #     else:
+    #         return False
             
-    except Exception as e:
-        return False
+    # except Exception as e:
+    #     return False
 
 
 
@@ -349,66 +349,67 @@ def replace_logger_filehandler(new_log_name):
     update_handler(message_logger, 'jsonl')
 
 
-def evaluate_final_answer_eval1(
-            question: str, 
-            ground_truth: str, 
-            prediction: str, 
-            manager: ProcessManager,
-            logger: logging.Logger,
-            ) -> Tuple[bool, Optional[str]]:
-    prompt = EVAL_PROMPT_1.format(prompt=question, response=prediction, expected_response=ground_truth)
-    messages = [
-        {
-            constants.ROLE: constants.USER,
-            constants.CONTENT: prompt
-        }
-    ]
-    logger.info(f"Starting evaluation of final answer with rubric")
-    logger.info(f"question: {question}")
-    logger.info(f"expected_response: {ground_truth}")
-    logger.info(f"Prediction: {prediction}")
-    response_content, _, _ = call_lm(messages, manager, logger, temperature=0.01)
+# def evaluate_final_answer_eval1(
+#             question: str, 
+#             ground_truth: str, 
+#             prediction: str, 
+#             manager: ProcessManager,
+#             logger: logging.Logger,
+#             ) -> Tuple[bool, Optional[str]]:
+#     prompt = EVAL_PROMPT_1.format(prompt=question, response=prediction, expected_response=ground_truth)
+#     messages = [
+#         {
+#             constants.ROLE: constants.USER,
+#             constants.CONTENT: prompt
+#         }
+#     ]
+#     logger.info(f"Starting evaluation of final answer with rubric")
+#     logger.info(f"question: {question}")
+#     logger.info(f"expected_response: {ground_truth[:50]}")
+#     logger.info(f"Prediction: {prediction[:50]}")
+#     response_content, _, _ = call_lm(messages, manager, logger, temperature=0.01)
     
-    json_str = ""
-    try:
-        # Try to extract JSON from markdown code block if present
-        json_match = re.search(r'```json\s*(\{.*?\})\s*```', response_content, re.DOTALL)
-        if json_match:
-            json_str = json_match.group(1)
-        else:
-            # Fallback for raw JSON possibly with leading/trailing text
-            json_start = response_content.find('{')
-            json_end = response_content.rfind('}')
-            if json_start != -1 and json_end != -1:
-                json_str = response_content[json_start:json_end+1]
-            else:
-                raise json.JSONDecodeError("No JSON object found in response", response_content, 0)
+#     json_str = ""
+#     try:
+#         # Try to extract JSON from markdown code block if present
+#         json_match = re.search(r'```json\s*(\{.*?\})\s*```', response_content, re.DOTALL)
+#         if json_match:
+#             json_str = json_match.group(1)
+#         else:
+#             # Fallback for raw JSON possibly with leading/trailing text
+#             json_start = response_content.find('{')
+#             json_end = response_content.rfind('}')
+#             if json_start != -1 and json_end != -1:
+#                 json_str = response_content[json_start:json_end+1]
+#             else:
+#                 raise json.JSONDecodeError("No JSON object found in response", response_content, 0)
 
-        scores_data = json.loads(json_str)
+#         scores_data = json.loads(json_str)
+#         # print(f"DEBUG: scores_data: {scores_data}")
         
-        prompt_adherence_score = scores_data.get("prompt_adherence_score")
-        content_accuracy_score = scores_data.get("content_accuracy_score")
-        final_score = scores_data.get("final_score")
+#         prompt_adherence_score = scores_data.get("prompt_adherence_score")
+#         content_accuracy_score = scores_data.get("content_accuracy_score")
+#         final_score = scores_data.get("final_score")
 
-        logger.info(f"Extracted scores: Prompt Adherence={prompt_adherence_score}, Content Accuracy={content_accuracy_score}, Final={final_score}")
+#         logger.info(f"Extracted scores: Prompt Adherence={prompt_adherence_score}, Content Accuracy={content_accuracy_score}, Final={final_score}")
 
-        if final_score is None:
-            logger.error("Could not find 'final_score' in the LLM response.")
-            return False, "Missing 'final_score' in response"
+#         if final_score is None:
+#             logger.error("Could not find 'final_score' in the LLM response.")
+#             return False, "Missing 'final_score' in response"
 
-        # Success is defined as final_score >= 6 (based on eval_prompt_1_metric docstring)
-        is_success = int(final_score) >= 6
+#         # Success is defined as final_score >= 6 (based on eval_prompt_1_metric docstring)
+#         is_success = int(final_score) >= 6
         
-        return is_success, json.dumps(scores_data)
+#         return is_success, json.dumps(scores_data)
 
-    except json.JSONDecodeError:
-        error_msg = f"Failed to decode JSON from LLM response: {response_content}"
-        logger.error(error_msg)
-        return False, error_msg
-    except (KeyError, TypeError) as e:
-        error_msg = f"Error accessing scores from parsed JSON: {e}. Data: {json_str}"
-        logger.error(error_msg)
-        return False, error_msg
+#     except json.JSONDecodeError:
+#         error_msg = f"Failed to decode JSON from LLM response: {response_content}"
+#         logger.error(error_msg)
+#         return False, error_msg
+#     except (KeyError, TypeError) as e:
+#         error_msg = f"Error accessing scores from parsed JSON: {e}. Data: {json_str}"
+#         logger.error(error_msg)
+#         return False, error_msg
 
 
 

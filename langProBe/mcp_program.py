@@ -18,6 +18,16 @@ import json
 from typing import List, Dict, Optional, Tuple
 
 
+"""
+Main file that deals with the program/system logic to get responses.
+Functions/classes present: 
+- MCPPredict Class: Main class that deals with the program/system logic to get responses.
+- Logger created and used in this
+- evaluate prediction is also in this.
+
+Uses the program utils file to build the messages, call the LLM, and parse responses and call MCPs.
+"""
+
 MCP_SAMPLE_SYSTEM_PROMPT = """
 You are a helpful assistant. You are able to answer questions using different tools.  
 The content of your available tools begins with ## Available Tools, indicating the collection of usable tools.  
@@ -56,6 +66,9 @@ class LangProBeMCPMetaProgram(dspy.Module):
     
 
 class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
+    '''
+    This is the program/system that is run to get responses. Called MCPPredict.
+    '''
     def __init__(self, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="mcp_sample", config=None):
         super().__init__()
         self.system_prompt = system_prompt
@@ -65,6 +78,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         self.config = config
 
         # Configure run logger
+        # Mainly using the run_logger, i don't know what the message logger is for.
         self.run_logger = logging.getLogger('MCPPredictRunLogger')
         self.run_logger.setLevel(logging.DEBUG)
 
@@ -200,8 +214,9 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             })
 
         self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
-        self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {messages[-1][constants.CONTENT]}")
-        
+        prediction = messages[-1].get(constants.CONTENT, "")
+        self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {prediction[:50]}")
+
         # IMPORTANT: This is where the evaluation is done !!!!!!
         success = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
         self.log_messages(messages, question, success, (end_time-start_time), all_prompt_tokens, all_completion_tokens)

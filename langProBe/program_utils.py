@@ -6,6 +6,7 @@ import copy
 from pydantic import BaseModel, Field
 import re
 import os
+import sys
 import langProBe.constants as constants
 import logging
 from .synced_mcp_client import SyncedMcpClient
@@ -120,8 +121,7 @@ def call_lm(
     This function is used to call the LLM API, it can be used for Anthropic, AWS Bedrock and OpenAI.
     '''
     # Log the input messages being sent to the LLM
-    logger.debug(f"ID: {manager.id}, Input messages to LLM: {json.dumps(messages, indent=2, ensure_ascii=False)}")
-    
+    # logger.debug(f"ID: {manager.id}, Input messages to LLM: {json.dumps(messages, indent=2, ensure_ascii=False)}")
     response = None
     try:
         # Getting the correct model to use for the LLM call.
@@ -236,7 +236,9 @@ def call_lm(
                 
             except (ClientError, BotoCoreError) as e:
                 logger.error(f"ID: {manager.id}, AWS Bedrock error: {str(e)}")
+                logger.error("Exiting program due to AWS Bedrock error.")
                 raise
+                # sys.exit(1)
 
         # OpenAI API call
         else:

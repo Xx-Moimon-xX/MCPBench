@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Refresh AWS credentials before running the evaluation
+# if [ -f "../../refresh_aws_token.sh" ]; then
+#     ../../refresh_aws_token.sh
+#     if [ $? -ne 0 ]; then
+#         echo "Failed to refresh AWS token. Please check your AWS login."
+#         exit 1
+#     fi
+# fi
+
 if [ -f local.env ]; then
   set -a
   source local.env

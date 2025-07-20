@@ -24,6 +24,11 @@ from langProBe.evaluation_utils import find_missing_entries, replace_logger_file
 # Global configuration variable that can be accessed by other modules
 global_config = None
 
+"""
+This file is the starting point and has the evaluate() and evaluate_all() functions.
+- Deals with config file here and the command line arguments. 
+- It also with all the evaluation_records.csv, evaluation_results.csv and MCP_WEBSEARCH.stat stuff. 
+"""
 
 class CompareAnswerSignature(dspy.Signature):
     """
@@ -180,15 +185,14 @@ def evaluate(
     else:
         benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path)
 
-    print(f"Initialised benchmark: {benchmark}")
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     benchmark_name = benchmark_meta.name or benchmark.__class__.__name__
 
     # If the number of threads is not provided, use the number of threads from the benchmark meta
     num_threads = benchmark_meta.num_threads or num_threads
-    print(f"Evaluating {benchmark_name}")
+    print(f"evaluating {benchmark_name}")
     print(f"num_threads: {num_threads}")
-    print(f"Test set size: {len(benchmark.test_set)}")
+    print(f"test set size: {len(benchmark.test_set)}")
 
     # Create the file path for the evaluation results if it does not exist
     Path(file_path).mkdir(parents=True, exist_ok=True)
@@ -207,22 +211,14 @@ def evaluate(
 
     
 
-    # print(f"Programs in the benchmark: {benchmark_meta.program}")
-    # # For each program in the benchmark, we evaluate it
-    # print("Type of benchmark_meta.program:", type(benchmark_meta.program), "Type of benchmark_meta.program[0]:", type(benchmark_meta.program[0]))
-    # print("Value of benchmark_meta.program:", benchmark_meta.program[0])
-    # # print("Value of benchmark_meta.program[0]._name:", benchmark_meta.program[0]._name)
-    # print("Length of benchmark_meta.program:", len(benchmark_meta.program))
+    # For each program in the benchmark, we evaluate it
     for program in benchmark_meta.program:
-        # print(f"DEBUG: program: {program}")
         program_name = getattr(program, "_name", program.__class__.__name__)
-
-        # print(f"Program we're using to evaluate: {program_name}")
-
         ## suppress_output is a context manager that suppresses the output of the program.
         with suppress_output(suppress=suppress_dspy_output):
 
             # Initialising the evaluation benchmark.
+            # THIS IS WHERE THE PROGRAM IS PASSED TO THE EVALUATE BENCH FUNCTION.
             evaluate_bench = EvaluateBench(
                 benchmark=benchmark,
                 program=program,
@@ -230,19 +226,18 @@ def evaluate(
                 lm=lm,
                 benchmark_name=benchmark_meta.name,
                 num_threads=num_threads,
-                api_key=api_key if api_key else os.getenv("OPENAI_API_KEY", ""),
-                api_base=api_base if api_base else os.getenv("OPENAI_API_BASE", ""),
+                api_key=api_key if api_key else os.getenv("AWS_ACCESS_KEY_ID", ""),
+                api_base=api_base if api_base else "",
                 config=config,
             )
-            print(f"Evaluating benchmark: {evaluate_bench}")
             evaluate_bench.evaluate()
-        # print(f"Results: {evaluate_bench.results}")
 
         # if missing_mode:
         #     add_to_evaluation_records(file_path, evaluate_bench.results)
         evaluation_result = evaluate_bench.results
 
         file_name = f"{evaluation_result.benchmark}_{evaluation_result.program}"
+        # TO DO: might want to change the output here for how we want it displayed.
         with open(os.path.join(file_path, f"{file_name}.txt"), "w") as f:
             f.write(f"score,cost,input_tokens,output_tokens\n")
             f.write(
@@ -268,9 +263,7 @@ def evaluate_all(
     if benchmarks and isinstance(benchmarks[0], str):
         benchmarks = register_all_benchmarks(benchmarks)
 
-    print(f"Benchmarks (len: {len(benchmarks)}): {benchmarks}")
     for benchmark_meta in benchmarks:
-        print(f"Evaluating benchmark: {benchmark_meta}")
         evaluate(
             benchmark_meta,
             lm,
@@ -339,7 +332,6 @@ def main():
     args = parser.parse_args()
 
     config = read_json(args.config)
-    # print('DEBUG: config after loading:', config)
     
     # Set global config for use by other modules
     global global_config
@@ -357,7 +349,7 @@ def main():
     
     benchmarks = [benchmark for benchmark in registered_benchmarks]
     if not benchmarks:
-        print(f"No benchmark registered with name {args.benchmark}")
+        print(f"No benchmark registered with name {args.benchmark}\n")
         sys.exit(1)
 
     evaluate_all(
