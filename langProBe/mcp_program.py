@@ -51,15 +51,20 @@ class MCP_LM(BaseModel):
         default=None,
         description="The API base URL for the model.",
     )
+    eval_model: str = Field(
+        default=None,
+        description="The model to use for evaluation.",
+    )
 
 class LangProBeMCPMetaProgram(dspy.Module):
     def __init__(self):
         super().__init__()
         self.lm = MCP_LM()
-    def setup_lm(self, lm, api_key=None, api_base=None):
+    def setup_lm(self, lm, api_key=None, api_base=None, eval_model=None):
         self.lm.model = lm
         self.lm.api_key = api_key
         self.lm.api_base = api_base
+        self.lm.eval_model = eval_model
 
     def program_type(self):
         return "mcp"
@@ -155,14 +160,11 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         answer_eval_manager.lm_api_key = self.lm.api_key
         answer_eval_manager.lm_api_base = self.lm.api_base
         # Use the same model type as the main LM for evaluation
-        if self.lm.model.startswith("bedrock/"):
-            answer_eval_manager.model = "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0"
+        if self.lm.eval_model:
+            answer_eval_manager.model = self.lm.eval_model
         else:
-            answer_eval_manager.model = "openai/deepseek-v3"
-        # # Set AWS credentials if available
-        # answer_eval_manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
-        # answer_eval_manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-        # answer_eval_manager.aws_region = os.getenv("AWS_REGION")
+            answer_eval_manager.model = self.lm.model
+
         return evaluate_final_answer(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
 
     def log_messages(self, messages, question, success, time_cost, prompt_tokens_cost, completion_tokens_cost):

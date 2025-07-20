@@ -257,6 +257,7 @@ class EvaluateBench(ABC):
         api_base: str = None,
         config=None,
         file_path=None,
+        eval_lm=None,
     ):
         '''
         Initializes the evaluation with the given benchmark, program, metric, language model, and other configs.
@@ -275,6 +276,7 @@ class EvaluateBench(ABC):
         self.metric = metric
         self.num_threads = num_threads
         devset = benchmark.get_test_set()
+        self.program.lm.eval_model = eval_lm
 
 
         # Everything is done inside here!!

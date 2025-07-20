@@ -165,6 +165,7 @@ def evaluate(
     api_key=None,
     api_base=None,
     config=None,
+    eval_lm=None,
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
@@ -214,7 +215,8 @@ def evaluate(
             f"benchmark: {benchmark_name}\n"
             f"lm: {lm}\n"
             f"test_set_size: {len(benchmark.test_set)}\n"
-            f"dataset_name: {dataset_name}"
+            f"dataset_name: {dataset_name}\n"
+            f"eval_lm: {eval_lm}"
         )
 
     
@@ -239,6 +241,7 @@ def evaluate(
                 config=config,
                 # dataset=dataset_name,
                 file_path=file_path,
+                eval_lm=eval_lm,
             )
             evaluate_bench.evaluate()
 
@@ -268,6 +271,7 @@ def evaluate_all(
     api_key=None,
     api_base=None,
     config=None,
+    eval_lm=None,
 ):
     # Only register when benchmarks is a list of strings
     if benchmarks and isinstance(benchmarks[0], str):
@@ -286,6 +290,7 @@ def evaluate_all(
             api_key=api_key,
             api_base=api_base,
             config=config,
+            eval_lm=eval_lm,
         )
 
     # After all the evaluations are done, we read the evaluation results and save them to a csv file
@@ -308,6 +313,9 @@ def main():
     parser.add_argument("--lm_api_key", type=str, help="API key for language model")
     parser.add_argument(
         "--lm_api_base", type=str, help="API base for language model"
+    )
+    parser.add_argument(
+        "--eval_lm", type=str, help="Language model to use for evaluation"
     )
     parser.add_argument(
         "--dataset_mode", type=str, help="Dataset mode (train, val, test)"
@@ -373,6 +381,7 @@ def main():
         missing_mode_file=args.missing_mode_file,
         api_key=args.lm_api_key,
         api_base=args.lm_api_base,
+        eval_lm=args.eval_lm,
         config=config,
     )
 

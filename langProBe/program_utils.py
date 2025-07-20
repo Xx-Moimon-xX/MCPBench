@@ -209,7 +209,7 @@ def call_lm(
                 
                 # Log the full response for debugging
                 logger.debug(f"ID: {manager.id}, Full Bedrock API response: {json.dumps(response, indent=2, default=str)}")
-                
+                # print(f"Model used: {model_name}")
                 # Extract response content
                 output_message = response.get('output', {}).get('message', {})
                 content_list = output_message.get('content', [])
