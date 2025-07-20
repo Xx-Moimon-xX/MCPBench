@@ -6,6 +6,8 @@ import sys
 import time
 from contextlib import contextmanager
 from pathlib import Path
+import csv
+import json
 
 import dspy
 
@@ -82,6 +84,56 @@ def suppress_output(suppress=True):
             sys.stdout.close()
             sys.stderr = original_stderr
             sys.stdout = original_stdout
+
+
+def save_predictions_to_csv(file_path, predictions):
+    """Saves prediction details to a CSV file with dynamic, unsorted headers for evaluation_data."""
+    csv_file_path = os.path.join(file_path, "evaluation_data.csv")
+    
+    parsed_eval_data_list = []
+    all_eval_keys = []
+    seen_keys = set()
+    
+    # First pass to collect all unique keys in order of appearance
+    for pred in predictions:
+        eval_dict = {}
+        if isinstance(pred.evaluation_data, str):
+            try:
+                eval_dict = json.loads(pred.evaluation_data)
+            except (json.JSONDecodeError, TypeError):
+                pass
+        elif isinstance(pred.evaluation_data, dict):
+            eval_dict = pred.evaluation_data
+        
+        parsed_eval_data_list.append(eval_dict)
+        if isinstance(eval_dict, dict):
+            for key in eval_dict.keys():
+                if key not in seen_keys:
+                    all_eval_keys.append(key)
+                    seen_keys.add(key)
+
+    base_headers = ["question", "ground_truth", "answer", "success"]
+    eval_data_headers = all_eval_keys  # No longer sorting
+    full_headers = base_headers + eval_data_headers
+    
+    with open(csv_file_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(full_headers)
+        
+        # Second pass to write the data
+        for i, pred in enumerate(predictions):
+            base_row_data = [
+                pred.question,
+                pred.ground_truth,
+                pred.answer,
+                pred.success
+            ]
+            
+            current_eval_dict = parsed_eval_data_list[i]
+            eval_row_data = [current_eval_dict.get(header, "") for header in eval_data_headers] if isinstance(current_eval_dict, dict) else ["" for _ in eval_data_headers]
+            
+            full_row = base_row_data + eval_row_data
+            writer.writerow(full_row)
 
 
 def generate_evaluation_records(file_path):
@@ -248,6 +300,10 @@ def evaluate(
         # if missing_mode:
         #     add_to_evaluation_records(file_path, evaluate_bench.results)
         evaluation_result = evaluate_bench.results
+        # print(f"evaluation_result: {evaluation_result}")
+
+        if evaluation_result and evaluation_result.outputs_raw_data:
+            save_predictions_to_csv(file_path, evaluation_result.outputs_raw_data)
 
         file_name = f"{evaluation_result.benchmark}_{evaluation_result.program}"
         # TO DO: might want to change the output here for how we want it displayed.

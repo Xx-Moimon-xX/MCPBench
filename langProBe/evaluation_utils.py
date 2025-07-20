@@ -42,7 +42,12 @@ def evaluate_final_answer(
     logger.info(f"expected_response: {ground_truth[:50]}")
     logger.info(f"Prediction: {prediction[:50]}")
     response_content, _, _ = call_lm(messages, manager, logger, temperature=0.01)
-    return "true" in response_content.lower()
+
+    if response_content is None:
+        return False, None
+    success = "true" in response_content.lower()
+
+    return success, response_content
 
 
 def normalize_number_str(number_str: str) -> float:

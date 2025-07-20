@@ -240,7 +240,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {prediction[:50]}")
 
         # IMPORTANT: This is where the evaluation is done !!!!!!
-        success = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
+        success, evaluation_data = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
         self.log_messages(messages, question, success, (end_time-start_time), all_prompt_tokens, all_completion_tokens)
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
         # self.run_logger.info("==" * 50)
@@ -251,5 +251,6 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             ground_truth=gt,
             answer=messages[-1][constants.CONTENT],
             trace=messages,
-            process_report=manager
+            process_report=manager,
+            evaluation_data=evaluation_data
         )
