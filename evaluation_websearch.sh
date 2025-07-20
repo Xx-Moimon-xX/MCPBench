@@ -30,14 +30,18 @@ fi
 # Start the evaluation program using a more direct method to ensure proper multiprocess initialization
 DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
+DATE=$(date +%F)
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+dataset_name=websearch_10_forslack
+
 python3 -m langProBe.evaluation \
   --benchmark=WebSearch \
   --dataset_mode=tiny \
-  --dataset_path=langProBe/WebSearch/data/websearch_10_forslack.jsonl \
-  --file_path=evaluation_websearch_test \
+  --dataset_path=langProBe/WebSearch/data/$dataset_name.jsonl \
+  --file_path=runs/$DATE/websearch_run_${TIMESTAMP}_${dataset_name} \
   --lm=bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0 \
   --lm_api_key=$AWS_ACCESS_KEY_ID \
-  --num_threads=8 \
+  --num_threads=1 \
   --config=$CONFIG_FILE
 
 

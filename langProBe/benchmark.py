@@ -256,6 +256,7 @@ class EvaluateBench(ABC):
         api_key: str = None,
         api_base: str = None,
         config=None,
+        file_path=None,
     ):
         '''
         Initializes the evaluation with the given benchmark, program, metric, language model, and other configs.
@@ -266,6 +267,10 @@ class EvaluateBench(ABC):
         if hasattr(program, 'config'):
             program.config = config
         self.program = program
+        # if hasattr(self.program, "set_dataset"):
+        #     self.program.set_dataset(dataset)
+        # if hasattr(self.program, "set_log_path"):
+        self.program.set_log_path(file_path)
         self.program.setup_lm(lm, api_key=api_key, api_base=api_base)
         self.metric = metric
         self.num_threads = num_threads

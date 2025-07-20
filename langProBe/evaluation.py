@@ -175,12 +175,17 @@ def evaluate(
     # If the dataset mode is not provided, use the dataset mode from the benchmark meta
     dataset_mode = dataset_mode or benchmark_meta.dataset_mode
 
+    if dataset_path:
+        dataset_name = os.path.splitext(os.path.basename(dataset_path))[0]
+    else:
+        dataset_name = None
+
     # If the missing mode file is provided, we use it to find the missing data
     if missing_mode_file:
         origin_data = read_jsonl(dataset_path)
         runed_data = read_jsonl(missing_mode_file)
         missing_data = find_missing_entries(origin_data, runed_data)
-        benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, missing_data=missing_data)
+        benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path, missing_data=missing_data)
         replace_logger_filehandler(os.path.splitext(missing_mode_file)[0])
     else:
         benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path)
@@ -196,6 +201,8 @@ def evaluate(
 
     # Create the file path for the evaluation results if it does not exist
     Path(file_path).mkdir(parents=True, exist_ok=True)
+    # new_file_path = os.path.join(file_path, f"{benchmark_name}")
+    # Path(new_file_path).mkdir(parents=True, exist_ok=True)
 
     # Read the evaluation records from the file path or if no file creates a new one
     evaluation_records = read_evaluation_records(file_path)
@@ -207,6 +214,7 @@ def evaluate(
             f"benchmark: {benchmark_name}\n"
             f"lm: {lm}\n"
             f"test_set_size: {len(benchmark.test_set)}\n"
+            f"dataset_name: {dataset_name}"
         )
 
     
@@ -229,6 +237,8 @@ def evaluate(
                 api_key=api_key if api_key else os.getenv("AWS_ACCESS_KEY_ID", ""),
                 api_base=api_base if api_base else "",
                 config=config,
+                # dataset=dataset_name,
+                file_path=file_path,
             )
             evaluate_bench.evaluate()
 

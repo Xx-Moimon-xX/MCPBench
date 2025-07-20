@@ -76,6 +76,8 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         self.max_steps = max_steps
         self.max_length = 30000
         self.config = config
+        # self.mcps = config.get("mcp_pool")
+        # self.mcpserver = self.config["mcp_pool"][0].get("name")
 
         # Configure run logger
         # Mainly using the run_logger, i don't know what the message logger is for.
@@ -85,23 +87,40 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         # Configure message logger
         self.message_logger = logging.getLogger('MCPPredictMessageLogger')
         self.message_logger.setLevel(logging.DEBUG)
+        # self.dataset = dataset
+        self.log_path = None
 
         # Create log directory
         os.makedirs('logs', exist_ok=True)
+        # self.setup_loggers()
+
+    # def set_dataset(self, dataset):
+    #     self.dataset = dataset
+        # self.setup_loggers()
+
+    def set_log_path(self, path):
+        self.log_path = path
         self.setup_loggers()
 
     def setup_loggers(self):
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        log_dir = self.log_path
+        if log_dir:
+            os.makedirs(log_dir, exist_ok=True)
+        else:
+            return
+
+        now = datetime.now()
+        timestamp = now.strftime('%Y%m%d_%H%M%S')
         
         # Set up run log
-        run_log_file = f'logs/{self.task_name}_run_{timestamp}.log'
+        run_log_file = f'{log_dir}/{self.task_name}_run_{timestamp}.log'
         run_handler = logging.FileHandler(run_log_file, encoding='utf-8')
         run_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         run_handler.setFormatter(run_formatter)
         self.run_logger.addHandler(run_handler)
 
         # Set up message log
-        message_log_file = f'logs/{self.task_name}_messages_{timestamp}.jsonl'
+        message_log_file = f'{log_dir}/{self.task_name}_messages_{timestamp}.jsonl'
         message_handler = logging.FileHandler(message_log_file, encoding='utf-8')
         self.message_logger.addHandler(message_handler)
 
@@ -182,6 +201,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
         # Use config passed to the instance
         mcps = self.config['mcp_pool']
+
 
         messages = build_init_messages(self.system_prompt, mcps, question)
         steps = 0

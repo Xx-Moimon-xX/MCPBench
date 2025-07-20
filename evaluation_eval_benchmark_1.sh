@@ -30,11 +30,15 @@ fi
 # Start the evaluation program using a more direct method to ensure proper multiprocess initialization
 DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
+DATE=$(date +%F)
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+dataset_name=eval_benchmark_1_10
+
 python3 -m langProBe.evaluation \
   --benchmark=eval_benchmark_1 \
   --dataset_mode=tiny \
-  --dataset_path=langProBe/eval_benchmark_1/data/eval_benchmark_1_10.jsonl \
-  --file_path=evaluation_eval_benchmark_1_test \
+  --dataset_path=langProBe/eval_benchmark_1/data/$dataset_name.jsonl \
+  --file_path=runs/$DATE/eval_benchmark_1_run_${TIMESTAMP}_${dataset_name} \
   --lm=bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0 \
   --lm_api_key=$AWS_ACCESS_KEY_ID \
   --num_threads=1 \

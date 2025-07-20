@@ -1,5 +1,4 @@
 from langProBe.benchmark import BenchmarkMeta, MCPBench
-from langProBe.mcp_program import MCPPredict
 from langProBe.evaluation_utils import mcp_metric
 from .eval_1_program import Eval1Predict
 
@@ -19,6 +18,8 @@ def get_eval_benchmark_1():
         system_prompt=MCP_SAMPLE_SYSTEM_PROMPT,
         task_name="eval_benchmark_1")
 
+    # It's giving a different program object, but I think it should be the benchmark object that's changed not the program object.
+    # Because the program object is a constant (i.e. how the system generates responses), and the benchmark is what should change.
     return [
         BenchmarkMeta(
             MCPBench,
@@ -29,4 +30,5 @@ def get_eval_benchmark_1():
         )
     ]
 
+# Returns a BenchmarkMeta object
 benchmark = get_eval_benchmark_1()
