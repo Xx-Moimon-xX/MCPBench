@@ -6,6 +6,8 @@ import time
 import traceback
 from datetime import datetime
 from typing import List, Tuple, Optional
+from langProBe.benchmark import Benchmark
+from langProBe.config_utils import read_jsonl
 # from langProBe.evaluation_utils import question_scorer, evaluate_final_answer_eval1
 
 from langProBe.mcp_program import MCPPredict
@@ -37,95 +39,93 @@ Detailed information about input parameters, where each parameter includes: para
 If you have obtained the final result. Please provide your final answer enclosed within <answer></answer> tags. Ensure that only the final answer is included, without any additional explanations or commentary.
 """
 
-EVAL_PROMPT_1 = """You are evaluating an LLM response against a prompt and expected answer. You have two evaluation tasks:
+EVAL_PROMPT_2 = """You are an expert evaluator assessing how well an LLM response matches expected responses.
 
-**Task 1: Prompt Adherence**
-Evaluate if the response appropriately addresses the given prompt, including cases where the expected response indicates a failure.
-- Score 5: Fully addresses all aspects of the prompt, including correct identification of failures if applicable
-- Score 4: Addresses most aspects with minor gaps (may miss minor failure details)
-- Score 3: Addresses some aspects but misses key elements or misrepresents failure cases
-- Score 2: Minimally addresses the prompt or incorrectly describes failures
-- Score 1: Fails to address the prompt meaningfully
-
-**Task 2: Content Accuracy** 
-Evaluate if the response conveys the same semantic meaning and core content as the expected response, including failure scenarios.
-- Score 5: Conveys the same semantic meaning and captures all core concepts from the expected response, even if phrased differently
-- Score 4: Conveys similar semantic meaning with most core concepts, minor differences in emphasis or detail
-- Score 3: Conveys the general meaning but misses some important concepts or has notable semantic gaps
-- Score 2: Partially aligns with expected meaning but has significant conceptual differences or omissions
-- Score 1: Conveys different semantic meaning or contradicts the core concepts of the expected response
-
+**EVALUATION DATA:**
 [BEGIN DATA]
 [Prompt]: {prompt}
-[Response]: {response}
-[Expected Response]: {expected_response}
+[LLM Response]: {response}
+[Expected Response 1]: {expected_response_1}
+[Expected Response 2]: {expected_response_2}
+[Expected Response 3]: {expected_response_3}
 [END DATA]
 
-For each task:
-1. Analyze the relevant comparison
-2. Assign a score (1-5) using the rubric above
-3. Provide a yes/no answer (Prompt Adherence: "Does it address the prompt?" | Content Accuracy: "Does it convey the same semantic meaning?")
-4. Give brief reasoning
+**TASK:**
+1. Compare the LLM response to each expected response and identify which ONE it most closely matches
+2. Score the match quality using this 5-point scale:
+   - **5 (Excellent):** Same core meaning, even if worded differently
+   - **4 (Good):** Minor differences only (slight wording variations)
+   - **3 (Partial):** Significant differences affecting clarity/completeness
+   - **2 (Poor):** Some relation but fails to convey correct meaning
+   - **1 (No Match):** No meaningful match in meaning/content/intent
+3. Determine acceptance: scores 3-5 = "yes", scores 1-2 = "no"
 
-Final score = Prompt Adherence + Content Accuracy (max 10)
+**CRITICAL OUTPUT REQUIREMENTS:**
+- You MUST return ONLY a JSON object with EXACTLY these 4 fields
+- Use EXACTLY these field names (case-sensitive): "selected_expected_response", "score", "answer", "reasoning"
+- DO NOT add any other fields or modify field names
+- DO NOT include any text before or after the JSON
+- DO NOT include markdown code blocks or formatting
+- DO NOT include a comma after the last field in the JSON object.
+- The value of the "reasoning" field should be a string, with no extra characters (such as commas, periods, or whitespace) after the closing quotation mark.
 
-Return as a JSON object with the following structure:
+**REQUIRED JSON FORMAT:**
 {{
-  "prompt_adherence_score": <1-5>,
-  "prompt_adherence_answer": "<yes/no>",
-  "prompt_adherence_reasoning": "<brief explanation>",
-  "content_accuracy_score": <1-5>,
-  "content_accuracy_answer": "<yes/no>",
-  "content_accuracy_reasoning": "<brief explanation>",
-  "final_score": <2-10>
+    "selected_expected_response": "<exact copy of the expected response you selected>",
+    "score": <integer from 1 to 5>,
+    "answer": "<exactly 'yes' or 'no' in lowercase>",
+    "reasoning": "<2-3 sentence explanation comparing LLM response to selected expected response>"
 }}
-"""
 
-def eval_prompt_1_metric(example: dspy.Example, pred: dspy.Prediction):
-    """
-    Evaluates a prediction using the eval_prompt_1 evaluation prompt.
-    Returns True if final_score >= 6, False otherwise.
+Focus on semantic meaning over exact wording. When uncertain between scores, choose the lower score.
 
-    I DONT REALLY KNOW HOW TO USE THIS FUNCTION.
-    """
-    if not hasattr(pred, 'answer') or not pred.answer:
-        return False
-    
-    prompt_text = EVAL_PROMPT_1.format(
-        prompt=example.question,
-        response=pred.answer,
-        expected_response=example.answer
-    )
-    
-    # Create a simple evaluation using the existing infrastructure
-    # This is a simplified version - in practice you'd want to use the full ProcessManager
-    try:
-        # For now, we'll use a simple heuristic based on string similarity
-        # In a real implementation, you'd call an LLM with the prompt_text
-        
-        # Simple fallback scoring based on string similarity
-        response_lower = pred.answer.lower()
-        expected_lower = example.answer.lower()
-        
-        # Basic similarity check
-        if response_lower == expected_lower:
-            return True
-        elif any(word in response_lower for word in expected_lower.split()):
-            return True
+Return only the JSON object now:"""
+
+
+class MCPBench2(Benchmark):
+    '''
+    Concrete benchmark for MCP tasks. Loads test data from a JSONL file or provided data, and creates dspy.Example objects.
+    '''
+    def __init__(self, dataset_mode="lite", dataset_path=None, missing_data=[]):
+        '''
+        Initializes MCPBench with a dataset mode, path, and optional missing data.
+        '''
+        self.dataset_path = dataset_path
+        self.missing_data = missing_data
+        super().__init__(dataset_mode=dataset_mode)
+
+    def init_dataset(self):
+        '''
+        Loads the dataset and test set from the given path or missing_data, and creates dspy.Example objects for each entry.
+        '''
+        self.dataset = []
+        self.test_set = []
+        if self.missing_data:
+            test_raw_data = self.missing_data
         else:
-            return False
-            
-    except Exception as e:
-        return False
+            test_raw_data = read_jsonl(self.dataset_path)
+        
+        for test_data in test_raw_data:
+            self.test_set.append(
+                dspy.Example(
+                    id=test_data["unique_id"],
+                    question=test_data["Prompt"],
+                    answer1=test_data["Answer1"],
+                    answer2=test_data["Answer2"],
+                    answer3=test_data["Answer3"],
+                ).with_inputs("id", "question", "answer1", "answer2", "answer3", "config")
+            )
 
-def evaluate_final_answer_eval1(
+def evaluate_final_answer_eval2(
             question: str, 
-            ground_truth: str, 
+            ground_truth_1: str, 
+            ground_truth_2: str, 
+            ground_truth_3: str, 
             prediction: str, 
             manager: ProcessManager,
             logger: logging.Logger,
             ) -> Tuple[bool, Optional[str]]:
-    prompt = EVAL_PROMPT_1.format(prompt=question, response=prediction, expected_response=ground_truth)
+    prompt = EVAL_PROMPT_2.format(prompt=question, response=prediction, expected_response_1=ground_truth_1, expected_response_2=ground_truth_2, expected_response_3=ground_truth_3)
     messages = [
         {
             constants.ROLE: constants.USER,
@@ -134,7 +134,9 @@ def evaluate_final_answer_eval1(
     ]
     logger.info(f"Starting evaluation of final answer with rubric")
     logger.info(f"question: {question}")
-    logger.info(f"expected_response: {ground_truth[:50]}")
+    logger.info(f"expected_response 1: {ground_truth_1[:50]}")
+    logger.info(f"expected_response 2: {ground_truth_2[:50]}")
+    logger.info(f"expected_response 3: {ground_truth_3[:50]}")
     logger.info(f"Prediction: {prediction[:50]}")
     response_content, _, _ = call_lm(messages, manager, logger, temperature=0.01)
     
@@ -156,18 +158,19 @@ def evaluate_final_answer_eval1(
         scores_data = json.loads(json_str)
         # print(f"DEBUG: scores_data: {scores_data}")
         
-        prompt_adherence_score = scores_data.get("prompt_adherence_score")
-        content_accuracy_score = scores_data.get("content_accuracy_score")
-        final_score = scores_data.get("final_score")
+        score = scores_data.get("score")
+        answer = scores_data.get("answer")
+        reasoning = scores_data.get("reasoning")
+        selected_expected_response = scores_data.get("selected_expected_response")
 
-        logger.info(f"Extracted scores: Prompt Adherence={prompt_adherence_score}, Content Accuracy={content_accuracy_score}, Final={final_score}")
+        logger.info(f"Extracted score: {score}, answer: {answer}, selected_expected_response: {selected_expected_response}, reasoning: {reasoning}")
 
-        if final_score is None:
-            logger.error("Could not find 'final_score' in the LLM response.")
-            return False, "Missing 'final_score' in response"
+        if score is None or answer is None:
+            logger.error("Could not find 'score' or 'answer' in the LLM response.")
+            return False, "Missing 'score' or 'answer' in response"
 
-        # Success is defined as final_score >= 6 (based on eval_prompt_1_metric docstring)
-        is_success = int(final_score) >= 6
+        # Success is defined by the 'answer' field being 'yes'
+        is_success = answer == "yes"
         
         return is_success, json.dumps(scores_data)
 
@@ -181,7 +184,7 @@ def evaluate_final_answer_eval1(
         return False, error_msg
 
     
-class Eval1Predict(MCPPredict):
+class Eval2Predict(MCPPredict):
     '''
     Program that is run to get responses. Called Eval1Predict and it is a child class of MCPPredict.
     '''
@@ -189,7 +192,7 @@ class Eval1Predict(MCPPredict):
         super().__init__(max_steps, system_prompt, task_name)
 
     
-    def evaluate_prediction(self, question: str, ground_truth: str, prediction: str) -> Tuple[bool, Optional[str]]:
+    def evaluate_prediction(self, question: str, ground_truth_1: str, ground_truth_2: str, ground_truth_3: str, prediction: str) -> Tuple[bool, Optional[str]]:
         # This is mainly for gaia (not used anywhere else), probably not needed for eval1.
         answer_eval_manager = ProcessManager()
         answer_eval_manager.lm_api_key = self.lm.api_key
@@ -200,7 +203,7 @@ class Eval1Predict(MCPPredict):
         else:
             answer_eval_manager.model = "openai/deepseek-v3"
 
-        is_success, evaluation_data = evaluate_final_answer_eval1(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
+        is_success, evaluation_data = evaluate_final_answer_eval2(question, ground_truth_1, ground_truth_2, ground_truth_3, prediction, answer_eval_manager, self.run_logger)
         
         # TO DO: ID here is wrong, i.e. answer_eval_manager isn't correct or whatever. Need to check/fix this.
         # self.run_logger.info(f"ID: {answer_eval_manager.id}, Evaluation completed successfully")
@@ -225,7 +228,9 @@ class Eval1Predict(MCPPredict):
 
         unique_id = kwargs.get('id')
         question = kwargs.get('question')
-        gt = kwargs.get('answer')
+        gt1 = kwargs.get('answer1')
+        gt2 = kwargs.get('answer2')
+        gt3 = kwargs.get('answer3')
 
         manager = ProcessManager()
         manager.lm_api_key = self.lm.api_key
@@ -274,15 +279,19 @@ class Eval1Predict(MCPPredict):
 
         ## Evaluation is done here!!!
 
-        success, evaluation_data = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
+        success, evaluation_data = self.evaluate_prediction(question, gt1, gt2, gt3, messages[-1][constants.CONTENT])
         self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
                           all_completion_tokens)
+        # Get the selected expected response from the evaluation data
+        selected_expected_response = json.loads(evaluation_data).get("selected_expected_response")
+
+
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
 
         return dspy.Prediction(
             success=success,
             question=question,
-            ground_truth=gt,
+            ground_truth=selected_expected_response,
             answer=messages[-1][constants.CONTENT],
             trace=messages,
             process_report=manager,

@@ -32,31 +32,18 @@ DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
 DATE=$(date +%F)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-dataset_name=websearch_10
+dataset_name=eval_benchmark_2_1_slack
 
 python3 -m langProBe.evaluation \
-  --benchmark=WebSearch \
+  --benchmark=eval_benchmark_2 \
   --dataset_mode=tiny \
-  --dataset_path=langProBe/WebSearch/data/$dataset_name.jsonl \
-  --file_path=runs/$DATE/websearch_run_${TIMESTAMP}_${dataset_name} \
-  --lm=bedrock/apac.anthropic.claude-3-5-sonnet-20241022-v2:0 \
+  --dataset_path=langProBe/eval_benchmark_2/data/$dataset_name.jsonl \
+  --file_path=runs/$DATE/eval_benchmark_2_run_${TIMESTAMP}_${dataset_name} \
+  --lm=bedrock/apac.anthropic.claude-3-7-sonnet-20250219-v1:0 \
   --lm_api_key=$AWS_ACCESS_KEY_ID \
   --num_threads=1 \
   --config=$CONFIG_FILE
 
-# python -c "
-# import multiprocessing as mp
-# mp.set_start_method('spawn', True)
-# from langProBe.evaluation import main
-# main()
-# " \
-# --benchmark=WebSearch \
-# --dataset_mode=full \
-# --dataset_path=langProBe/WebSearch/data/websearch_600.jsonl \
-# --file_path=evaluation_websearch_test \
-# --lm=anthropic/claude-3-opus-20240229 \
-# --lm_api_base=https://api.anthropic.com/v1 \
-# --lm_api_key=$ANTHROPIC_API_KEY \
-# # --missing_mode_file=path/to/logs/task_messages.jsonl \
-# --num_threads=1 \
-# --config=$CONFIG_FILE
+# apac.anthropic.claude-3-5-sonnet-20241022-v2:0
+# apac.anthropic.claude-sonnet-4-20250514-v1:0
+# apac.anthropic.claude-3-7-sonnet-20250219-v1:0
