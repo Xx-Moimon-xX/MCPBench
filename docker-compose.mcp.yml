@@ -1,0 +1,27 @@
+services:
+  mcp-slack:
+    image: supercorp/supergateway:latest
+    container_name: mcp-slack
+    ports:
+      - "8000:8000"
+    volumes:
+      - "/Users/cxnpl/cxnpl/thesis:/workspace"
+    working_dir: /workspace
+    command:
+      - --stdio
+      - "node servers/slack/dist/index.js"
+      - --port
+      - "8000"
+      - --baseUrl
+      - "http://localhost:8000"
+      - --ssePath
+      - /sse
+      - --messagePath
+      - /message
+      - --name
+      - "slack"
+      - --keyword
+      - ""
+    restart: unless-stopped
+    environment:
+      NODE_PATH: /workspace/node_modules
