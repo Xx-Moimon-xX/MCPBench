@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import List, Tuple, Optional
 # from langProBe.evaluation_utils import question_scorer, evaluate_final_answer_eval1
 
-from langProBe.mcp_program import MCPPredict
+from langProBe.mcp_program import MCPPredict, MCPCall
 
 import dspy
 from openai import OpenAI
@@ -121,6 +121,8 @@ def eval_prompt_1_metric(example: dspy.Example, pred: dspy.Prediction):
 def evaluate_final_answer_eval1(
             question: str, 
             ground_truth: str, 
+            tools_required: List[str],
+            tools_called: List[MCPCall],
             prediction: str, 
             manager: ProcessManager,
             logger: logging.Logger,
@@ -162,14 +164,26 @@ def evaluate_final_answer_eval1(
 
         logger.info(f"Extracted scores: Prompt Adherence={prompt_adherence_score}, Content Accuracy={content_accuracy_score}, Final={final_score}")
 
+        tool_calling_success = True
+        ## Checking if the required tools were called.
+        if tools_called:
+            called_tool_names = [call.mcp_tool_name for call in tools_called]
+            for tool in tools_required:
+                if tool not in called_tool_names:
+                    print(f"Tool {tool} was not called.")
+                    tool_calling_success = False
+                    # return False, None, False
+        else:
+            tool_calling_success = False
+
         if final_score is None:
             logger.error("Could not find 'final_score' in the LLM response.")
-            return False, "Missing 'final_score' in response"
+            return False, "Missing 'final_score' in response", tool_calling_success
 
         # Success is defined as final_score >= 6 (based on eval_prompt_1_metric docstring)
-        is_success = int(final_score) >= 6
+        is_success = int(final_score) >= 6 and tool_calling_success
         
-        return is_success, json.dumps(scores_data)
+        return is_success, json.dumps(scores_data), tool_calling_success
 
     except json.JSONDecodeError:
         error_msg = f"Failed to decode JSON from LLM response: {response_content}"
@@ -189,7 +203,7 @@ class Eval1Predict(MCPPredict):
         super().__init__(max_steps, system_prompt, task_name)
 
     
-    def evaluate_prediction(self, question: str, ground_truth: str, prediction: str) -> Tuple[bool, Optional[str]]:
+    def evaluate_prediction(self, question: str, ground_truth: str, tools_required: List[str], tools_called: List[MCPCall], prediction: str) -> Tuple[bool, Optional[str]]:
         # This is mainly for gaia (not used anywhere else), probably not needed for eval1.
         answer_eval_manager = ProcessManager()
         answer_eval_manager.lm_api_key = self.lm.api_key
@@ -200,12 +214,12 @@ class Eval1Predict(MCPPredict):
         else:
             answer_eval_manager.model = "openai/deepseek-v3"
 
-        is_success, evaluation_data = evaluate_final_answer_eval1(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
+        return evaluate_final_answer_eval1(question, ground_truth, tools_required, tools_called, prediction, answer_eval_manager, self.run_logger)
         
         # TO DO: ID here is wrong, i.e. answer_eval_manager isn't correct or whatever. Need to check/fix this.
         # self.run_logger.info(f"ID: {answer_eval_manager.id}, Evaluation completed successfully")
         # self.run_logger.info(f"ID: {answer_eval_manager.id}, scores_data: {scores_data}")
-        return is_success, evaluation_data  
+        # return is_success, evaluation_data  
 
         # return question_scorer(prediction, ground_truth, self.run_logger)
 
@@ -226,6 +240,8 @@ class Eval1Predict(MCPPredict):
         unique_id = kwargs.get('id')
         question = kwargs.get('question')
         gt = kwargs.get('answer')
+        tools_required = kwargs.get('tools_required')
+        print(f"tools_required: {tools_required}")
 
         manager = ProcessManager()
         manager.lm_api_key = self.lm.api_key
@@ -238,25 +254,36 @@ class Eval1Predict(MCPPredict):
         # The config is passed to the program instance by the EvaluateBench constructor.
         # We should use self.config instead of a global import.
         mcps = self.config['mcp_pool']
-
-
+        
         messages = build_init_messages(self.system_prompt, mcps, question)
+        self.run_logger.debug(f"ID: {manager.id}, Build initial messages: {messages}")
         steps = 0
         all_completion_tokens = 0
         all_prompt_tokens = 0
         start_time = time.time()
+        tools_called = []
 
         while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
             response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger)
+            self.run_logger.debug(f"ID: {manager.id}, Response from LLM: {response}")
+
             all_completion_tokens += completion_tokens
             all_prompt_tokens += prompt_tokens
             mcp_calls = response_parsing(response)
+
+            if not mcp_calls.shutdown:
+                for mcp_call in mcp_calls.mcps:
+                    tools_called.append(mcp_call)
+                    print(f"Adding tool: {mcp_call}")
+
+            self.run_logger.debug(f"ID: {manager.id}, After response parsing: {mcp_calls}")
 
             new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
             messages = build_messages(messages, new_messages)
             steps += 1
 
         end_time = time.time()
+        print(f"Tools called: {tools_called}")
 
         # If the maximum number of steps is reached and there is still no answer
         if messages[-1][constants.ROLE] != constants.ASSISTANT:
@@ -274,7 +301,7 @@ class Eval1Predict(MCPPredict):
 
         ## Evaluation is done here!!!
 
-        success, evaluation_data = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
+        success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, tools_required, tools_called, messages[-1][constants.CONTENT])
         self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
                           all_completion_tokens)
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
@@ -286,5 +313,6 @@ class Eval1Predict(MCPPredict):
             answer=messages[-1][constants.CONTENT],
             trace=messages,
             process_report=manager,
-            evaluation_data=evaluation_data
+            evaluation_data=evaluation_data,
+            tool_calling_success=tool_calling_success
         )

@@ -32,7 +32,7 @@ DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
 DATE=$(date +%F)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-dataset_name=websearch_10
+dataset_name=websearch_10_forslack
 
 python3 -m langProBe.evaluation \
   --benchmark=WebSearch \

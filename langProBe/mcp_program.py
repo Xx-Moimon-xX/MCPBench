@@ -6,7 +6,9 @@ from langProBe.program_utils import (
     build_messages,
     response_parsing,
     mcp_calling,
-    ProcessManager
+    ProcessManager,
+    MCPCall,
+    MCPCallList
 )
 import time
 from langProBe.evaluation_utils import evaluate_final_answer
@@ -152,7 +154,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         message_handler = logging.FileHandler(message_log_file, encoding='utf-8')
         self.message_logger.addHandler(message_handler)
 
-    def evaluate_prediction(self, question: str, ground_truth: str, prediction: str) -> Tuple[bool, Optional[str]]:
+    def evaluate_prediction(self, question: str, ground_truth: str, tools_required: List[str], tools_called: List[MCPCall], prediction: str) -> Tuple[bool, Optional[str]]:
         '''
         Main function to evaluate the prediction.
         '''
@@ -165,7 +167,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         else:
             answer_eval_manager.model = self.lm.model
 
-        return evaluate_final_answer(question, ground_truth, prediction, answer_eval_manager, self.run_logger)
+        return evaluate_final_answer(question, ground_truth, tools_required, tools_called, prediction, answer_eval_manager, self.run_logger)
 
     def log_messages(self, messages, question, success, time_cost, prompt_tokens_cost, completion_tokens_cost):
         log_entry = {
@@ -186,17 +188,14 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         unique_id = kwargs.get('id')
         question = kwargs.get('question')
         gt = kwargs.get('answer')
+        tools_required = kwargs.get('tools_required')
+        print(f"tools_required: {tools_required}")
 
         manager = ProcessManager()
         manager.lm_api_key = self.lm.api_key
         manager.lm_api_base = self.lm.api_base
         manager.model = self.lm.model
         manager.id = unique_id
-
-        # # Set AWS credentials if available
-        # manager.aws_access_key_id = os.getenv("AWS_ACCESS_KEY_ID")
-        # manager.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY")
-        # manager.aws_region = os.getenv("AWS_REGION", "us-east-1")
 
         self.run_logger.info(f"ID: {manager.id}, Starting forward pass for question: {question}")
 
@@ -206,26 +205,38 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
 
         messages = build_init_messages(self.system_prompt, mcps, question)
+        self.run_logger.debug(f"ID: {manager.id}, Build initial messages: {messages}")
         steps = 0
         all_completion_tokens = 0
         all_prompt_tokens = 0
         start_time = time.time()
+        tools_called = []
 
         # Iterative processing loop until the last message is an assistant message or the maximum number of steps is reached
         while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
             response, completion_tokens, prompt_tokens= call_lm(messages, manager, self.run_logger)
+            self.run_logger.debug(f"ID: {manager.id}, Response from LLM: {response}")
+
             all_completion_tokens += completion_tokens
             all_prompt_tokens += prompt_tokens
             mcp_calls = response_parsing(response)
 
+            if not mcp_calls.shutdown:
+                for mcp_call in mcp_calls.mcps:
+                    tools_called.append(mcp_call)
+                    print(f"Adding tool: {mcp_call}")
+            
+            self.run_logger.debug(f"ID: {manager.id}, After response parsing: {mcp_calls}")
+
             new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
 
-            self.run_logger.info(f"New messages from MCP calling: {new_messages}")
+            # self.run_logger.info(f"New messages from MCP calling: {new_messages}")
             messages = build_messages(messages, new_messages)
             self.run_logger.info(f"Messages concatenated with new messages: {messages}")
             steps += 1
 
         end_time = time.time()
+        print(f"Tools called: {tools_called}")
 
         # If the maximum number of steps is reached and there is still no answer
         if messages[-1][constants.ROLE] != constants.ASSISTANT:
@@ -240,7 +251,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {prediction[:50]}")
 
         # IMPORTANT: This is where the evaluation is done !!!!!!
-        success, evaluation_data = self.evaluate_prediction(question, gt, messages[-1][constants.CONTENT])
+        success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, tools_required, tools_called, messages[-1][constants.CONTENT])
         self.log_messages(messages, question, success, (end_time-start_time), all_prompt_tokens, all_completion_tokens)
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
         # self.run_logger.info("==" * 50)
@@ -252,5 +263,6 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             answer=messages[-1][constants.CONTENT],
             trace=messages,
             process_report=manager,
-            evaluation_data=evaluation_data
+            evaluation_data=evaluation_data,
+            tool_calling_success=tool_calling_success
         )

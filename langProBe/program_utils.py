@@ -173,7 +173,7 @@ def call_lm(
                 aws_access_key_id=manager.aws_access_key_id or os.getenv("AWS_ACCESS_KEY_ID"),
                 aws_secret_access_key=manager.aws_secret_access_key or os.getenv("AWS_SECRET_ACCESS_KEY"),
                 aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
-                region_name=manager.aws_region or os.getenv("AWS_REGION", "us-east-1")
+                region_name=manager.aws_region or os.getenv("AWS_REGION", "ap-southeast-")
             )
             
             # Convert messages to format expected by Bedrock Converse API
@@ -188,6 +188,7 @@ def call_lm(
                 elif m.get("role") == "assistant":
                     bedrock_messages.append({"role": "assistant", "content": [{"text": m["content"]}]})
                 elif m.get("role") == "tool":
+                    # Lol so we convert the tool call response to a user message when sending it to the LLM.
                     bedrock_messages.append({"role": "user", "content": [{"text": m["content"]}]})
             
             try:
@@ -201,6 +202,7 @@ def call_lm(
                     }
                 }
                 
+                # If system message is provided, add it to the request params
                 if system_message:
                     request_params["system"] = [{"text": system_message}]
                 
@@ -214,6 +216,7 @@ def call_lm(
                 output_message = response.get('output', {}).get('message', {})
                 content_list = output_message.get('content', [])
                 
+                # This just cleans up the new lines and stuff.
                 response_text = ""
                 if content_list:
                     for content in content_list:
@@ -342,6 +345,8 @@ def build_system_content(base_system: str,
         try:
             result = client.list_tools()
             tools = result.tools
+            # print(f"Tools directly from MCP server: {tools}")
+            # logger.debug(f"Tools directly from MCP server: {tools}")
         except Exception as e:
             raise Exception(f"Fail access to server: {mcp['name']}, error: {e}")
 
@@ -503,6 +508,7 @@ def mcp_calling(
             mcp_tool_name = mcp.mcp_tool_name
             mcp_args = mcp.mcp_args
 
+
             tool_call = {
                 "type": "function",
                 "function": {
@@ -581,9 +587,11 @@ def mcp_calling(
                 try:
                     logger.debug(f"ID:{manager.id}, Calling tool '{mcp_tool_name}' with arguments: {mcp_args}")
                     result = client.call_tool(mcp_tool_name, mcp_args)
+                    logger.debug(f"ID:{manager.id}, Raw tool call response from '{mcp_tool_name}': {result}")
                     texts = [item.text for item in result.content]
+
                     result_str_segment = ''.join(texts)
-                    logger.debug(f"ID:{manager.id}, Received result from tool '{mcp_tool_name}': {result_str_segment}")
+                    logger.debug(f"ID:{manager.id}, Cleaned tool call response from '{mcp_tool_name}': {result_str_segment}")
 
                     logger.info(f"ID:{manager.id}, MCP Server '{mcp_server_name}' returned: {result_str_segment[:5000]}")
 
@@ -593,6 +601,7 @@ def mcp_calling(
             else:
                 logger.warning(f"ID:{manager.id}, Skipping tool call for '{mcp_tool_name}' due to client initialization failure.")
 
+        ## Tool call responses are truncated to 5000 characters!!!!
         messages.append({
             constants.ROLE: constants.TOOL,
             constants.CONTENT: result_str[:5000],

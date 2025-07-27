@@ -10,7 +10,7 @@ from langProBe.benchmark import Benchmark
 from langProBe.config_utils import read_jsonl
 # from langProBe.evaluation_utils import question_scorer, evaluate_final_answer_eval1
 
-from langProBe.mcp_program import MCPPredict
+from langProBe.mcp_program import MCPPredict, MCPCall
 
 import dspy
 from openai import OpenAI
@@ -113,7 +113,8 @@ class MCPBench2(Benchmark):
                     answer1=test_data["Answer1"],
                     answer2=test_data["Answer2"],
                     answer3=test_data["Answer3"],
-                ).with_inputs("id", "question", "answer1", "answer2", "answer3", "config")
+                    tools_required=test_data["tools_required"]
+                ).with_inputs("id", "question", "answer1", "answer2", "answer3", "tools_required", "config")
             )
 
 def evaluate_final_answer_eval2(
@@ -121,6 +122,8 @@ def evaluate_final_answer_eval2(
             ground_truth_1: str, 
             ground_truth_2: str, 
             ground_truth_3: str, 
+            tools_required: List[str],
+            tools_called: List[MCPCall],
             prediction: str, 
             manager: ProcessManager,
             logger: logging.Logger,
@@ -165,14 +168,26 @@ def evaluate_final_answer_eval2(
 
         logger.info(f"Extracted score: {score}, answer: {answer}, selected_expected_response: {selected_expected_response}, reasoning: {reasoning}")
 
+        tool_calling_success = True
+        ## Checking if the required tools were called.
+        if tools_called:
+            called_tool_names = [call.mcp_tool_name for call in tools_called]
+            for tool in tools_required:
+                if tool not in called_tool_names:
+                    print(f"Tool {tool} was not called.")
+                    tool_calling_success = False
+                    # return False, None, False
+        else:
+            tool_calling_success = False
+
         if score is None or answer is None:
             logger.error("Could not find 'score' or 'answer' in the LLM response.")
-            return False, "Missing 'score' or 'answer' in response"
+            return False, "Missing 'score' or 'answer' in response", tool_calling_success
 
-        # Success is defined by the 'answer' field being 'yes'
-        is_success = answer == "yes"
+        # Success is defined by the 'answer' field being 'yes' and tool calling success
+        is_success = answer == "yes" and tool_calling_success
         
-        return is_success, json.dumps(scores_data)
+        return is_success, json.dumps(scores_data), tool_calling_success
 
     except json.JSONDecodeError:
         error_msg = f"Failed to decode JSON from LLM response: {response_content}"
@@ -192,7 +207,7 @@ class Eval2Predict(MCPPredict):
         super().__init__(max_steps, system_prompt, task_name)
 
     
-    def evaluate_prediction(self, question: str, ground_truth_1: str, ground_truth_2: str, ground_truth_3: str, prediction: str) -> Tuple[bool, Optional[str]]:
+    def evaluate_prediction(self, question: str, ground_truth_1: str, ground_truth_2: str, ground_truth_3: str, tools_required: List[str], tools_called: List[MCPCall], prediction: str) -> Tuple[bool, Optional[str]]:
         # This is mainly for gaia (not used anywhere else), probably not needed for eval1.
         answer_eval_manager = ProcessManager()
         answer_eval_manager.lm_api_key = self.lm.api_key
@@ -203,12 +218,12 @@ class Eval2Predict(MCPPredict):
         else:
             answer_eval_manager.model = "openai/deepseek-v3"
 
-        is_success, evaluation_data = evaluate_final_answer_eval2(question, ground_truth_1, ground_truth_2, ground_truth_3, prediction, answer_eval_manager, self.run_logger)
+        return evaluate_final_answer_eval2(question, ground_truth_1, ground_truth_2, ground_truth_3, tools_required, tools_called, prediction, answer_eval_manager, self.run_logger)
         
         # TO DO: ID here is wrong, i.e. answer_eval_manager isn't correct or whatever. Need to check/fix this.
         # self.run_logger.info(f"ID: {answer_eval_manager.id}, Evaluation completed successfully")
         # self.run_logger.info(f"ID: {answer_eval_manager.id}, scores_data: {scores_data}")
-        return is_success, evaluation_data  
+        # return is_success, evaluation_data  
 
         # return question_scorer(prediction, ground_truth, self.run_logger)
 
@@ -231,6 +246,8 @@ class Eval2Predict(MCPPredict):
         gt1 = kwargs.get('answer1')
         gt2 = kwargs.get('answer2')
         gt3 = kwargs.get('answer3')
+        tools_required = kwargs.get('tools_required')
+        print(f"tools_required: {tools_required}")
 
         manager = ProcessManager()
         manager.lm_api_key = self.lm.api_key
@@ -250,6 +267,7 @@ class Eval2Predict(MCPPredict):
         all_completion_tokens = 0
         all_prompt_tokens = 0
         start_time = time.time()
+        tools_called = []
 
         while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
             response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger)
@@ -257,11 +275,19 @@ class Eval2Predict(MCPPredict):
             all_prompt_tokens += prompt_tokens
             mcp_calls = response_parsing(response)
 
+            if not mcp_calls.shutdown:
+                for mcp_call in mcp_calls.mcps:
+                    tools_called.append(mcp_call)
+                    print(f"Adding tool: {mcp_call}")
+            
+            self.run_logger.debug(f"ID: {manager.id}, After response parsing: {mcp_calls}")
+
             new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
             messages = build_messages(messages, new_messages)
             steps += 1
 
         end_time = time.time()
+        print(f"Tools called: {tools_called}")
 
         # If the maximum number of steps is reached and there is still no answer
         if messages[-1][constants.ROLE] != constants.ASSISTANT:
@@ -279,7 +305,7 @@ class Eval2Predict(MCPPredict):
 
         ## Evaluation is done here!!!
 
-        success, evaluation_data = self.evaluate_prediction(question, gt1, gt2, gt3, messages[-1][constants.CONTENT])
+        success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt1, gt2, gt3, tools_required, tools_called, messages[-1][constants.CONTENT])
         self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
                           all_completion_tokens)
         # Get the selected expected response from the evaluation data
@@ -295,5 +321,6 @@ class Eval2Predict(MCPPredict):
             answer=messages[-1][constants.CONTENT],
             trace=messages,
             process_report=manager,
-            evaluation_data=evaluation_data
+            evaluation_data=evaluation_data, 
+            tool_calling_success=tool_calling_success
         )

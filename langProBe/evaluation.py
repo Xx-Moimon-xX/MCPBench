@@ -88,6 +88,7 @@ def suppress_output(suppress=True):
 
 def save_predictions_to_csv(file_path, predictions):
     """Saves prediction details to a CSV file with dynamic, unsorted headers for evaluation_data."""
+    """ THIS IS THE FUNCTION THAT SAVES THE EVALUATION DATA TO A CSV FILE. """
     csv_file_path = os.path.join(file_path, "evaluation_data.csv")
     
     parsed_eval_data_list = []
@@ -112,7 +113,7 @@ def save_predictions_to_csv(file_path, predictions):
                     all_eval_keys.append(key)
                     seen_keys.add(key)
 
-    base_headers = ["question", "ground_truth", "answer", "success"]
+    base_headers = ["serial_number","question", "ground_truth", "answer","tool_calling_success", "success"]
     eval_data_headers = all_eval_keys  # No longer sorting
     full_headers = base_headers + eval_data_headers
     
@@ -123,9 +124,11 @@ def save_predictions_to_csv(file_path, predictions):
         # Second pass to write the data
         for i, pred in enumerate(predictions):
             base_row_data = [
+                i,
                 pred.question,
                 pred.ground_truth,
                 pred.answer,
+                pred.tool_calling_success,
                 pred.success
             ]
             

@@ -1,7 +1,7 @@
 import json
 import dspy
 from typing import List, Tuple, Optional
-from langProBe.program_utils import call_lm, ProcessManager
+from langProBe.program_utils import call_lm, ProcessManager, MCPCall
 import langProBe.constants as constants
 import logging
 import re
@@ -26,6 +26,8 @@ Return only True or False."""
 def evaluate_final_answer(
             question: str, 
             ground_truth: str, 
+            tools_required: List[str],
+            tools_called: List[MCPCall],
             prediction: str, 
             manager: ProcessManager,
             logger: logging.Logger,
@@ -43,11 +45,26 @@ def evaluate_final_answer(
     logger.info(f"Prediction: {prediction[:50]}")
     response_content, _, _ = call_lm(messages, manager, logger, temperature=0.01)
 
-    if response_content is None:
-        return False, None
-    success = "true" in response_content.lower()
+    tool_calling_success = True
+    ## Checking if the required tools were called.
+    if tools_called:
+        called_tool_names = [call.mcp_tool_name for call in tools_called]
+        for tool in tools_required:
+            if tool not in called_tool_names:
+                print(f"Tool {tool} was not called.")
+                tool_calling_success = False
+                # return False, None, False
+    else:
+        tool_calling_success = False
+    
+    ## If I want to add other tool calling stuff like how many tools called and which arguments were passed, I can do this here.
 
-    return success, response_content
+    if response_content is None:
+        return False, None, tool_calling_success
+    
+    success = "true" in response_content.lower() and tool_calling_success
+
+    return success, response_content, tool_calling_success
 
 
 def normalize_number_str(number_str: str) -> float:

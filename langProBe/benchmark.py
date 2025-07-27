@@ -147,7 +147,8 @@ class MCPBench(Benchmark):
                     id=test_data["unique_id"],
                     question=test_data["Prompt"],
                     answer=test_data["Answer"],
-                ).with_inputs("id", "question", "answer", "config")
+                    tools_required=test_data["tools_required"],
+                ).with_inputs("id", "question", "answer", "tools_required", "config")
             )
 
 # @dataclass is a Python decorator that automatically generates special methods like __init__, __repr__, and __eq__ for classes that are mainly used to store data.
