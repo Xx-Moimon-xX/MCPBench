@@ -111,4 +111,4 @@ if __name__ == "__main__":
 
 
 # To run it: 
-# export $(cat local.env | xargs) && source .venv/bin/activate && python3 list_mcp_tools.py configs/slack.json
+# export $(cat local.env | xargs) && source .venv/bin/activate && python3 list_mcp_tools_by_running_servers.py configs/slack.json

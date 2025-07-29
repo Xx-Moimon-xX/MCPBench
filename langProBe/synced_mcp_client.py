@@ -18,7 +18,7 @@ class SyncedMcpClient(Process):
     and communicates with it using multiprocessing Queues and pickle.
     """
 
-    def __init__(self, server_url: str = None):
+    def __init__(self, server_url: str = None, headers=None):
         super().__init__()
         # turn off logging from the logger of 'httpx'
         httpx_logger = logging.getLogger("httpx")
@@ -28,6 +28,7 @@ class SyncedMcpClient(Process):
         self.logger = logging.getLogger(__name__)
 
         self.server_url = server_url
+        self.headers = headers
         self.request_queue = Queue()
         self.response_queue = Queue()
         self.is_running = False
@@ -42,6 +43,7 @@ class SyncedMcpClient(Process):
         The main process function that runs the AsyncMCPClient in a separate process.
         """
         self.is_running = True
+        print(f"Trying to connect to server_url: {self.server_url}")
         asyncio.run(self._run_async_client())
 
     async def _run_async_client(self):
@@ -51,7 +53,7 @@ class SyncedMcpClient(Process):
         from .async_mcp_client import AsyncMCPClient
 
         client = AsyncMCPClient()
-        await client.connect_to_sse_server(server_url=self.server_url)
+        await client.connect_to_sse_server(server_url=self.server_url, headers=self.headers)
 
         try:
             while self.is_running:

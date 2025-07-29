@@ -6,3 +6,4 @@ shortuuid
 anthropic
 boto3
 pandas
+pyyaml

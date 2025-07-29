@@ -86,6 +86,18 @@ def suppress_output(suppress=True):
             sys.stdout = original_stdout
 
 
+def flatten_dict(d, parent_key='', sep='_'):
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, dict):
+            for sub_k, sub_v in v.items():
+                items.append((new_key + sep + sub_k, sub_v))
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
+
 def save_predictions_to_csv(file_path, predictions):
     """Saves prediction details to a CSV file with dynamic, unsorted headers for evaluation_data."""
     """ THIS IS THE FUNCTION THAT SAVES THE EVALUATION DATA TO A CSV FILE. """
@@ -106,12 +118,13 @@ def save_predictions_to_csv(file_path, predictions):
         elif isinstance(pred.evaluation_data, dict):
             eval_dict = pred.evaluation_data
         
-        parsed_eval_data_list.append(eval_dict)
-        if isinstance(eval_dict, dict):
-            for key in eval_dict.keys():
-                if key not in seen_keys:
-                    all_eval_keys.append(key)
-                    seen_keys.add(key)
+        flat_eval_dict = flatten_dict(eval_dict)
+        parsed_eval_data_list.append(flat_eval_dict)
+        
+        for key in flat_eval_dict.keys():
+            if key not in seen_keys:
+                all_eval_keys.append(key)
+                seen_keys.add(key)
 
     base_headers = ["serial_number","question", "ground_truth", "answer","tool_calling_success", "success"]
     eval_data_headers = all_eval_keys  # No longer sorting

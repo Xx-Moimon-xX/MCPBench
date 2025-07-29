@@ -558,27 +558,17 @@ def mcp_calling(
                         continue
 
                     url = item.get("url", "")
-                    if url:
-                        logger.debug(f"ID:{manager.id}, Found URL for MCP Server '{target_name}': {url}")
-                        break
-                    run_configs = item.get("run_config", [])
-                    for run_config in run_configs:
-                        port = run_config.get("port")
-                        if port:
-                            url = f"http://localhost:{port}/sse"
-                            logger.debug(f"ID:{manager.id}, Constructed URL for MCP Server '{target_name}': {url}")
-                            break
-                    if url:
-                        break
-
-                if not url:
-                    logger.error(f"ID:{manager.id}, No valid URL found for MCP Server '{target_name}'.")
-                    raise ValueError(f"ID:{manager.id}, No valid URL found for MCP Server '{target_name}'.")
-
-                client = SyncedMcpClient(server_url=url)
-                logger.debug(f"ID:{manager.id}, Initialized SyncedMcpClient with URL: {url}")
-                client.list_tools()
-                logger.debug(f"ID:{manager.id}, Retrieved tool list from MCP Server '{target_name}'.")
+                    headers = item.get("headers", None)
+                    # If this is a remote server and headers are not present, try to get from env
+                    if not headers and url and url.startswith("http"):
+                        if item.get("name", "").lower() == "neon":
+                            token = os.environ.get("NEON_API_TOKEN")
+                            if token:
+                                headers = {"Authorization": f"Bearer {token}"}
+                    client = SyncedMcpClient(server_url=url, headers=headers)
+                    logger.debug(f"ID:{manager.id}, Initialized SyncedMcpClient with URL: {url}")
+                    client.list_tools()
+                    logger.debug(f"ID:{manager.id}, Retrieved tool list from MCP Server '{target_name}'.")
             except Exception as e:
                 logger.error(f"ID:{manager.id}, Failed to initialize SyncedMcpClient for server '{mcp_server_name}': {str(e)}")
                 client = None

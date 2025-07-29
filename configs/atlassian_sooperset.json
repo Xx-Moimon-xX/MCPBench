@@ -4,17 +4,18 @@
             "name": "atlassian",
             "run_config": [
                 {
-                    "command": "/Users/cxnpl/cxnpl/thesis/servers/mcp-atlassian/.venv/bin/mcp-atlassian",
+                    "command": "docker",
                     "args": [
-                        "--transport", "stdio",
-                        "--confluence-url", "$CONFLUENCE_URL",
-                        "--confluence-username", "$CONFLUENCE_USERNAME",
-                        "--confluence-token", "$CONFLUENCE_TOKEN",
-                        "--jira-url", "$JIRA_URL",
-                        "--jira-username", "$JIRA_USERNAME",
-                        "--jira-token", "$JIRA_TOKEN"
+                    "run",
+                    "-d",
+                    "-p", "8007:8007",
+                    "-v", "/Users/cxnpl/cxnpl/thesis/external/MCPBench/local.env:/local.env",
+                    "ghcr.io/sooperset/mcp-atlassian:latest",
+                    "--env-file", "/local.env",
+                    "--transport", "sse",
+                    "--port", "8007"
                     ],
-                    "port": 8006
+                    "port": 8007
                 }
             ]
         }

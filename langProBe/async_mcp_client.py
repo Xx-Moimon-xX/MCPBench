@@ -14,10 +14,10 @@ class AsyncMCPClient:
         self.exit_stack = AsyncExitStack()
         self.anthropic = Anthropic()
 
-    async def connect_to_sse_server(self, server_url: str):
+    async def connect_to_sse_server(self, server_url: str, headers=None):
         """Connect to an MCP server running with SSE transport"""
         # Store the context managers so they stay alive
-        self._streams_context = sse_client(url=server_url)
+        self._streams_context = sse_client(url=server_url, headers=headers)
         streams = await self._streams_context.__aenter__()
 
         self._session_context = ClientSession(*streams)
