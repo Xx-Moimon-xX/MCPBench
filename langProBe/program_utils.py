@@ -335,13 +335,34 @@ def build_system_content(base_system: str,
         
         # Connecting the the MCP server to get the tools!!!!
         url = mcp.get("url")
-        if not url:
+        headers = None
+        if url:
+            headers = mcp.get("headers")
+            if not headers:
+                server_name = mcp.get("name", "")
+                norm_name = re.sub(r'[-_]', '', server_name).lower()
+                found_token = None
+                found_key = None
+                for key, value in os.environ.items():
+                    norm_key = re.sub(r'[-_]', '', key).lower()
+                    if norm_key.startswith(norm_name) and (
+                        key.endswith('_TOKEN') or key.endswith('_API_KEY') or key.endswith('_API_TOKEN') or key.endswith('_PERSONAL_ACCESS_TOKEN')
+                    ):
+                        found_token = value
+                        found_key = key
+                        break
+                if found_token and found_key:
+                    if found_key.endswith('_API_KEY'):
+                        headers = {"X-API-Key": found_token}
+                    elif found_key.endswith('_PERSONAL_ACCESS_TOKEN') or found_key.endswith('_API_TOKEN') or found_key.endswith('_TOKEN'):
+                        headers = {"Authorization": f"Bearer {found_token}"}
+        else:
             try:
                 port = mcp.get('run_config')[0]["port"]
                 url = f"http://localhost:{port}/sse"
             except:
                 raise Exception("No url found")
-        client = SyncedMcpClient(server_url=url)
+        client = SyncedMcpClient(server_url=url, headers=headers)
         try:
             result = client.list_tools()
             tools = result.tools
@@ -560,11 +581,24 @@ def mcp_calling(
                     url = item.get("url", "")
                     headers = item.get("headers", None)
                     # If this is a remote server and headers are not present, try to get from env
-                    if not headers and url and url.startswith("http"):
-                        if item.get("name", "").lower() == "neon":
-                            token = os.environ.get("NEON_API_TOKEN")
-                            if token:
-                                headers = {"Authorization": f"Bearer {token}"}
+                    if not headers:
+                        server_name = mcp.get("name", "")
+                        norm_name = re.sub(r'[-_]', '', server_name).lower()
+                        found_token = None
+                        found_key = None
+                        for key, value in os.environ.items():
+                            norm_key = re.sub(r'[-_]', '', key).lower()
+                            if norm_key.startswith(norm_name) and (
+                                key.endswith('_TOKEN') or key.endswith('_API_KEY') or key.endswith('_API_TOKEN') or key.endswith('_PERSONAL_ACCESS_TOKEN')
+                            ):
+                                found_token = value
+                                found_key = key
+                                break
+                        if found_token and found_key:
+                            if found_key.endswith('_API_KEY'):
+                                headers = {"X-API-Key": found_token}
+                            elif found_key.endswith('_PERSONAL_ACCESS_TOKEN') or found_key.endswith('_API_TOKEN') or found_key.endswith('_TOKEN'):
+                                headers = {"Authorization": f"Bearer {found_token}"}
                     client = SyncedMcpClient(server_url=url, headers=headers)
                     logger.debug(f"ID:{manager.id}, Initialized SyncedMcpClient with URL: {url}")
                     client.list_tools()

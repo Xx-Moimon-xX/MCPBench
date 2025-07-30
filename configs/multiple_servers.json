@@ -120,10 +120,6 @@
             "url": "https://mcp.apify.com/sse"
         },
         {
-            "name": "Cloudflare",
-            "url": "https://builds.mcp.cloudflare.com/sse"
-        },
-        {
             "name": "DeepWiki",
             "url": "https://mcp.deepwiki.com/sse"
         },
