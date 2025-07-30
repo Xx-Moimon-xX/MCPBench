@@ -1,0 +1,9 @@
+{
+    "mcp_pool": [
+        {
+            "name": "Apify",
+            "url": "https://mcp.apify.com/sse"
+        }
+    ]
+}
+

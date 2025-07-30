@@ -1,0 +1,8 @@
+{
+    "mcp_pool": [
+        {
+            "name": "Coingecko",
+            "url": "https://mcp.api.coingecko.com/sse"
+        }
+    ]
+}

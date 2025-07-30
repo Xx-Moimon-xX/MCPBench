@@ -35,27 +35,113 @@
             ]
         },
         {
-            "name": "atlassian",
+            "name": "Neon",
+            "url": "https://mcp.neon.tech/sse"
+        },
+        {
+            "name": "spotify-mock",
             "run_config": [
                 {
-                    "command": "docker",
+                    "command": "node",
                     "args": [
-                    "run",
-                    "-d",
-                    "-p", "8007:8007",
-                    "-v", "/Users/cxnpl/cxnpl/thesis/external/MCPBench/local.env:/local.env",
-                    "ghcr.io/sooperset/mcp-atlassian:latest",
-                    "--env-file", "/local.env",
-                    "--transport", "sse",
-                    "--port", "8007"
+                        "/Users/cxnpl/cxnpl/thesis/servers/spotify-mock/dist/index.js"
                     ],
-                    "port": 8007
+                    "port": 8400
                 }
             ]
         },
         {
-            "name": "Neon",
-            "url": "https://mcp.neon.tech/sse"
+            "name": "notion-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/notion-mock/dist/index.js"
+                    ],
+                    "port": 8401
+                }
+            ]
+        },
+        {
+            "name": "memory",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["-y", "@modelcontextprotocol/server-memory"],
+                    "port": 8303
+                }
+            ]
+        },
+        {
+            "name": "react-native-debugger-mcp",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["-y", "@twodoorsdev/react-native-debugger-mcp"],
+                    "port": 8308
+                }
+            ]
+        },
+        {
+            "name": "npm-sentinel",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["-y", "@nekzus/mcp-server@latest"],
+                    "port": 8301
+                }
+            ]
+        },
+        {
+            "name": "excel",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["--yes", "@negokaz/excel-mcp-server"],
+                    "port": 8307,
+                    "env": {
+                        "EXCEL_MCP_PAGING_CELLS_LIMIT": "4000"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "playwright",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["@playwright/mcp@latest"],
+                    "port": 8305
+                }
+            ]
+        },
+        {
+            "name": "Apify",
+            "url": "https://mcp.apify.com/sse"
+        },
+        {
+            "name": "Cloudflare",
+            "url": "https://builds.mcp.cloudflare.com/sse"
+        },
+        {
+            "name": "DeepWiki",
+            "url": "https://mcp.deepwiki.com/sse"
+        },
+        {
+            "name": "Semgrep",
+            "url": "https://mcp.semgrep.ai/sse"
+        },
+        {
+            "name": "GitMCP",
+            "url": "https://gitmcp.io/docs"
+        },
+        {
+            "name": "LLMText",
+            "url": "https://mcp.llmtxt.dev/sse"
+        },
+        {
+            "name": "Coingecko",
+            "url": "https://mcp.api.coingecko.com/sse"
         }
     ]
 } 

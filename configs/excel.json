@@ -1,0 +1,17 @@
+{
+    "mcp_pool": [
+        {
+            "name": "excel",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["--yes", "@negokaz/excel-mcp-server"],
+                    "port": 8307,
+                    "env": {
+                        "EXCEL_MCP_PAGING_CELLS_LIMIT": "4000"
+                    }
+                }
+            ]
+        }
+    ]
+} 

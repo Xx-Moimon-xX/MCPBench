@@ -1,0 +1,6 @@
+{
+    "mcp_pool": {
+        "name": "Context7",
+        "url": "https://mcp.context7.com/sse"
+    }
+}

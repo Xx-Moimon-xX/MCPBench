@@ -1,0 +1,16 @@
+{
+    "mcp_pool": [
+        {
+            "name": "spotify-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/spotify-mock/dist/index.js"
+                    ],
+                    "port": 8400
+                }
+            ]
+        }
+    ]
+} 

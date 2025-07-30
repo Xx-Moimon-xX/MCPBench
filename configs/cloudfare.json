@@ -1,0 +1,8 @@
+{
+    "mcp_pool": [
+        {
+            "name": "Cloudflare",
+            "url": "https://builds.mcp.cloudflare.com/sse"
+        }
+    ]
+}

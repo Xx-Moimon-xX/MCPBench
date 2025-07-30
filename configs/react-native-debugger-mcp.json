@@ -1,0 +1,14 @@
+{
+    "mcp_pool": [
+        {
+            "name": "react-native-debugger-mcp",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["-y", "@twodoorsdev/react-native-debugger-mcp"],
+                    "port": 8308
+                }
+            ]
+        }
+    ]
+} 

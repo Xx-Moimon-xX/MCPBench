@@ -1,0 +1,17 @@
+{
+    "mcp_pool": [
+        {
+            "name": "awslabs.cdk-mcp-server",
+            "run_config": [
+                {
+                    "command": "uvx",
+                    "args": ["awslabs.cdk-mcp-server@latest"],
+                    "port": 8304,
+                    "env": {
+                        "FASTMCP_LOG_LEVEL": "ERROR"
+                    }
+                }
+            ]
+        }
+    ]
+} 

@@ -1,0 +1,8 @@
+{
+    "mcp_pool": [
+        {
+            "name": "DeepWiki",
+            "url": "https://mcp.deepwiki.com/sse"
+        }
+    ]
+}
