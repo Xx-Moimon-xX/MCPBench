@@ -44,7 +44,7 @@ def get_server_url_and_headers_from_config(config_filename: str):
     """Extracts all servers' URLs and headers from the config. Supports both direct URL and host/port config styles. If no headers for a URL server, tries to find a token in local.env."""
     config_dir = os.path.join(os.path.dirname(__file__), "configs")
     config_path = os.path.join(config_dir, config_filename)
-    env_path = os.path.join(os.path.dirname(__file__), "../local.env")
+    env_path = os.path.join(os.path.dirname(__file__), "local.env")
     env_vars = load_env_vars(env_path)
 
     try:
@@ -75,6 +75,7 @@ def get_server_url_and_headers_from_config(config_filename: str):
                     elif token_key.endswith('_PERSONAL_ACCESS_TOKEN') or token_key.endswith('_API_TOKEN') or token_key.endswith('_TOKEN'):
                         headers = {"Authorization": f"Bearer {token}"}
             url = server_config["url"]
+            print(f"Using custom headers: {headers}")
             servers.append({"name": name, "url": url, "headers": headers})
         else:
             run_configs = server_config.get("run_config", [])
