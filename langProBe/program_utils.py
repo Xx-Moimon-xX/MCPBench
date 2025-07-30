@@ -581,24 +581,31 @@ def mcp_calling(
                     url = item.get("url", "")
                     headers = item.get("headers", None)
                     # If this is a remote server and headers are not present, try to get from env
-                    if not headers:
-                        server_name = mcp.get("name", "")
-                        norm_name = re.sub(r'[-_]', '', server_name).lower()
-                        found_token = None
-                        found_key = None
-                        for key, value in os.environ.items():
-                            norm_key = re.sub(r'[-_]', '', key).lower()
-                            if norm_key.startswith(norm_name) and (
-                                key.endswith('_TOKEN') or key.endswith('_API_KEY') or key.endswith('_API_TOKEN') or key.endswith('_PERSONAL_ACCESS_TOKEN')
-                            ):
-                                found_token = value
-                                found_key = key
-                                break
-                        if found_token and found_key:
-                            if found_key.endswith('_API_KEY'):
-                                headers = {"X-API-Key": found_token}
-                            elif found_key.endswith('_PERSONAL_ACCESS_TOKEN') or found_key.endswith('_API_TOKEN') or found_key.endswith('_TOKEN'):
-                                headers = {"Authorization": f"Bearer {found_token}"}
+                    if url:
+                        if not headers:
+                            server_name = mcp.get("name", "")
+                            norm_name = re.sub(r'[-_]', '', server_name).lower()
+                            found_token = None
+                            found_key = None
+                            for key, value in os.environ.items():
+                                norm_key = re.sub(r'[-_]', '', key).lower()
+                                if norm_key.startswith(norm_name) and (
+                                    key.endswith('_TOKEN') or key.endswith('_API_KEY') or key.endswith('_API_TOKEN') or key.endswith('_PERSONAL_ACCESS_TOKEN')
+                                ):
+                                    found_token = value
+                                    found_key = key
+                                    break
+                            if found_token and found_key:
+                                if found_key.endswith('_API_KEY'):
+                                    headers = {"X-API-Key": found_token}
+                                elif found_key.endswith('_PERSONAL_ACCESS_TOKEN') or found_key.endswith('_API_TOKEN') or found_key.endswith('_TOKEN'):
+                                    headers = {"Authorization": f"Bearer {found_token}"}
+                    else:
+                        try:
+                            port = mcp.get('run_config')[0]["port"]
+                            url = f"http://localhost:{port}/sse"
+                        except:
+                            raise Exception("No url found")
                     client = SyncedMcpClient(server_url=url, headers=headers)
                     logger.debug(f"ID:{manager.id}, Initialized SyncedMcpClient with URL: {url}")
                     client.list_tools()
