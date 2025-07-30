@@ -1,0 +1,10 @@
+{
+    "mcp_pool": [
+        {
+            "name": "HuggingFace",
+            "url": "https://hf.co/mcp"
+        }
+    ]
+}
+
+// curl -i -X POST "https://hf.co/mcp" -H "Authorization: Bearer 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" -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -d '{"jsonrpc":"2.0","method":"list_tools","params":{},"id":1}' | cat

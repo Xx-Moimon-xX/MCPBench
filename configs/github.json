@@ -1,0 +1,12 @@
+{
+    "mcp_pool": [
+        {
+            "name": "Github",
+            "url": "https://api.githubcopilot.com/mcp/",
+            "type": "http",
+            "headers": {
+                "Authorization": "Bearer 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"
+            }
+        }
+    ]
+}
