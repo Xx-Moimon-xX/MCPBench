@@ -1,0 +1,17 @@
+{
+    "mcp_pool": [
+        {
+            "name": "postgres",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/postgres/dist/index.js",
+                        "postgresql://mcpbench_user:mcpbench_pass@localhost:5432/mcpbench_car_bi"
+                    ],
+                    "port": 8001
+                }
+            ]
+        }
+    ]
+}

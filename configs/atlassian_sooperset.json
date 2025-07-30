@@ -1,0 +1,23 @@
+{
+    "mcp_pool": [
+        {
+            "name": "atlassian",
+            "run_config": [
+                {
+                    "command": "docker",
+                    "args": [
+                    "run",
+                    "-d",
+                    "-p", "8007:8007",
+                    "-v", "/Users/cxnpl/cxnpl/thesis/external/MCPBench/local.env:/local.env",
+                    "ghcr.io/sooperset/mcp-atlassian:latest",
+                    "--env-file", "/local.env",
+                    "--transport", "sse",
+                    "--port", "8007"
+                    ],
+                    "port": 8007
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,15 @@
+{
+    "mcp_pool": [
+        {
+            "name": "mysql",
+            "run_config": [
+                {
+                    "command": "uvx --from mysql-mcp-server mysql_mcp_server",
+                    "args": "MYSQL_HOST=localhost MYSQL_PORT=3306 MYSQL_USER=root MYSQL_PASSWORD=xxx MYSQL_DATABASE=car_bi",
+                    "port": 8005
+                }
+            ]
+        }
+    ],
+    "query_type": "SQL"
+}

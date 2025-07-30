@@ -1,0 +1,427 @@
+prompt,expected_response_1,expected_response_2,expected_response_3
+List all channels in the workspace,"Here are all the channels in the Slack workspace:
+
+Main Company Channels:
+#general (201 members) - Main company-wide channel for announcements and team conversations
+#random (199 members) - Casual conversation and team jokes
+#help-it (196 members) - IT related queries
+#help-hr (191 members) - HR related queries
+#help-legal-risk-compliance (97 members) - Legal/risk/compliance queries
+Engineering & Tech Channels:
+#all-devs (132 members) - All engineers company-wide
+#plz-review (109 members) - Code review requests
+#eng-backend (102 members) - Backend engineering discussions
+#fe-gang (89 members) - Frontend engineering team
+#guild-backend (33 members) - Backend guild
+#guild-devx (132 members) - Developer experience guild
+Product & Operations:
+#product (76 members) - Product management discussions
+#operations-service-model (4 members) - Operations organization
+#prod-onboarding (69 members) - Production onboarding
+#incident-response (97 members) - Incident response FAQ
+Business & Finance:
+#finance (37 members) - Finance workstream
+#business-team (4 members) - Business team discussions
+#intel (96 members) - Competitor and client intelligence
+#client-implementation-and-governance (3 members) - Client work
+Team Squads:
+#squad-users (102 members) - User-focused squad
+#squad-lending (95 members) - Lending team
+#squad-mese (21 members) - Payments, Payees, Cards squad
+#squad-platform (106 members) - Platform squad
+#squad-data (98 members) - Data team
+Social & Fun:
+#pet-pics (51 members) - Pet photos
+#foodlovers (44 members) - Food discussions
+#good-reads (41 members) - Blog post recommendations
+#run-club (41 members) - Running club
+#gains-club (20 members) - Gym and fitness
+#coffee-buddies (49 members) - Coffee meetups
+Office Locations:
+#sydney-office (101 members) - Sydney office coordination
+#melbourne-office (8 members) - Melbourne office
+#india-office (58 members) - India office
+The workspace has a total of 580+ channels covering everything from technical projects and production alerts to social clubs and office coordination. The channels are well-organized with clear naming conventions (prefixes like proj-, squad-, help-, vendor-, etc.) to help users find relevant discussions.",,
+Show me all public channels,"Here are all the public channels available in your Slack workspace:
+
+General Channels
+#general (202 members) - Main workspace channel for announcements and team-wide conversations
+#random (200 members) - For everything else - team jokes, ideas, and GIFs
+Core Business & Operations
+#business-team (4 members) - Business team discussions, propositions, product, roadmap
+#business-development (4 members) - Business development activities
+#client-solutions (3 members) - Client solutions and differentiator discussions
+#operations-service-model (4 members) - Operations organization and delivery
+#pmo (1 member) - Project Management Office
+#product-operations (88 members) - Product operations discussions
+Engineering & Development
+#all-devs (132 members) - All engineers company-wide
+#eng-backend (102 members) - Backend engineering discussions
+#fe-gang (90 members) - Frontend engineering discussions and PR review requests
+#tech (1 member) - General tech discussions
+#design (52 members) - Design updates, feedback, and questions
+Squads & Teams
+#squad-mese (21 members) - Payments, Payees, Cards Squad
+#squad-users (102 members) - User onboarding squad
+#squad-lending (95 members) - Lending squad
+#squad-platform (107 members) - Platform squad
+#squad-txb (125 members) - Transaction banking squad
+#squad-data (98 members) - Data team requests and discussions
+#squad-prod-ops (119 members) - Production operations support
+Help & Support Channels
+#help-it (197 members) - IT related queries
+#help-hr (192 members) - HR related queries
+#help-legal-risk-compliance (97 members) - Legal/risk/compliance queries
+#help-engineering (28 members) - Engineering related queries
+#help-office-syd (64 members) - Sydney office related help
+Production & Monitoring
+#prod-lending (75 members) - Production lending issues
+#prod-txb (52 members) - Production TXB issues/discussions
+#prod-platform-alerts (30 members) - Production platform alerts
+#incident-response (98 members) - Incidents FAQs and response
+#major-incident-comms (73 members) - Major incidents internal communications
+Social & Interest Groups
+#pet-pics (54 members) - Pet photos
+#foodlovers (43 members) - Food tips, recipes, events, news
+#run-club (41 members) - Running club
+#gains-club (20 members) - Gym and fitness related
+#rock-enthusiasts (13 members) - Rock climbing
+#formula-1-club (16 members) - Formula 1 discussions (no spoilers!)
+#swim-club (20 members) - Swimming club
+#cxnpl-tennis-club (14 members) - Tennis club
+There are 502 total public channels in your workspace, covering everything from core business operations to social activities and specialized project work.",,
+Post 'Hello team! From eval framework here.' to channel C08UFS9HMCN,"I successfully posted the message \Hello team! From eval framework here.\"" to channel C08UFS9HMCN (which is the ai-slackbot-testing channel) at the timestamp...""",,
+Add heart reaction to message at timestamp 1750300317.785949 in channel C08UFS9HMCN,Great! I've successfully added a heart reaction (__) to the message at timestamp 1750300317.785949 in channel C08UFS9HMCN. The reaction has been added successfully.,"It looks like a heart reaction has already been added to this message. The Slack API returned an ""already_reacted"" error, which means either you or someone else has already reacted to this message with a heart emoji.
+
+If you'd like to try a different reaction emoji, just let me know which one you'd prefer!",
+Reply to thread 1750300317.785949 in channel C08UFS9HMCN with 'Thanks for the update!',"Perfect! I've successfully replied to the thread with ""Thanks for the update!"" in channel C08UFS9HMCN. The reply was posted at timestamp 1751251060.214489 and is now part of the thread that started with message 1750300317.785949.",,
+Get all replies from thread 1750300317.785949 in channel C08UFS9HMCN,"Here are all the replies in the thread starting with timestamp 1750300317.785949:
+
+Thread Summary
+Total replies: 6 messages (including the original)
+Thread participants: 2 users
+Latest reply: Just posted (1751251060.214489)
+
+Messages in order:
+Original Message (1750300317.785949) - by Codex bot:
+__ Random Message Alert! __
+Fun fact about octopuses having three hearts and blue blood! ____
+Testing AI chatbot functionality
+Written on behalf of Alan Nguyen
+Reactions: __ (2), __ (1), __ (1)
+Reply 1 (1750743854.095189) - by User U08FUTB4QLC:
+""Awesome, thats so cool!""
+Reply 2 (1750743906.601929) - by Codex bot:
+""Thanks for the update!""
+Written on behalf of Mohitha Mohan
+Reply 3 (1750920418.327549) - by Codex bot:
+""Thanks for the update!""
+Reply 4 (1750922035.122979) - by Codex bot:
+""Thanks for the update!""
+Reply 5 (1751251060.214489) - by Codex bot:
+""Thanks for the update!"" (this is the reply we just posted)
+The thread shows good engagement with the original fun fact message, and several ""Thanks for the update!"" replies from the Codex bot.",,
+Show me all the users in the workspace,"Here are all the users in your Slack workspace:
+
+Workspace Members (160 total users)
+Leadership & Management:
+
+Cameron Meindl (@cameron_meindl) - Field CTO Constantinople
+Keerthi Iyengar (@keerthi_iyengar) - Chief Operating Officer
+Danielle Ross (@danielle_ross) - Head of People
+Luke Raven (@luke_raven) - Head of FinCrime & Fraud
+Tony Bolcina (@tony_bolcina) - Head of Design
+Engineering Managers:
+
+Maciej Adamczak (@maciej_adamczak) - UX Squad: Platform - Engineering Manager
+Kausthubh Adhikari (@kausthubh_adhikari) - Engineering Manager - UX Squad Mobile
+Rohit Khandelwal (@rohit_khandelwal) - Engineering Manager - TXB squad
+Senior Engineers & Technical Leads:
+
+Oscar Fawkes (@oscar_fawkes) - GAI TL
+Evan Kohilas (@evan_kohilas) - Senior Software Engineer on the Platform Squad
+Shubham Ranu (@shubham_ranu) - Senior Software Engineer - Users & Onboarding
+Utkarsh Sharma (@utkarsh_sharma) - Senior Software Engineer
+Mrinal Pradhan (@mrinal_pradhan) - Senior Software Engineer
+Software Engineers:
+
+Campbell Wang (@campbell_wang) - Junior Software Engineer (with quite the title collection! __)
+Meraj Ahmad (@meraj_ahmad) - Software Engineering - Users & Onboarding
+Nitin Mishra (@nitin_mishra) - Software Engineer
+Dhairya Punjabi (@dhairya_punjabi) - Senior Software Developer
+Ishaank Gupta (@ishaank_gupta) - Senior FE @ Onboarding
+Aniket Chaudhary (@aniket_chaudhary) - Senior FE @txb (and water connoisseur! __)
+ThoughtWorks Team:
+
+Neha Aggarwal, Shubham Kumar, Rishi Dahiya, Ankit Chaudhary, Shivam Kapoor, Komal Bansal, Umair Shaik, Suresh Kumar Putchala, Manish Gupta, Aashita Trehan, Bhumanyu Kumar, Brijesh Gajjar, Adarsh Jegadeesan, Camilo Diaz, Luke McCartin, Trupthi Mahesh, Arun Chakkaravarthi M, Praveen Prasannan
+Specialists & Other Roles:
+
+Alan Nguyen (@alan_nguyen) - Forward deployed prompt engineer __
+Jeremy Smith (@jeremy_smith) - Crab __
+Blake Belcastro (@blake_belcastro) - Chief Widget Officer
+Alec Zhang (@alec_zhang) - Where's the lamb sauce
+Theon Ho (@theon_ho) - Laksa King
+Andy Truong (@andy_truong) - Progamer
+Gautham Ontri (@gautham_ontri) - Internet Mechanic
+Jordan Yoong (@jordan_yoong) - Internet security guard
+Benjamin Staite (@benjamin_staite) - Head of Basketball Operations
+Fun Titles & Personalities:
+
+Stella Reeve (@stella_reeve) - Product Ops (his name is Beans)
+Lawrence Shi (@lawrence_shi) - i live for hardstyle baby
+Ido Zamir (@ido_zamir) - Old Man with Soup
+Lachlan McGrath (@lachlan_mcgrath) - Banh Mi Enthusiast
+Grace Gleeson (@grace_gleeson) - CXNPL Botanist
+Hayley Rodgers (@hayley_rodgers) - kitchen fairy
+Fergus Charles (@fergus_charles) - In house chef _____
+Alexandra Maher (@alexandra_maher) - live laugh loan no longer
+Kaito Nakamichi (@kaito_nakamichi) - average volatility enthusiast
+Heather Prenter (@heather_prenter) - Heather from Credit
+Arun Manivannan (@arun_manivannan) - master of awkward conversations
+And many more talented individuals across various teams including Data Analytics, Legal, Talent Acquisition, Client Delivery, AWS, and other specialized roles!
+
+The workspace has a great mix of technical talent, leadership, and some wonderfully creative job titles! __",,
+Get profile details for user U08FUTB4QLC,"Here are the detailed profile information for user U08FUTB4QLC:
+
+Profile Details for Mohitha Mohan
+Basic Information:
+
+Real Name: Mohitha Mohan
+Display Name: Mohitha Mohan
+Email: Mohitha@cxnpl.com
+User ID: U08FUTB4QLC
+Username: @mohitha_mohan
+Profile Status:
+
+Title: (Not specified)
+Status Text: (Currently empty)
+Status Emoji: (None set)
+Contact Information:
+
+Phone: (Not provided)
+Skype: (Not provided)
+Profile Images:
+
+Has Custom Image: Yes
+Avatar Hash: fb39e0e7d7e7
+Profile Image: Available in multiple sizes (24px to 1024px)
+Additional Details:
+
+First Name: Mohitha
+Last Name: Mohan
+Huddle State: Default (not in a huddle)
+This user appears to be one of the team members at CXNPL (based on their email domain) and was one of the participants in the thread we looked at earlier, where they replied ""Awesome, thats so cool!"" to the octopus fun fact message.",,
+Search for messages containing 'mcp server',"Here are the search results for messages containing 'mcp server':
+
+Search Results: 'mcp server' (10 matches found)
+Recent MCP Server Development Activity
+Mohitha Mohan (Jan 19) in #squad-ai-internal:
+""Okay got the mock boshporus mcp server to work on open webui through the docker container yay. The only thing I forgot to mention is that you do have to connect your tool server to open webui manually (user tool server) as seen here..."" 
+Successfully got Bosphorus MCP server working with Open WebUI
+Notes about manual tool server connection requirements
+Jeremy Smith (Jan 26) in #squad-ai-internal:
+""All MCP servers in a single MCPO container and all tools working (still. They were all working in Mohitha's original PR)"" 
+GitLab merge request for consolidating all MCP servers
+Needs approval from Mohitha or Oscar
+Jeremy Smith (Feb 3) in #squad-ai-internal:
+""Holy hell that's an advanced MCP server. Needs approval but wow, handling auth flow properly via the chat is pretty cool"" 
+Impressed with advanced MCP server capabilities, especially auth flow handling
+Mohitha Mohan (Feb 10) in #squad-ai-internal:
+""Found this jira tool bug on mainmerge. Looks like its the same empty string error, we might have to clean up the atlassian mcp server code too?"" 
+Bug report related to Atlassian MCP server
+Empty string error affecting Jira tools
+Jeremy Smith (Feb 3) in #ai-cxnpl:
+""MS 365 MCP Server? Currently using it with desktop apps (not Codex) as there's a bug/incompatibility..."" 
+Requesting access approval for MS 365 MCP Server
+Working on compatibility issues with Codex
+Mohitha Mohan (Feb 6) in #squad-ai-internal:
+""Awesome I got the mcp server tool to return only a section of the metadata and increased the default limit of channel items to 1000..."" 
+Performance improvements to MCP server
+Better performance on Cursor and Claude
+Alan Nguyen (Jan 26) in #squad-ai:
+""The AI squad is about to release an Internal AI chatbot + our own MCP servers (incl atlassian, slack). We're aiming to create a systematic approach..."" 
+Announcement about upcoming AI chatbot release
+MCP servers for Atlassian and Slack
+Link to documentation space
+Mohitha Mohan (Feb 2) in #squad-ai-internal:
+""The whole remote MCPs definitely didn't have this much documentation when I was looking into it like a month ago... It also looks like they archived the slack mcp server we were using"" 
+Commentary on rapid MCP development pace
+Notice that their Slack MCP server was archived
+Jeremy Smith (Dec 18) in #squad-ai-internal:
+[Long technical log about MCP server configuration] 
+Detailed server startup logs showing multiple MCP servers being configured
+Includes: slack, atlassian, bosphorus, slack-mutated, microsoft365, spinach, gitlab
+Shows some startup errors with Atlassian server
+Summary
+The team has been actively working on:
+
+Multiple MCP servers: Atlassian/Jira, Slack, Microsoft 365, Bosphorus, GitLab
+Integration challenges: Working on compatibility with Open WebUI and Codex
+Performance optimizations: Improving metadata handling and response limits
+Auth flow handling: Advanced authentication capabilities
+Documentation: Creating systematic approaches for MCP server development
+The conversation shows they're building a comprehensive internal AI platform with multiple integrated tools via MCP servers! ____",,
+Get recent messages from the ytg channel,"I've successfully retrieved the recent messages from the ytg channel. Here's a summary of the recent activity:
+
+Recent Messages from the YTG Channel
+The ytg channel appears to be a social group for women at the company (""Young, Talented, Gorgeous"" or similar). Here are the key recent activities:
+
+Most Recent Messages:
+Upcoming Dinner Plans - Someone mentioned wrapping up a call and leaving the office soon, with people confirming their attendance for ""tonight"" with checking hands and raised hand reactions.
+Restaurant Booking - Ross has booked a place and shared an image, with people reacting positively to indicate they're interested in attending.
+Date Planning - Discussion about May 14th working for most people, with many positive reactions.
+Dinner Suggestion - A message about it being time for another dinner, which received lots of heart reactions and positive responses.
+Nail Salon Recommendation - Someone shared a location near the office for nail services (blancblue nail & beauty in Haymarket).
+Social Sports Information - A PSA about Urban Rec offering free registration for women to join social sports teams in Sydney.
+Bottomless Brunch Planning - Multiple detailed messages about organizing a ""CXNPLadies"" bottomless brunch at Ho Jiak Town Hall, including:
+Menu details and pricing ($88 each for 9 courses + unlimited drinks)
+Poll for date selection (Feb 14 dinner vs Feb 15 brunch)
+Discussion about alternative venues for those not wanting alcohol/expensive options
+Promotions Celebration - Congratulatory messages celebrating promotions and role changes of several women in the group.
+Fitness/Sports - Messages about borrowing workout clothes and charity walk participation.
+The channel appears very active with social planning, workplace celebrations, and mutual support among the female employees.",,
+Post 'Meeting in 5 minutes - from eval framework' to ai-slackbot-testing channel,"Perfect! I've successfully posted the message ""Meeting in 5 minutes - from eval framework"" to the ai-slackbot-testing channel. The message was posted with timestamp 1751349675.278699 and appears to have been sent from the Codex bot account.",,
+Add thumbsup to message 1751349675.278699 in ai-slackbot-testing channel,"Great! I've successfully added a thumbs up (__) reaction to the message with timestamp 1751349675.278699 in the ai-slackbot-testing channel. The reaction has been applied to the ""Meeting in 5 minutes - from eval framework"" message.","It looks like someone has already reacted to this message with a thumbs up emoji as well! The Slack API returned an ""already_reacted"" error, which means either you or someone else has already added this reaction to the message.
+
+If you'd like to try a different reaction emoji, just let me know which one you'd prefer!",
+Reply 'Will be there! from eval framework' to thread 1751349675.278699 in ai-slackbot-testing channel,"Perfect! I've successfully replied ""Will be there!"" to the thread with timestamp 1751349675.278699 in the ai-slackbot-testing channel. The reply was posted with timestamp 1751349872.760909 and is now part of that message thread.",,
+Show thread replies for 1751349675.278699  in ai-slackbot-testing,"Here are the thread replies for message 1751349675.278699 in the ai-slackbot-testing channel:
+
+Thread Messages
+Original Message (1751349675.278699)
+
+From: Codex bot
+Message: ""Meeting in 5 minutes - from eval framework""
+Reactions: __ (1 reaction from the Codex bot itself)
+Reply 1 (1751349872.760909)
+
+From: Codex bot
+Message: ""Will be there!""
+The thread contains the original meeting reminder message that we posted earlier, followed by the reply ""Will be there!"" that we just added. Both messages were posted by the Codex bot. The original message also has a thumbs up reaction that was added earlier.",,
+Get profile details for Mohitha Mohan,"Here are the profile details for Mohitha Mohan:
+
+Mohitha Mohan - Profile Details
+Basic Information:
+
+Full Name: Mohitha Mohan
+Username: mohitha_mohan
+User ID: U08FUTB4QLC
+Email: Mohitha@cxnpl.com
+Profile Details:
+
+Display Name: Mohitha Mohan
+First Name: Mohitha
+Last Name: Mohan
+Title: (No title set)
+Phone: (Not provided)
+Status: (No status message set)
+Profile Image:
+Has a custom profile image uploaded
+Avatar hash: fb39e0e7d7e7
+Various image sizes available (24x24 to 1024x1024 pixels)
+Other Details:
+
+No additional custom fields set up
+No Skype information provided
+Currently not in a huddle
+No status emoji or expiration set
+Mohitha appears to be a newer team member with a basic profile setup at Constantinople/CXNPL.",,
+Search for messages containing 'regex' from Oscar Fawkes,"I found 3 messages from Oscar Fawkes containing the word ""regex"". Here are the search results:
+
+Messages containing 'regex' from Oscar Fawkes
+1. Digital Wallet HTML Terms/Conditions (August 19, 2024)
+
+Channel: squad-mese-coord
+Message: ""Sharing the regex for Digital wallet HTML terms/conditions in case the proverbial bus beats me to writing it up formally - basically export html from word, open in vscode, find replace the below with empty string
+[;\s\n]color:[^']""
+Link: https://constantinoplehq.slack.com/archives/C056KSDAZPH/p1724033558168669?thread_ts=1724033558.168669
+2. TXB Visa API Discussion (January 8, 2025)
+
+Channel: proj-txb-visa
+Message: ""Their API is pretty expressive, if a message can't be processed you'll get 400 with field level explanation and regex if applicable""
+Link: https://constantinoplehq.slack.com/archives/C07SV2PD97X/p1741680690610569?thread_ts=1741677323.629989
+3. Payee Name Validation (February 16, 2024)
+
+Channel: squad-mese-coord
+Message: ""@Benjamin Staite @Peter Liang @Campbell Wang could you cross check the regex on the payee name FE and BE PRs for consistency? We'll need to test them together as well of course""
+Link: https://constantinoplehq.slack.com/archives/C056KSDAZPH/p1708039454108839?thread_ts=1708039454.108839
+The search found Oscar discussing regex patterns for HTML cleanup, API validation, and frontend/backend consistency checks for payee name validation.",,
+Search for food safari in sydney-office,"Great! I found 10 messages about ""Food Safari"" in the sydney-office channel. Here are the search results:
+
+Food Safari Messages in Sydney Office
+Recent Food Safari Events:
+
+1. Latest - Sushi Jones (December 31, 2024)
+
+From: Ross Bevins Cameron
+Message: ""Food Safari is here! Today we have a selection of different foods from Sushi Jones... Enjoy! __ ________""
+2. Food Safari Despite Weather (December 31, 2024)
+
+From: Ross Bevins Cameron
+Message: ""Despite the bad weather and PI Planning being moved, Food Safari is still going ahead today __""
+3. Pablo's Kitchen (December 18, 2024)
+
+From: Ross Bevins Cameron
+Message: ""Food Safari is here! This time we have ordered from Pablo's Kitchen... featuring fusions of foods & spices from ____ ____ ____ ____ Enjoy! ______""
+4. Malacca Straits (June 4, 2024)
+
+From: Ross Bevins Cameron
+Message: ""Food Safari is here! This week we have Malacca Straits on Broadway ______ Enjoy! __""
+5. Grace of India (April 7, 2024)
+
+From: Ross Bevins Cameron
+Message: ""The moment has come... Food Safari is here! __ Today we have Grace of India ____ __ come and get stuck in __""
+6. Made in Italy (May 21, 2024)
+
+From: Ross Bevins Cameron
+Message: ""Food Safari has arrived! This time we have... Made in Italy ________ Enjoy! __""
+7. Italian Leftovers Reminder (May 22, 2024)
+
+From: Ross Bevins Cameron
+Message: ""Just a reminder that we still have a lot of Food Safari left over, so no need to buy lunch today! ____ We'll also have plenty of fruit & avocados available to take home so please help yourselves ____""
+8. Bavarian Buffet (May 21, 2024)
+
+From: Ross Bevins Cameron
+Message: ""Food Safari is here! This week we have a Bavarian Buffet from Hut Dog Catering & Events. Enjoy! __________""
+Employee Responses:
+
+9. Alan's Thanks (May 22, 2024)
+
+From: Alan Nguyen
+Message: ""Thanks Ross! Nothing tastes better than saving money with food safari left overs __""
+10. Irish Chinese Suggestion (February 12, 2024)
+
+From: Alan Nguyen
+Message: ""We gotta get some Irish Chinese for food safari one day cc @Owen Hughes @Chloe Lee""
+The Food Safari appears to be a regular office lunch initiative organized by Ross Bevins Cameron, featuring different international cuisines for the Sydney office team to enjoy together!",,
+Get profile details for John Smith,"It looks like I couldn't find a user with that exact name. The search requires either an email address, username, account ID, or a more specific identifier.
+
+Could you provide:
+
+John Smith's email address (e.g., john.smith@company.com )
+Their username or account ID
+Or perhaps their display name is slightly different?
+This will help me retrieve their profile information accurately.",,
+Get me recent messages from the trump-supporters channel,"I searched through all the channels in your Slack workspace, and I couldn't find a channel named ""trump-supporters"". The channel list doesn't contain any channel with that name.
+
+The channels I found include various work-related channels like:
+
+general
+random
+tech-related channels
+project-specific channels
+team channels
+social channels (like pet-pics, foodlovers, games, etc.)
+Could you please:
+
+Double-check the channel name - it might be slightly different
+Verify that you have access to this channel
+Or let me know if you'd like messages from a different channel instead?",,
+"Search for ""petrichor"" on slack","The search for ""petrichor"" on Slack returned no results. There are currently no messages in your Slack workspace that contain the word ""petrichor"".
+
+This could mean:
+
+The term hasn't been mentioned in any messages
+It might be in channels you don't have access to
+It could be spelled differently or used in a different context
+Would you like me to try a different search term or help you with something else?",,

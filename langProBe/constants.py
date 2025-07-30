@@ -1,0 +1,7 @@
+ROLE = 'role'
+CONTENT = 'content'
+SYSTEM = 'system'
+USER = 'user'
+ASSISTANT = 'assistant'
+TOOL = 'tool'
+TOOL_CALLS = 'tool_calls'

@@ -1,0 +1,16 @@
+{
+    "mcp_pool": [
+        {
+            "name": "slack",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/slack/dist/index.js"
+                    ],
+                    "port": 8000
+                }
+            ]
+        }
+    ]
+} 

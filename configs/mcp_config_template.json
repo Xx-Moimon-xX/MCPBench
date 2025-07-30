@@ -1,0 +1,18 @@
+{
+    "mcp_pool": [
+        {
+            "name": "Remote MCP example",
+            "url": "url from https://modelscope.cn/mcp or https://smithery.ai"
+        },
+        {
+            "name": "Local run example",
+            "run_config": [
+                {
+                    "command": "npx -y firecrawl-mcp",
+                    "args": "FIRECRAWL_API_KEY=xxx",
+                    "port": 8005
+                }
+            ]
+        }  
+    ]
+}

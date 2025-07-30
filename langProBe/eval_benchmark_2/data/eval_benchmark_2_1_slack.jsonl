@@ -1,0 +1,1 @@
+{"unique_id": 1, "Prompt": "Get slack channels in the workspace", "Answer1": "General, Announcements, Random, etc.", "Answer2": "Some channels are: General, Random, etc.", "Answer3": "There are no channels available.", "tools_required": ["slack_list_channels"]}

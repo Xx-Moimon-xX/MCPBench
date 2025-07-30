@@ -1,0 +1,61 @@
+{
+    "mcp_pool": [
+        {
+            "name": "slack",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/slack/dist/index.js"
+                    ],
+                    "port": 8000
+                }
+            ]
+        },
+        {
+            "name": "brave-search",
+            "run_config": [
+                {
+                    "command": "/Users/cxnpl/.nvm/versions/node/v23.11.0/bin/node",
+                    "args": ["/Users/cxnpl/cxnpl/thesis/servers/brave-search/dist/index.js"],
+                    "port": 8100
+                }
+            ]
+        },
+        {
+            "name": "gitlab",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/mcp-gitlab/build/index.js"
+                    ],
+                    "port": 8006
+                }
+            ]
+        },
+        {
+            "name": "atlassian",
+            "run_config": [
+                {
+                    "command": "docker",
+                    "args": [
+                    "run",
+                    "-d",
+                    "-p", "8007:8007",
+                    "-v", "/Users/cxnpl/cxnpl/thesis/external/MCPBench/local.env:/local.env",
+                    "ghcr.io/sooperset/mcp-atlassian:latest",
+                    "--env-file", "/local.env",
+                    "--transport", "sse",
+                    "--port", "8007"
+                    ],
+                    "port": 8007
+                }
+            ]
+        },
+        {
+            "name": "Neon",
+            "url": "https://mcp.neon.tech/sse"
+        }
+    ]
+} 

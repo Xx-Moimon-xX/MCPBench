@@ -1,0 +1,72 @@
+{"unique_id": 2, "Prompt": "2025年2月19日记录的竞品名称是什么？", "Answer": "飞海科技科技有限公司"}
+{"unique_id": 4, "Prompt": "华泰通安网络有限公司的销量是多少？", "Answer": "30"}
+{"unique_id": 6, "Prompt": "诺依曼软件科技有限公司的记录日期是什么时候？", "Answer": "2025-01-05"}
+{"unique_id": 9, "Prompt": "东方峻景网络有限公司的市场占有率是多少？", "Answer": "9.06"}
+{"unique_id": 11, "Prompt": "西南区域中，系列D的订单数量是多少？", "Answer": "60"}
+{"unique_id": 12, "Prompt": "华北区域中，所有车系的大定数量总和是多少？", "Answer": "98"}
+{"unique_id": 13, "Prompt": "华南区域中，首次到店客流量最高的门店是哪个？", "Answer": "帅县店"}
+{"unique_id": 14, "Prompt": "华东区域中，成交率最低的门店是哪个？", "Answer": "强市店"}
+{"unique_id": 15, "Prompt": "西北区域中，总体市场销量最高的日期是哪一天？", "Answer": "2024-01-16"}
+{"unique_id": 16, "Prompt": "2024年12月，华南区域的总客流量是多少？", "Answer": "1168"}
+{"unique_id": 17, "Prompt": "锁单数量大于10的车系有哪些？", "Answer": "['系列C']"}
+{"unique_id": 18, "Prompt": "在2025年2月，华南区域的总订单数量是多少？", "Answer": "0"}
+{"unique_id": 19, "Prompt": "留存大定数量最多的车系是哪个？", "Answer": "系列C"}
+{"unique_id": 20, "Prompt": "系列A在华东区域的市场占有率是多少？", "Answer": "21.41%"}
+{"unique_id": 22, "Prompt": "系列B在华东区域的月度销量目标是多少？", "Answer": "58"}
+{"unique_id": 23, "Prompt": "系列D在2025年2月19日的市场占有率是多少？", "Answer": "19.99%"}
+{"unique_id": 25, "Prompt": "系列D在华北区域的年度销量目标是多少？", "Answer": "1320"}
+{"unique_id": 28, "Prompt": "飞海科技科技有限公司在2025年2月19日的竞品销量是多少？", "Answer": "23"}
+{"unique_id": 31, "Prompt": "万迅电脑传媒有限公司的竞品市场占有率百分比是多少？", "Answer": "6.92"}
+{"unique_id": 33, "Prompt": "2024年12月30日，系列C在华南区域的销量是多少？", "Answer": "19"}
+{"unique_id": 36, "Prompt": "华东区域中燃油车的库存总数是多少？", "Answer": "700"}
+{"unique_id": 38, "Prompt": "华南区域中系列B的库存总数是多少？", "Answer": "533"}
+{"unique_id": 39, "Prompt": "仓库名称为'梧州市仓库'的库存总数是多少？", "Answer": "330"}
+{"unique_id": 40, "Prompt": "系列C在西南区域的库存总数是多少？", "Answer": "177"}
+{"unique_id": 44, "Prompt": "所有政策中，哪些政策的类型是‘燃油车’？", "Answer": "['燃油车新购补贴', '燃油车置换补贴']"}
+{"unique_id": 45, "Prompt": "最早生效的政策名称是什么？", "Answer": "新能源置换补贴"}
+{"unique_id": 46, "Prompt": "失效日期在2024年12月30日之后的政策有哪些？", "Answer": "['燃油车新购补贴', '燃油车置换补贴']"}
+{"unique_id": 47, "Prompt": "描述为‘新能源新购补贴’的政策的生效日期是什么时候？", "Answer": "2024-08-16"}
+{"unique_id": 48, "Prompt": "名称包含‘置换’的政策有哪些？", "Answer": "['燃油车置换补贴', '新能源置换补贴']"}
+{"unique_id": 49, "Prompt": "政策类型为‘新能源’且在2024年内生效的政策有哪些？", "Answer": "['新能源新购补贴', '新能源置换补贴']"}
+{"unique_id": 50, "Prompt": "哪条政策的有效期最长？", "Answer": "燃油车新购补贴"}
+{"unique_id": 51, "Prompt": "政策‘新能源新购补贴’是否已经失效？", "Answer": "True"}
+{"unique_id": 54, "Prompt": "车系市场销量最高的记录日期是哪一天？", "Answer": "2025-01-27"}
+{"unique_id": 55, "Prompt": "西南区域系列D的年度销量目标是多少？", "Answer": "1032"}
+{"unique_id": 56, "Prompt": "所有政策中，生效日期最早的是哪个政策？", "Answer": "新能源置换补贴"}
+{"unique_id": 58, "Prompt": "华东区域系列C的月度销量目标是多少？", "Answer": "97"}
+{"unique_id": 59, "Prompt": "哪些政策在2025年仍然有效？", "Answer": "燃油车新购补贴, 燃油车置换补贴"}
+{"unique_id": 60, "Prompt": "华北区域系列B的年度销量目标是多少？", "Answer": "2244"}
+{"unique_id": 61, "Prompt": "总体市场销量最低的记录日期是哪一天？", "Answer": "2025-02-11"}
+{"unique_id": 62, "Prompt": "华南区域系列A的月度销量目标是多少？", "Answer": "184"}
+{"unique_id": 63, "Prompt": "系列D在西南区域的库存总数是多少？", "Answer": "253"}
+{"unique_id": 64, "Prompt": "系列B在华北区域的总库存量是多少？", "Answer": "396"}
+{"unique_id": 65, "Prompt": "华东区域系列A的库存总量是多少？", "Answer": "374"}
+{"unique_id": 66, "Prompt": "华南区域系列C的库存总量是多少？", "Answer": "278"}
+{"unique_id": 68, "Prompt": "系列B的竞品市场占有率总和是多少？", "Answer": "23.17"}
+{"unique_id": 69, "Prompt": "系列A在西南区域的月度销量目标是多少？", "Answer": "57"}
+{"unique_id": 70, "Prompt": "系列C在华东区域的年度销量目标是多少？", "Answer": "1164"}
+{"unique_id": 71, "Prompt": "系列B在华南区域的库存总量是多少？", "Answer": "533"}
+{"unique_id": 72, "Prompt": "记录日期为2025-02-12的竞品销量总和是多少？", "Answer": "61"}
+{"unique_id": 74, "Prompt": "车系市场销量最高的记录日期是哪一天？", "Answer": "2025-01-27"}
+{"unique_id": 76, "Prompt": "政策‘燃油车新购补贴’的生效日期是什么时候？", "Answer": "2024-02-02"}
+{"unique_id": 77, "Prompt": "哪些政策在2025年仍然有效？", "Answer": "['燃油车新购补贴', '燃油车置换补贴']"}
+{"unique_id": 78, "Prompt": "总体市场销量最低的记录日期是哪一天？", "Answer": "2025-02-11"}
+{"unique_id": 79, "Prompt": "新能源相关的政策有哪些？", "Answer": "['新能源新购补贴', '新能源置换补贴']"}
+{"unique_id": 80, "Prompt": "2025年1月11日的车系市场销量是多少？", "Answer": "91"}
+{"unique_id": 81, "Prompt": "政策‘新能源新购补贴’的失效日期是什么时候？", "Answer": "2024-12-23"}
+{"unique_id": 84, "Prompt": "系列A在2025年2月7日的竞品销量是多少？", "Answer": "87"}
+{"unique_id": 85, "Prompt": "华东区域系列C的库存总数是多少？", "Answer": "355"}
+{"unique_id": 86, "Prompt": "系列B的竞品市场占有率最高的公司名称是什么？", "Answer": "华泰通安网络有限公司"}
+{"unique_id": 87, "Prompt": "2025年2月27日的车系市场销量是多少？", "Answer": "88"}
+{"unique_id": 88, "Prompt": "系列D在华北区域的库存总数是多少？", "Answer": "344"}
+{"unique_id": 90, "Prompt": "2025年1月20日的总体市场销量是多少？", "Answer": "742"}
+{"unique_id": 91, "Prompt": "系列B在华南区域的库存总数是多少？", "Answer": "533"}
+{"unique_id": 94, "Prompt": "系列A在华南区域的库存总数是多少？", "Answer": "562"}
+{"unique_id": 95, "Prompt": "新能源车的总库存数量是多少？", "Answer": "2385"}
+{"unique_id": 96, "Prompt": "哪个仓库的库存数量最多，数量是多少？", "Answer": "梧州县仓库, 297"}
+{"unique_id": 97, "Prompt": "华北区域中燃油车的库存总数是多少？", "Answer": "616"}
+{"unique_id": 98, "Prompt": "最后盘点时间在2025年1月的库存总数是多少？", "Answer": "1518"}
+{"unique_id": 99, "Prompt": "系列B在西南区域的库存总数是多少？", "Answer": "489"}
+{"unique_id": 100, "Prompt": "华东区域中新能源车的库存总数是多少？", "Answer": "959"}
+{"unique_id": 101, "Prompt": "系列C在华南区域的库存总数是多少？", "Answer": "278"}
+{"unique_id": 102, "Prompt": "2025年2月盘点的库存总数是多少？", "Answer": "2133"}
