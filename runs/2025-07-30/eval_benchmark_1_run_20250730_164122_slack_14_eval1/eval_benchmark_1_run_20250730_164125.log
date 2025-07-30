@@ -1,0 +1,3 @@
+2025-07-30 16:41:25,065 - MCPPredictRunLogger - INFO - ID: 1, Starting forward pass for question: List all channels in the workspace
+2025-07-30 16:41:25,066 - MCPPredictRunLogger - INFO - ID: 2, Starting forward pass for question: Show me all public channels
+2025-07-30 16:41:25,066 - MCPPredictRunLogger - INFO - ID: 3, Starting forward pass for question: Get all replies from thread 1750300317.785949 in channel C08UFS9HMCN

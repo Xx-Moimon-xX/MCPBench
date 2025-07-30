@@ -1,0 +1,5 @@
+benchmark: EVAL_BENCHMARK_1
+lm: bedrock/apac.anthropic.claude-3-7-sonnet-20250219-v1:0
+test_set_size: 14
+dataset_name: slack_14_eval1
+eval_lm: None

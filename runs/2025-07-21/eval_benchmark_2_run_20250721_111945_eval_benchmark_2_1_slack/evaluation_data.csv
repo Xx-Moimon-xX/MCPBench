@@ -1,0 +1,26 @@
+question,ground_truth,answer,success,selected_expected_response,score,answer,reasoning
+Get slack channels in the workspace,"General, Announcements, Random, etc.","I've retrieved the list of Slack channels in the workspace. Here are the channels available:
+
+1. **random** (ID: C02MR0SC1M5)
+   - Purpose: ""This channel is for... well, everything else. It's a place for team jokes, spur-of-the-moment ideas, and funny GIFs. Go wild!""
+   - Members: 209
+
+2. **general** (ID: C02N5LDJPD1)
+   - Purpose: ""This is the one channel that will always include everyone. It's a great spot for announcements and team-wide conversations.""
+   - Members: 212
+   - This is the workspace's general channel
+
+3. **operating-model** (ID: C0374RE85GV)
+   - Members: 1
+
+4. **10x-and-cxnpl** (ID: C03DMU28597)
+   - Members: 1
+
+5. **q2-constantinople** (ID: C03JF7B8U69)
+   - Members: 3
+   - This is a shared channel
+
+6. **tech** (ID: C03L9N39805)
+   - The information for this channel appears to be cut off in the response
+
+Note that the response was truncated, so there might be more channels in the workspace. If you'd like to see more details about a specific channel or see the complete list, I can help you with additional requests.",True,"General, Announcements, Random, etc.",4,yes,"The LLM response lists channels including general and random, which matches the core content of the expected response. While the LLM response provides more detail (including IDs and member counts), the fundamental information about available channels aligns well with the expected response, though it doesn't specifically mention an Announcements channel"

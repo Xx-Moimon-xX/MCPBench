@@ -1,0 +1,5 @@
+benchmark: MCP_WEBSEARCH
+lm: bedrock/apac.anthropic.claude-3-5-sonnet-20241022-v2:0
+test_set_size: 2
+dataset_name: websearch_10
+eval_lm: None

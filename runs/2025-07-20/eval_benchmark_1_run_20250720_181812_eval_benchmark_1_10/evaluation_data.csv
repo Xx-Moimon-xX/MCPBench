@@ -1,0 +1,34 @@
+question,ground_truth,answer,success,prompt_adherence_score,prompt_adherence_answer,prompt_adherence_reasoning,content_accuracy_score,content_accuracy_answer,content_accuracy_reasoning,final_score
+Get slack channels in the workspace,"General, Announcements, Random, etc.","I'll summarize the Slack channels from the workspace. Here are the channels listed:
+
+1. #random
+   - General purpose channel for casual conversations, team jokes, and GIFs
+   - Has 209 members
+   - Created by U02NVB78XLG
+
+2. #general
+   - The default channel that includes everyone
+   - Has 212 members
+   - Used for announcements and team-wide conversations
+   - This is the primary channel that includes all workspace members
+
+3. #operating-model
+   - Has 1 member
+   - Created by U030GGA1Q7J
+   - No specific purpose set
+
+4. #10x-and-cxnpl
+   - Has 1 member
+   - Created by U02US5S4UMD
+   - No specific purpose set
+
+5. #q2-constantinople
+   - Has 3 members
+   - Created by U02NVB78XLG
+   - This is a shared channel
+   - No specific purpose set
+
+6. #tech
+   - Appears in the list but details were cut off in the response
+
+These channels represent a mix of general communication spaces (#general, #random) and specific project or team channels. The #general channel has the highest membership with 212 members, followed by #random with 209 members. Some channels appear to be more specialized with smaller membership numbers.",True,5,yes,The response fully addresses the prompt by providing a comprehensive list of Slack channels in the workspace with detailed information about each channel,4,yes,"The response includes the core channels mentioned in the expected response (General, Random) and provides additional details. While more verbose than expected, it maintains semantic accuracy but perhaps includes more detail than necessary",9

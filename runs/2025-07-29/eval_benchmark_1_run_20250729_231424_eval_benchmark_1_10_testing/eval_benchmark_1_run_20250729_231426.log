@@ -1,0 +1,147 @@
+2025-07-29 23:14:26,313 - MCPPredictRunLogger - INFO - ID: 1, Starting forward pass for question: Get slack channels in the workspace
+2025-07-29 23:14:29,086 - MCPPredictRunLogger - DEBUG - ID: 1, Build initial messages: [{'role': 'system', 'content': '\nYou are a helpful assistant. You are able to answer questions using different tools.  \nThe content of your available tools begins with ## Available Tools, indicating the collection of usable tools.  \nWithin the tool collection, each server is identified by ### server_name, where server_name represents the name of the server.  \nUnder each server, there are multiple tools (tool), and each tool starts with - tool_name, where tool_name is the name of the tool.  \nThe tool description includes:  \nA brief text description outlining the functionality of the tool.  \nDetailed information about input parameters, where each parameter includes: parameter name, parameter type, whether it is mandatory, and the purpose or description of the parameter.\n## Available Tools\n### Server \'Deepwiki\' include following tools\n- read_wiki_structure: Get a list of documentation topics for a GitHub repository\n  Parameters:\n- repoName (string, required): GitHub repository: owner/repo (e.g. "facebook/react")\n\n- read_wiki_contents: View documentation about a GitHub repository\n  Parameters:\n- repoName (string, required): GitHub repository: owner/repo (e.g. "facebook/react")\n\n- ask_question: Ask any question about a GitHub repository\n  Parameters:\n- repoName (string, required): GitHub repository: owner/repo (e.g. "facebook/react")\n- question (string, required): The question to ask about the repository\n\n\n## Tool Calling Rules\nWhen external tools are required, the call request must be strictly generated according to the following rules:\n<tool>  \n{  \n  "server_name": "",  \n  "tool_name": "",  \n  "inputs": {  \n    "<parameter1>": "<value1>",  \n    "<parameter2>": "<value2>",  \n  }  \n}  \n</tool>  \n\nIf no tool is called, provide the final answer directly.\n\n'}, {'role': 'user', 'content': 'Get slack channels in the workspace'}]
+2025-07-29 23:14:34,773 - MCPPredictRunLogger - DEBUG - ID: 1, Full Bedrock API response: {
+  "ResponseMetadata": {
+    "RequestId": "72bd42cd-1830-47be-a931-2398d24608f3",
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "date": "Tue, 29 Jul 2025 13:14:34 GMT",
+      "content-type": "application/json",
+      "content-length": "701",
+      "connection": "keep-alive",
+      "x-amzn-requestid": "72bd42cd-1830-47be-a931-2398d24608f3"
+    },
+    "RetryAttempts": 0
+  },
+  "output": {
+    "message": {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "I'll help you find information about Slack channels in a workspace. To do this, I need to use a tool to search for relevant documentation. Let me do that for you.\n\n<tool>\n{\n  \"server_name\": \"Deepwiki\",\n  \"tool_name\": \"ask_question\",\n  \"inputs\": {\n    \"repoName\": \"slackapi/slack-api-docs\",\n    \"question\": \"How to get a list of all channels in a Slack workspace?\"\n  }\n}\n</tool>"
+        }
+      ]
+    }
+  },
+  "stopReason": "end_turn",
+  "usage": {
+    "inputTokens": 445,
+    "outputTokens": 124,
+    "totalTokens": 569,
+    "cacheReadInputTokens": 0,
+    "cacheWriteInputTokens": 0
+  },
+  "metrics": {
+    "latencyMs": 5437
+  }
+}
+2025-07-29 23:14:34,773 - MCPPredictRunLogger - DEBUG - ID: 1, Extracted response_text: 'I'll help you find information about Slack channels in a workspace. To do this, I need to use a tool to search for relevant documentation. Let me do that for you.
+
+<tool>
+{
+  "server_name": "Deepwiki",
+  "tool_name": "ask_question",
+  "inputs": {
+    "repoName": "slackapi/slack-api-docs",
+    "question": "How to get a list of all channels in a Slack workspace?"
+  }
+}
+</tool>'
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - DEBUG - ID: 1, Response from LLM: I'll help you find information about Slack channels in a workspace. To do this, I need to use a tool to search for relevant documentation. Let me do that for you.
+
+<tool>
+{
+  "server_name": "Deepwiki",
+  "tool_name": "ask_question",
+  "inputs": {
+    "repoName": "slackapi/slack-api-docs",
+    "question": "How to get a list of all channels in a Slack workspace?"
+  }
+}
+</tool>
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - DEBUG - ID: 1, After response parsing: shutdown=False mcps=[MCPCall(mcp_server_name='Deepwiki', mcp_tool_name='ask_question', mcp_args={'repoName': 'slackapi/slack-api-docs', 'question': 'How to get a list of all channels in a Slack workspace?'})] raw_content='I\'ll help you find information about Slack channels in a workspace. To do this, I need to use a tool to search for relevant documentation. Let me do that for you.\n\n<tool>\n{\n  "server_name": "Deepwiki",\n  "tool_name": "ask_question",\n  "inputs": {\n    "repoName": "slackapi/slack-api-docs",\n    "question": "How to get a list of all channels in a Slack workspace?"\n  }\n}\n</tool>'
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - DEBUG - ID:1, Entering mcp_calling with mcp_call_list: shutdown=False mcps=[MCPCall(mcp_server_name='Deepwiki', mcp_tool_name='ask_question', mcp_args={'repoName': 'slackapi/slack-api-docs', 'question': 'How to get a list of all channels in a Slack workspace?'})] raw_content='I\'ll help you find information about Slack channels in a workspace. To do this, I need to use a tool to search for relevant documentation. Let me do that for you.\n\n<tool>\n{\n  "server_name": "Deepwiki",\n  "tool_name": "ask_question",\n  "inputs": {\n    "repoName": "slackapi/slack-api-docs",\n    "question": "How to get a list of all channels in a Slack workspace?"\n  }\n}\n</tool>'
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - INFO - ID:1, Processing MCP call list with 1 MCPs. mcp_call_list: shutdown=False mcps=[MCPCall(mcp_server_name='Deepwiki', mcp_tool_name='ask_question', mcp_args={'repoName': 'slackapi/slack-api-docs', 'question': 'How to get a list of all channels in a Slack workspace?'})] raw_content='I\'ll help you find information about Slack channels in a workspace. To do this, I need to use a tool to search for relevant documentation. Let me do that for you.\n\n<tool>\n{\n  "server_name": "Deepwiki",\n  "tool_name": "ask_question",\n  "inputs": {\n    "repoName": "slackapi/slack-api-docs",\n    "question": "How to get a list of all channels in a Slack workspace?"\n  }\n}\n</tool>'
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - DEBUG - ID:1, Processing MCP #1: mcp_server_name='Deepwiki' mcp_tool_name='ask_question' mcp_args={'repoName': 'slackapi/slack-api-docs', 'question': 'How to get a list of all channels in a Slack workspace?'}
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - INFO - ID:1, Calling MCP Server: Deepwiki, Tool: ask_question, Arguments: {'repoName': 'slackapi/slack-api-docs', 'question': 'How to get a list of all channels in a Slack workspace?'}
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - DEBUG - ID:1, Received config parameter: {'mcp_pool': [{'name': 'Deepwiki', 'url': 'https://mcp.deepwiki.com/sse'}]}
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - DEBUG - ID:1, Parsed config keys: ['mcp_pool']
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - DEBUG - ID:1, MCP pool: [{'name': 'Deepwiki', 'url': 'https://mcp.deepwiki.com/sse'}]
+2025-07-29 23:14:34,774 - MCPPredictRunLogger - DEBUG - ID:1, Found URL for MCP Server 'Deepwiki': https://mcp.deepwiki.com/sse
+2025-07-29 23:14:34,778 - MCPPredictRunLogger - DEBUG - ID:1, Initialized SyncedMcpClient with URL: https://mcp.deepwiki.com/sse
+2025-07-29 23:14:37,397 - MCPPredictRunLogger - DEBUG - ID:1, Retrieved tool list from MCP Server 'Deepwiki'.
+2025-07-29 23:14:37,397 - MCPPredictRunLogger - DEBUG - ID:1, Calling tool 'ask_question' with arguments: {'repoName': 'slackapi/slack-api-docs', 'question': 'How to get a list of all channels in a Slack workspace?'}
+2025-07-29 23:14:38,064 - MCPPredictRunLogger - DEBUG - ID:1, Raw tool call response from 'ask_question': meta=None content=[TextContent(type='text', text='Error processing question: Repository not found. Visit https://deepwiki.com/slackapi/slack-api-docs to index it.', annotations=None, meta=None)] structuredContent=None isError=False
+2025-07-29 23:14:38,064 - MCPPredictRunLogger - DEBUG - ID:1, Cleaned tool call response from 'ask_question': Error processing question: Repository not found. Visit https://deepwiki.com/slackapi/slack-api-docs to index it.
+2025-07-29 23:14:38,064 - MCPPredictRunLogger - INFO - ID:1, MCP Server 'Deepwiki' returned: Error processing question: Repository not found. Visit https://deepwiki.com/slackapi/slack-api-docs to index it.
+2025-07-29 23:14:38,064 - MCPPredictRunLogger - DEBUG - ID:1, Final messages prepared: [{'role': 'assistant', 'content': 'I\'ll help you find information about Slack channels in a workspace. To do this, I need to use a tool to search for relevant documentation. Let me do that for you.\n\n<tool>\n{\n  "server_name": "Deepwiki",\n  "tool_name": "ask_question",\n  "inputs": {\n    "repoName": "slackapi/slack-api-docs",\n    "question": "How to get a list of all channels in a Slack workspace?"\n  }\n}\n</tool>', 'tool_calls': [{'type': 'function', 'function': {'name': 'ask_question', 'arguments': '{"repoName": "slackapi/slack-api-docs", "question": "How to get a list of all channels in a Slack workspace?"}'}}]}, {'role': 'tool', 'content': 'Error processing question: Repository not found. Visit https://deepwiki.com/slackapi/slack-api-docs to index it.'}]
+2025-07-29 23:14:38,064 - MCPPredictRunLogger - INFO - ID:1, mcp_calling completed successfully.
+2025-07-29 23:14:42,758 - MCPPredictRunLogger - DEBUG - ID: 1, Full Bedrock API response: {
+  "ResponseMetadata": {
+    "RequestId": "cd704172-fecd-4383-8459-7e6c02cfd3ca",
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "date": "Tue, 29 Jul 2025 13:14:42 GMT",
+      "content-type": "application/json",
+      "content-length": "706",
+      "connection": "keep-alive",
+      "x-amzn-requestid": "cd704172-fecd-4383-8459-7e6c02cfd3ca"
+    },
+    "RetryAttempts": 0
+  },
+  "output": {
+    "message": {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "I apologize for the error. It seems the repository \"slackapi/slack-api-docs\" is not indexed in the system. Let me try with the official Slack SDK repository instead.\n\n<tool>\n{\n  \"server_name\": \"Deepwiki\",\n  \"tool_name\": \"ask_question\",\n  \"inputs\": {\n    \"repoName\": \"slackapi/node-slack-sdk\",\n    \"question\": \"How to get a list of all channels in a Slack workspace?\"\n  }\n}\n</tool>"
+        }
+      ]
+    }
+  },
+  "stopReason": "end_turn",
+  "usage": {
+    "inputTokens": 602,
+    "outputTokens": 128,
+    "totalTokens": 730,
+    "cacheReadInputTokens": 0,
+    "cacheWriteInputTokens": 0
+  },
+  "metrics": {
+    "latencyMs": 4520
+  }
+}
+2025-07-29 23:14:42,758 - MCPPredictRunLogger - DEBUG - ID: 1, Extracted response_text: 'I apologize for the error. It seems the repository "slackapi/slack-api-docs" is not indexed in the system. Let me try with the official Slack SDK repository instead.
+
+<tool>
+{
+  "server_name": "Deepwiki",
+  "tool_name": "ask_question",
+  "inputs": {
+    "repoName": "slackapi/node-slack-sdk",
+    "question": "How to get a list of all channels in a Slack workspace?"
+  }
+}
+</tool>'
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - DEBUG - ID: 1, Response from LLM: I apologize for the error. It seems the repository "slackapi/slack-api-docs" is not indexed in the system. Let me try with the official Slack SDK repository instead.
+
+<tool>
+{
+  "server_name": "Deepwiki",
+  "tool_name": "ask_question",
+  "inputs": {
+    "repoName": "slackapi/node-slack-sdk",
+    "question": "How to get a list of all channels in a Slack workspace?"
+  }
+}
+</tool>
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - DEBUG - ID: 1, After response parsing: shutdown=False mcps=[MCPCall(mcp_server_name='Deepwiki', mcp_tool_name='ask_question', mcp_args={'repoName': 'slackapi/node-slack-sdk', 'question': 'How to get a list of all channels in a Slack workspace?'})] raw_content='I apologize for the error. It seems the repository "slackapi/slack-api-docs" is not indexed in the system. Let me try with the official Slack SDK repository instead.\n\n<tool>\n{\n  "server_name": "Deepwiki",\n  "tool_name": "ask_question",\n  "inputs": {\n    "repoName": "slackapi/node-slack-sdk",\n    "question": "How to get a list of all channels in a Slack workspace?"\n  }\n}\n</tool>'
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - DEBUG - ID:1, Entering mcp_calling with mcp_call_list: shutdown=False mcps=[MCPCall(mcp_server_name='Deepwiki', mcp_tool_name='ask_question', mcp_args={'repoName': 'slackapi/node-slack-sdk', 'question': 'How to get a list of all channels in a Slack workspace?'})] raw_content='I apologize for the error. It seems the repository "slackapi/slack-api-docs" is not indexed in the system. Let me try with the official Slack SDK repository instead.\n\n<tool>\n{\n  "server_name": "Deepwiki",\n  "tool_name": "ask_question",\n  "inputs": {\n    "repoName": "slackapi/node-slack-sdk",\n    "question": "How to get a list of all channels in a Slack workspace?"\n  }\n}\n</tool>'
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - INFO - ID:1, Processing MCP call list with 1 MCPs. mcp_call_list: shutdown=False mcps=[MCPCall(mcp_server_name='Deepwiki', mcp_tool_name='ask_question', mcp_args={'repoName': 'slackapi/node-slack-sdk', 'question': 'How to get a list of all channels in a Slack workspace?'})] raw_content='I apologize for the error. It seems the repository "slackapi/slack-api-docs" is not indexed in the system. Let me try with the official Slack SDK repository instead.\n\n<tool>\n{\n  "server_name": "Deepwiki",\n  "tool_name": "ask_question",\n  "inputs": {\n    "repoName": "slackapi/node-slack-sdk",\n    "question": "How to get a list of all channels in a Slack workspace?"\n  }\n}\n</tool>'
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - DEBUG - ID:1, Processing MCP #1: mcp_server_name='Deepwiki' mcp_tool_name='ask_question' mcp_args={'repoName': 'slackapi/node-slack-sdk', 'question': 'How to get a list of all channels in a Slack workspace?'}
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - INFO - ID:1, Calling MCP Server: Deepwiki, Tool: ask_question, Arguments: {'repoName': 'slackapi/node-slack-sdk', 'question': 'How to get a list of all channels in a Slack workspace?'}
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - DEBUG - ID:1, Received config parameter: {'mcp_pool': [{'name': 'Deepwiki', 'url': 'https://mcp.deepwiki.com/sse'}]}
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - DEBUG - ID:1, Parsed config keys: ['mcp_pool']
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - DEBUG - ID:1, MCP pool: [{'name': 'Deepwiki', 'url': 'https://mcp.deepwiki.com/sse'}]
+2025-07-29 23:14:42,759 - MCPPredictRunLogger - DEBUG - ID:1, Found URL for MCP Server 'Deepwiki': https://mcp.deepwiki.com/sse
+2025-07-29 23:14:42,762 - MCPPredictRunLogger - DEBUG - ID:1, Initialized SyncedMcpClient with URL: https://mcp.deepwiki.com/sse

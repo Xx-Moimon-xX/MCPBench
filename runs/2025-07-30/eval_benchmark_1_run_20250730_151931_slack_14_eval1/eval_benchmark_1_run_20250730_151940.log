@@ -1,0 +1,8 @@
+2025-07-30 15:19:40,637 - MCPPredictRunLogger - INFO - ID: 1, Starting forward pass for question: List all channels in the workspace
+2025-07-30 15:19:40,637 - MCPPredictRunLogger - INFO - ID: 2, Starting forward pass for question: Show me all public channels
+2025-07-30 15:19:40,638 - MCPPredictRunLogger - INFO - ID: 3, Starting forward pass for question: Get all replies from thread 1750300317.785949 in channel C08UFS9HMCN
+2025-07-30 15:19:40,638 - MCPPredictRunLogger - INFO - ID: 4, Starting forward pass for question: Show me all the users in the workspace
+2025-07-30 15:19:40,638 - MCPPredictRunLogger - INFO - ID: 5, Starting forward pass for question: Get profile details for user U08FUTB4QLC
+2025-07-30 15:19:40,638 - MCPPredictRunLogger - INFO - ID: 6, Starting forward pass for question: Search for messages containing 'mcp server'
+2025-07-30 15:19:40,638 - MCPPredictRunLogger - INFO - ID: 7, Starting forward pass for question: Get recent messages from the ytg channel
+2025-07-30 15:25:10,684 - MCPPredictRunLogger - INFO - ID: 8, Starting forward pass for question: Show thread replies for 1751349675.278699  in ai-slackbot-testing

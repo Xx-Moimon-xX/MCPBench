@@ -1,0 +1,57 @@
+2025-07-27 22:39:08,136 - MCPPredictRunLogger - INFO - ID: 1, Starting forward pass for question: Can you list all Slack channels related to our ongoing banking software project?
+2025-07-27 22:39:13,566 - MCPPredictRunLogger - DEBUG - ID: 1, Full Bedrock API response: {
+  "ResponseMetadata": {
+    "RequestId": "fdc0a2c5-3c4b-4b85-abc5-fd0fdb76ef1d",
+    "HTTPStatusCode": 200,
+    "HTTPHeaders": {
+      "date": "Sun, 27 Jul 2025 12:39:13 GMT",
+      "content-type": "application/json",
+      "content-length": "572",
+      "connection": "keep-alive",
+      "x-amzn-requestid": "fdc0a2c5-3c4b-4b85-abc5-fd0fdb76ef1d"
+    },
+    "RetryAttempts": 0
+  },
+  "output": {
+    "message": {
+      "role": "assistant",
+      "content": [
+        {
+          "text": "I'll help you list the Slack channels related to your banking software project. Let me use the Slack API to get a list of channels first.\n\n<tool>\n{\n  \"server_name\": \"slack\",\n  \"tool_name\": \"slack_list_channels\",\n  \"inputs\": {\n    \"limit\": 100\n  }\n}\n</tool>"
+        }
+      ]
+    }
+  },
+  "stopReason": "end_turn",
+  "usage": {
+    "inputTokens": 611,
+    "outputTokens": 86,
+    "totalTokens": 697,
+    "cacheReadInputTokens": 0,
+    "cacheWriteInputTokens": 0
+  },
+  "metrics": {
+    "latencyMs": 2746
+  }
+}
+2025-07-27 22:39:13,566 - MCPPredictRunLogger - DEBUG - ID: 1, Extracted response_text: 'I'll help you list the Slack channels related to your banking software project. Let me use the Slack API to get a list of channels first.
+
+<tool>
+{
+  "server_name": "slack",
+  "tool_name": "slack_list_channels",
+  "inputs": {
+    "limit": 100
+  }
+}
+</tool>'
+2025-07-27 22:39:13,567 - MCPPredictRunLogger - DEBUG - ID: 1, After response parsing: shutdown=False mcps=[MCPCall(mcp_server_name='slack', mcp_tool_name='slack_list_channels', mcp_args={'limit': 100})] raw_content='I\'ll help you list the Slack channels related to your banking software project. Let me use the Slack API to get a list of channels first.\n\n<tool>\n{\n  "server_name": "slack",\n  "tool_name": "slack_list_channels",\n  "inputs": {\n    "limit": 100\n  }\n}\n</tool>'
+2025-07-27 22:39:13,567 - MCPPredictRunLogger - DEBUG - ID:1, Entering mcp_calling with mcp_call_list: shutdown=False mcps=[MCPCall(mcp_server_name='slack', mcp_tool_name='slack_list_channels', mcp_args={'limit': 100})] raw_content='I\'ll help you list the Slack channels related to your banking software project. Let me use the Slack API to get a list of channels first.\n\n<tool>\n{\n  "server_name": "slack",\n  "tool_name": "slack_list_channels",\n  "inputs": {\n    "limit": 100\n  }\n}\n</tool>'
+2025-07-27 22:39:13,567 - MCPPredictRunLogger - INFO - ID:1, Processing MCP call list with 1 MCPs. mcp_call_list: shutdown=False mcps=[MCPCall(mcp_server_name='slack', mcp_tool_name='slack_list_channels', mcp_args={'limit': 100})] raw_content='I\'ll help you list the Slack channels related to your banking software project. Let me use the Slack API to get a list of channels first.\n\n<tool>\n{\n  "server_name": "slack",\n  "tool_name": "slack_list_channels",\n  "inputs": {\n    "limit": 100\n  }\n}\n</tool>'
+2025-07-27 22:39:13,567 - MCPPredictRunLogger - DEBUG - ID:1, Processing MCP #1: mcp_server_name='slack' mcp_tool_name='slack_list_channels' mcp_args={'limit': 100}
+2025-07-27 22:39:13,567 - MCPPredictRunLogger - INFO - ID:1, Calling MCP Server: slack, Tool: slack_list_channels, Arguments: {'limit': 100}
+2025-07-27 22:39:13,567 - MCPPredictRunLogger - DEBUG - ID:1, Received config parameter: {'mcp_pool': [{'name': 'slack', 'run_config': [{'command': 'node', 'args': ['/Users/cxnpl/cxnpl/thesis/servers/slack/dist/index.js'], 'port': 8000}]}]}
+2025-07-27 22:39:13,567 - MCPPredictRunLogger - DEBUG - ID:1, Parsed config keys: ['mcp_pool']
+2025-07-27 22:39:13,567 - MCPPredictRunLogger - DEBUG - ID:1, MCP pool: [{'name': 'slack', 'run_config': [{'command': 'node', 'args': ['/Users/cxnpl/cxnpl/thesis/servers/slack/dist/index.js'], 'port': 8000}]}]
+2025-07-27 22:39:13,567 - MCPPredictRunLogger - DEBUG - ID:1, Constructed URL for MCP Server 'slack': http://localhost:8000/sse
+2025-07-27 22:39:13,571 - MCPPredictRunLogger - DEBUG - ID:1, Initialized SyncedMcpClient with URL: http://localhost:8000/sse

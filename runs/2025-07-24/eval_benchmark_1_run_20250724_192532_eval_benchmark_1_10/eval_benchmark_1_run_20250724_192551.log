@@ -1,0 +1,4 @@
+2025-07-24 19:25:51,351 - MCPPredictRunLogger - INFO - ID: 1, Starting forward pass for question: Get slack channels in the workspace
+2025-07-24 19:25:54,504 - MCPPredictRunLogger - ERROR - ID: 1, AWS Bedrock error: Error when retrieving token from sso: Token has expired and refresh failed
+2025-07-24 19:25:54,504 - MCPPredictRunLogger - ERROR - Exiting program due to AWS Bedrock error.
+2025-07-24 19:25:54,504 - MCPPredictRunLogger - ERROR - ID: 1, Error in call_lm: Error when retrieving token from sso: Token has expired and refresh failed

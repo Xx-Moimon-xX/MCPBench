@@ -1,0 +1,18 @@
+serial_number,question,ground_truth,answer,tool_calling_success,success,prompt_adherence_score,prompt_adherence_answer,prompt_adherence_reasoning,content_accuracy_score,content_accuracy_answer,content_accuracy_reasoning,final_score
+0,Get slack channels in the workspace,"General, Announcements, Random, etc.","I don't have a specific tool to get Slack channels in a workspace. The available tools I have are related to Neon database operations like managing projects, running SQL queries, and database migrations.
+
+To get Slack channels in a workspace, you would typically need to:
+
+1. Use the Slack API
+2. Have appropriate authentication credentials
+3. Use a Slack API client or make direct API calls to endpoints like `conversations.list`
+
+None of the tools I have available can directly access Slack workspace data. If you'd like to work with database operations using Neon, I'd be happy to help with that instead.",False,False,5,yes,The response fully addresses the prompt by clearly explaining that it cannot perform the requested action and why. It appropriately identifies this as a failure case and provides context about what would typically be needed to accomplish the task.,1,no,"The expected response is a simple list of Slack channels, while the actual response explains inability to access Slack data. The semantic meaning and content are completely different - one provides channel names, the other describes limitations and alternative approaches.",6
+1,search on .,,"I'll help you search for information. However, your request is quite general. Could you please provide more details about what you're looking for? 
+
+For example:
+- Are you trying to search for Neon projects?
+- Do you need information about a specific database?
+- Are you looking for help with SQL queries?
+
+With more specific information, I can use the appropriate tools to help you find what you need.",False,False,5,yes,"The response appropriately addresses the vague/incomplete search prompt by acknowledging it and requesting clarification, providing specific examples of what might be needed",5,yes,"The expected response is empty, indicating this was likely a test of handling an invalid/incomplete search query. The response correctly handles this by requesting clarification, which aligns with the implied expected behavior",10

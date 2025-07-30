@@ -1,0 +1,29 @@
+serial_number,question,ground_truth,answer,tool_calling_success,success,selected_expected_response,score,answer,reasoning
+0,Get slack channels in the workspace,"General, Announcements, Random, etc.","Based on the data retrieved, here are the Slack channels available in your workspace:
+
+1. **random** (ID: C02MR0SC1M5)
+   - Purpose: ""This channel is for... well, everything else. It's a place for team jokes, spur-of-the-moment ideas, and funny GIFs. Go wild!""
+   - Members: 208
+
+2. **general** (ID: C02N5LDJPD1)
+   - Purpose: ""This is the one channel that will always include everyone. It's a great spot for announcements and team-wide conversations.""
+   - Members: 211
+   - This is the default general channel
+
+3. **operating-model** (ID: C0374RE85GV)
+   - No specific purpose set
+   - Members: 1
+
+4. **10x-and-cxnpl** (ID: C03DMU28597)
+   - No specific purpose set
+   - Members: 1
+
+5. **q2-constantinople** (ID: C03JF7B8U69)
+   - No specific purpose set
+   - Members: 3
+   - This is a shared channel
+
+6. **tech** (ID: C03L9N39805)
+   - Information appears to be cut off in the response
+
+These are the channels that are currently visible in your Slack workspace. The general channel has the most members (211), which is typical as it's the default channel that all workspace members join automatically.",False,False,"General, Announcements, Random, etc.",5,yes,"The LLM response lists multiple Slack channels including general and random, which directly matches the expected response's core content. While the LLM response provides more detail including member counts and channel IDs, the fundamental information about available channels aligns perfectly with the expected response"
