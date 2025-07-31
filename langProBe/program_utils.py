@@ -602,10 +602,14 @@ def mcp_calling(
                                     headers = {"Authorization": f"Bearer {found_token}"}
                     else:
                         try:
-                            port = mcp.get('run_config')[0]["port"]
+                            port = item.get('run_config')[0]["port"]
+                            print(f"mcp_calling:port: {port}")
                             url = f"http://localhost:{port}/sse"
+                            print(f"mcp_calling:Using local MCP server at {url}")
                         except:
                             raise Exception("No url found")
+                    print("initialising with url: ", url, "and headers: ", headers)
+                    
                     client = SyncedMcpClient(server_url=url, headers=headers)
                     logger.debug(f"ID:{manager.id}, Initialized SyncedMcpClient with URL: {url}")
                     client.list_tools()
