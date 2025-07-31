@@ -181,11 +181,11 @@ def call_lm(
             system_message = ""
             
             # Debug: Print all messages before conversion
-            print(f"[DEBUG] call_lm: manager.id={manager.id} messages before Bedrock conversion:")
-            for i, m in enumerate(messages):
-                print(f"  Message {i}: role={m.get('role')} content={repr(m.get('content'))}")
-                if not m.get('content'):
-                    print(f"  [WARNING] Message {i} has empty or missing content!")
+            # print(f"[DEBUG] call_lm: manager.id={manager.id} messages before Bedrock conversion:")
+            # for i, m in enumerate(messages):
+            #     print(f"  Message {i}: role={m.get('role')} content={repr(m.get('content'))}")
+            #     if not m.get('content'):
+            #         print(f"  [WARNING] Message {i} has empty or missing content!")
             for m in messages:
                 if m.get("role") == "system":
                     system_message = m["content"]
@@ -609,12 +609,9 @@ def mcp_calling(
                     else:
                         try:
                             port = item.get('run_config')[0]["port"]
-                            print(f"mcp_calling:port: {port}")
                             url = f"http://localhost:{port}/sse"
-                            print(f"mcp_calling:Using local MCP server at {url}")
                         except:
                             raise Exception("No url found")
-                    print("initialising with url: ", url, "and headers: ", headers)
                     
                     client = SyncedMcpClient(server_url=url, headers=headers)
                     logger.debug(f"ID:{manager.id}, Initialized SyncedMcpClient with URL: {url}")
