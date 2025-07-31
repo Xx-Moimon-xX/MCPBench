@@ -180,6 +180,12 @@ def call_lm(
             bedrock_messages = []
             system_message = ""
             
+            # Debug: Print all messages before conversion
+            print(f"[DEBUG] call_lm: manager.id={manager.id} messages before Bedrock conversion:")
+            for i, m in enumerate(messages):
+                print(f"  Message {i}: role={m.get('role')} content={repr(m.get('content'))}")
+                if not m.get('content'):
+                    print(f"  [WARNING] Message {i} has empty or missing content!")
             for m in messages:
                 if m.get("role") == "system":
                     system_message = m["content"]

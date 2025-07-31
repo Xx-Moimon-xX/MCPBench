@@ -284,7 +284,8 @@ def evaluate(
             f"lm: {lm}\n"
             f"test_set_size: {len(benchmark.test_set)}\n"
             f"dataset_name: {dataset_name}\n"
-            f"eval_lm: {eval_lm}"
+            f"eval_lm: {eval_lm}\n",
+            f"num_threads: {num_threads}\n"
         )
 
     
