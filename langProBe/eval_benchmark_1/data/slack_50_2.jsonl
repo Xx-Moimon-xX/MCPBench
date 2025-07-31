@@ -1,0 +1,50 @@
+{"unique_id": 1, "Prompt": "Can you list all Slack channels related to our ongoing banking software project?", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 2, "Prompt": "Show me the latest discussions in the #core-banking channel about the new transaction processing system", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 3, "Prompt": "I need to see all responses to Sarah's message about the API security audit from yesterday in #compliance", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 4, "Prompt": "Who's currently assigned to the payment gateway integration team? Can you check the team members list?", "Answer": "", "Tool_Calls": ["slack_get_users"]}
+{"unique_id": 5, "Prompt": "What's John Smith's current role and contact details? He's working on the fraud detection system", "Answer": "", "Tool_Calls": ["slack_get_user_profile"]}
+{"unique_id": 6, "Prompt": "Can you find all channels discussing the upcoming Basel III compliance requirements?", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 7, "Prompt": "Show me the thread about the recent penetration testing results in #security-updates", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 8, "Prompt": "List all team members who have 'Risk Analyst' in their profile", "Answer": "", "Tool_Calls": ["slack_get_users", "slack_get_user_profile"]}
+{"unique_id": 9, "Prompt": "Find recent discussions about the new KYC implementation in the compliance channels", "Answer": "", "Tool_Calls": ["slack_list_channels", "slack_get_channel_history"]}
+{"unique_id": 10, "Prompt": "Show me all responses to the CTO's announcement about the new microservices architecture", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 11, "Prompt": "Get me the latest updates from the #mobile-banking channel about the iOS app release", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 12, "Prompt": "Find all project managers currently online in our workspace", "Answer": "", "Tool_Calls": ["slack_get_users"]}
+{"unique_id": 13, "Prompt": "Show me all channels related to the upcoming core system migration", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 14, "Prompt": "Get the full discussion thread about the recent database performance issues", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 15, "Prompt": "Find all channels discussing open banking API integrations", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 16, "Prompt": "Show me the latest messages about the new fraud detection algorithm testing", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 17, "Prompt": "Get me contact details for all members of the blockchain research team", "Answer": "", "Tool_Calls": ["slack_get_users", "slack_get_user_profile"]}
+{"unique_id": 18, "Prompt": "Find the thread about the recent AWS outage impact on our services", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 19, "Prompt": "Show me all channels related to regulatory reporting", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 20, "Prompt": "Get the discussion thread about the new authentication system rollout", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 21, "Prompt": "Find all messages related to the recent SWIFT integration testing", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 22, "Prompt": "Show me who's currently assigned to the data encryption project", "Answer": "", "Tool_Calls": ["slack_get_users"]}
+{"unique_id": 23, "Prompt": "Get me all channels discussing the upcoming PSD2 compliance deadline", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 24, "Prompt": "Find the thread about the recent mobile app security audit findings", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 25, "Prompt": "Show me all technical discussions about the new payment processing API", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 26, "Prompt": "Find all discussions about our machine learning model's recent credit scoring improvements", "Answer": "", "Tool_Calls": ["slack_list_channels", "slack_get_channel_history"]}
+{"unique_id": 27, "Prompt": "Show me the latest deployment pipeline discussions in #devops-alerts", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 28, "Prompt": "Get me the thread about the recent changes to our Docker containerization strategy", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 29, "Prompt": "Find all UX team members working on the new mobile banking interface", "Answer": "", "Tool_Calls": ["slack_get_users", "slack_get_user_profile"]}
+{"unique_id": 30, "Prompt": "Show me all channels discussing third-party payment provider integrations", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 31, "Prompt": "Get the full discussion about last week's production incident in #incident-response", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 32, "Prompt": "Find all messages related to the new blockchain payment gateway implementation", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 33, "Prompt": "Show me who's currently leading the cloud migration project", "Answer": "", "Tool_Calls": ["slack_get_users", "slack_get_user_profile"]}
+{"unique_id": 34, "Prompt": "List all channels related to our upcoming SOC 2 audit preparation", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 35, "Prompt": "Find the discussion thread about our new data retention policies", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 36, "Prompt": "Show me all messages about the recent changes to our API rate limiting", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 37, "Prompt": "Get me contact details for everyone on the AI fraud detection team", "Answer": "", "Tool_Calls": ["slack_get_users", "slack_get_user_profile"]}
+{"unique_id": 38, "Prompt": "Find all channels discussing the new digital onboarding process", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 39, "Prompt": "Show me the thread about updating our SSL certificate infrastructure", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 40, "Prompt": "List all recent discussions about the real-time payment system upgrade", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 41, "Prompt": "Find messages about the new quantum-resistant cryptography implementation", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 42, "Prompt": "Show me all channels related to our partnership with fintech startups", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 43, "Prompt": "Get me the thread about our new biometric authentication features", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 44, "Prompt": "Find all team members involved in the zero-trust security implementation", "Answer": "", "Tool_Calls": ["slack_get_users", "slack_get_user_profile"]}
+{"unique_id": 45, "Prompt": "Show me recent discussions about our GraphQL API migration", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 46, "Prompt": "Get all messages related to our new cloud cost optimization strategy", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 47, "Prompt": "Find the thread about updating our disaster recovery procedures", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}
+{"unique_id": 48, "Prompt": "Show me all channels discussing our new automated testing framework", "Answer": "", "Tool_Calls": ["slack_list_channels"]}
+{"unique_id": 49, "Prompt": "List all recent messages about our MongoDB cluster optimization", "Answer": "", "Tool_Calls": ["slack_get_channel_history"]}
+{"unique_id": 50, "Prompt": "Find the discussion about our new microservices monitoring setup", "Answer": "", "Tool_Calls": ["slack_get_channel_history", "slack_get_thread_replies"]}

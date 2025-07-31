@@ -263,6 +263,12 @@ class Eval1Predict(MCPPredict):
         start_time = time.time()
         tools_called = []
 
+        # Debug: Print messages before calling call_lm
+        print(f"[DEBUG] eval_1_program.forward: messages before call_lm:")
+        for i, m in enumerate(messages):
+            print(f"  Message {i}: role={m.get('role')} content={repr(m.get('content'))}")
+            if not m.get('content'):
+                print(f"  [WARNING] Message {i} has empty or missing content!")
         while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
             response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger)
             self.run_logger.debug(f"ID: {manager.id}, Response from LLM: {response}")

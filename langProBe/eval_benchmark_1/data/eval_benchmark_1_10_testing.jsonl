@@ -1,0 +1,2 @@
+{"unique_id": 1, "Prompt": "Get slack channels in the workspace", "Answer": "General, Announcements, Random, etc.", "tools_required": ["slack_list_channels"]}
+{"unique_id": 2, "Prompt": "search on .", "Answer": "", "tools_required": ["slack_list_channels"]}
