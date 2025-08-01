@@ -43,7 +43,7 @@ class SyncedMcpClient(Process):
         The main process function that runs the AsyncMCPClient in a separate process.
         """
         self.is_running = True
-        print(f"Trying to connect to server_url: {self.server_url}")
+        # print(f"Trying to connect to server_url: {self.server_url}")
         asyncio.run(self._run_async_client())
 
     async def _run_async_client(self):

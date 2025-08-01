@@ -170,7 +170,7 @@ def evaluate_final_answer_eval1(
             called_tool_names = [call.mcp_tool_name for call in tools_called]
             for tool in tools_required:
                 if tool not in called_tool_names:
-                    print(f"Tool {tool} was not called.")
+                    # print(f"Tool {tool} was not called.")
                     tool_calling_success = False
                     # return False, None, False
         else:
@@ -241,7 +241,7 @@ class Eval1Predict(MCPPredict):
         question = kwargs.get('question')
         gt = kwargs.get('answer')
         tools_required = kwargs.get('tools_required')
-        print(f"tools_required: {tools_required}")
+        # print(f"tools_required: {tools_required}")
 
         manager = ProcessManager()
         manager.lm_api_key = self.lm.api_key
@@ -264,11 +264,11 @@ class Eval1Predict(MCPPredict):
         tools_called = []
 
         # Debug: Print messages before calling call_lm
-        print(f"[DEBUG] eval_1_program.forward: messages before call_lm:")
-        for i, m in enumerate(messages):
-            print(f"  Message {i}: role={m.get('role')} content={repr(m.get('content'))}")
-            if not m.get('content'):
-                print(f"  [WARNING] Message {i} has empty or missing content!")
+        # print(f"[DEBUG] eval_1_program.forward: messages before call_lm:")
+        # for i, m in enumerate(messages):
+        #     print(f"  Message {i}: role={m.get('role')} content={repr(m.get('content'))}")
+        #     if not m.get('content'):
+        #         print(f"  [WARNING] Message {i} has empty or missing content!")
         while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
             response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger)
             self.run_logger.debug(f"ID: {manager.id}, Response from LLM: {response}")
@@ -280,7 +280,7 @@ class Eval1Predict(MCPPredict):
             if not mcp_calls.shutdown:
                 for mcp_call in mcp_calls.mcps:
                     tools_called.append(mcp_call)
-                    print(f"Adding tool: {mcp_call}")
+                    # print(f"Adding tool: {mcp_call}")
 
             self.run_logger.debug(f"ID: {manager.id}, After response parsing: {mcp_calls}")
 
@@ -289,7 +289,7 @@ class Eval1Predict(MCPPredict):
             steps += 1
 
         end_time = time.time()
-        print(f"Tools called: {tools_called}")
+        # print(f"Tools called: {tools_called}")
 
         # If the maximum number of steps is reached and there is still no answer
         if messages[-1][constants.ROLE] != constants.ASSISTANT:

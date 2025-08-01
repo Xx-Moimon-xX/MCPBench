@@ -189,7 +189,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         question = kwargs.get('question')
         gt = kwargs.get('answer')
         tools_required = kwargs.get('tools_required')
-        print(f"tools_required: {tools_required}")
+        # print(f"tools_required: {tools_required}")
 
         manager = ProcessManager()
         manager.lm_api_key = self.lm.api_key
@@ -224,7 +224,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             if not mcp_calls.shutdown:
                 for mcp_call in mcp_calls.mcps:
                     tools_called.append(mcp_call)
-                    print(f"Adding tool: {mcp_call}")
+                    # print(f"Adding tool: {mcp_call}")
             
             self.run_logger.debug(f"ID: {manager.id}, After response parsing: {mcp_calls}")
 
@@ -236,7 +236,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             steps += 1
 
         end_time = time.time()
-        print(f"Tools called: {tools_called}")
+        # print(f"Tools called: {tools_called}")
 
         # If the maximum number of steps is reached and there is still no answer
         if messages[-1][constants.ROLE] != constants.ASSISTANT:

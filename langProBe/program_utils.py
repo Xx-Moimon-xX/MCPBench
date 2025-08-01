@@ -144,7 +144,7 @@ def call_lm(
                 model=model_name,
                 max_tokens=1024,
                 messages=claude_messages,
-                temperature=temperature if temperature is not None else 0.7,
+                temperature=temperature if temperature is not None else 0.7
             )
             
             # Log the full response for debugging
@@ -203,7 +203,7 @@ def call_lm(
                     "modelId": model_name,
                     "messages": bedrock_messages,
                     "inferenceConfig": {
-                        "maxTokens": 1024,
+                        "maxTokens": 512,
                         "temperature": temperature if temperature is not None else 0.7
                     }
                 }
