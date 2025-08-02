@@ -116,6 +116,7 @@ def call_lm(
             manager: ProcessManager, 
             logger: logging.Logger, 
             temperature: float|None=None,
+            system_prompt: str = None,
             ) -> tuple[str | None, int, int]:    
     '''
     This function is used to call the LLM API, it can be used for Anthropic, AWS Bedrock and OpenAI.
@@ -126,9 +127,7 @@ def call_lm(
     try:
         # Getting the correct model to use for the LLM call.
         prefix, model_name = manager.model.split('/')
-        print(f"Prefix: {prefix}, Model: {model_name}, Manager.model: {manager.model}")
         if prefix == 'anthropic':
-            print(f"ID: {manager.id}, Calling Anthropic API with model: {model_name}")
             if Anthropic is None:
                 raise ImportError("The 'anthropic' package is required for Claude API support. Please install it via 'pip install anthropic'.")
             # Anthropic Claude API
@@ -141,13 +140,24 @@ def call_lm(
                     claude_messages.append({"role": "user", "content": m["content"]})
                 elif m.get("role") == "assistant":
                     claude_messages.append({"role": "assistant", "content": m["content"]})
+                elif m.get("role") == "tool":
+                    claude_messages.append({"role": "user", "content": m["content"]})
             # Call Claude API
-            completion = client.messages.create(
-                model=model_name,
-                max_tokens=1024,
-                messages=claude_messages,
-                temperature=temperature if temperature is not None else 0.7
-            )
+            if system_prompt:
+                completion = client.messages.create(
+                    model=model_name,
+                    max_tokens=1024,
+                    messages=claude_messages,
+                    temperature=temperature if temperature is not None else 0.7,
+                    system=system_prompt
+                )
+            else:   
+                completion = client.messages.create(
+                    model=model_name,
+                    max_tokens=1024,
+                    messages=claude_messages,
+                    temperature=temperature if temperature is not None else 0.7,
+                )
             
             # Log the full response for debugging
             logger.debug(f"ID: {manager.id}, Full Anthropic API response: {completion}")

@@ -255,6 +255,7 @@ class Eval1Predict(MCPPredict):
         mcps = self.config['mcp_pool']
         
         messages = build_init_messages(self.system_prompt, mcps, question)
+        system_prompt = messages[0][constants.CONTENT]
         self.run_logger.debug(f"ID: {manager.id}, Build initial messages: {messages}")
         steps = 0
         all_completion_tokens = 0
@@ -269,7 +270,7 @@ class Eval1Predict(MCPPredict):
         #     if not m.get('content'):
         #         print(f"  [WARNING] Message {i} has empty or missing content!")
         while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
-            response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger)
+            response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger, system_prompt=system_prompt)
             self.run_logger.debug(f"ID: {manager.id}, Response from LLM: {response}")
 
             all_completion_tokens += completion_tokens
