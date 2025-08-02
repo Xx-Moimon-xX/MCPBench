@@ -259,10 +259,10 @@ class Eval3Predict(MCPPredict):
         answer_eval_manager.lm_api_key = self.lm.api_key
         answer_eval_manager.lm_api_base = self.lm.api_base
         # Use the same model type as the main LM for evaluation
-        if self.lm.model.startswith("bedrock/"):
-            answer_eval_manager.model = "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0"
+        if self.lm.eval_model:
+            answer_eval_manager.model = self.lm.eval_model
         else:
-            answer_eval_manager.model = "openai/deepseek-v3"
+            answer_eval_manager.model = self.lm.model
 
         return evaluate_final_answer_eval3(question, ground_truth, rubric_data, tools_required, tools_called, prediction, answer_eval_manager, self.run_logger)
         

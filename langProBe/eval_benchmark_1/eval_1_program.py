@@ -204,15 +204,14 @@ class Eval1Predict(MCPPredict):
 
     
     def evaluate_prediction(self, question: str, ground_truth: str, tools_required: List[str], tools_called: List[MCPCall], prediction: str) -> Tuple[bool, Optional[str]]:
-        # This is mainly for gaia (not used anywhere else), probably not needed for eval1.
         answer_eval_manager = ProcessManager()
         answer_eval_manager.lm_api_key = self.lm.api_key
         answer_eval_manager.lm_api_base = self.lm.api_base
         # Use the same model type as the main LM for evaluation
-        if self.lm.model.startswith("bedrock/"):
-            answer_eval_manager.model = "bedrock/anthropic.claude-3-5-sonnet-20241022-v2:0"
+        if self.lm.eval_model:
+            answer_eval_manager.model = self.lm.eval_model
         else:
-            answer_eval_manager.model = "openai/deepseek-v3"
+            answer_eval_manager.model = self.lm.model
 
         return evaluate_final_answer_eval1(question, ground_truth, tools_required, tools_called, prediction, answer_eval_manager, self.run_logger)
         

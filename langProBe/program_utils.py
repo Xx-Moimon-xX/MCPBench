@@ -126,7 +126,9 @@ def call_lm(
     try:
         # Getting the correct model to use for the LLM call.
         prefix, model_name = manager.model.split('/')
+        print(f"Prefix: {prefix}, Model: {model_name}, Manager.model: {manager.model}")
         if prefix == 'anthropic':
+            print(f"ID: {manager.id}, Calling Anthropic API with model: {model_name}")
             if Anthropic is None:
                 raise ImportError("The 'anthropic' package is required for Claude API support. Please install it via 'pip install anthropic'.")
             # Anthropic Claude API
@@ -155,14 +157,17 @@ def call_lm(
             # Log extracted content
             logger.debug(f"ID: {manager.id}, Extracted response_text: '{response_text}'")
             # Anthropic does not return token usage in the same way
-            completion_tokens = getattr(completion, 'usage', {}).get('output_tokens', 0) if hasattr(completion, 'usage') else 0
-            prompt_tokens = getattr(completion, 'usage', {}).get('input_tokens', 0) if hasattr(completion, 'usage') else 0
+            if hasattr(completion, 'usage') and completion.usage is not None:
+                completion_tokens = getattr(completion.usage, 'output_tokens', 0)
+                prompt_tokens = getattr(completion.usage, 'input_tokens', 0)
+            else:
+                completion_tokens = 0
+                prompt_tokens = 0
             manager.lm_usages.append({
                 "completion_tokens": completion_tokens,
                 "prompt_tokens": prompt_tokens,
             })
             return response_text, completion_tokens, prompt_tokens
-
         # AWS Bedrock API call (using Converse API for better consistency)
         elif prefix == 'bedrock':
             if boto3 is None:
@@ -248,11 +253,11 @@ def call_lm(
                 logger.error("Exiting program due to AWS Bedrock error.")
                 raise
                 # sys.exit(1)
-
         # OpenAI API call
         else:
             # --- OpenAI logic as before ---
             # Creating the OpenAI client
+            print(f"ID: {manager.id}, Calling OpenAI API with model: {model_name}")
             oai = OpenAI(
                 api_key=manager.lm_api_key,
                 base_url=manager.lm_api_base,
