@@ -6,9 +6,9 @@
                 {
                     "command": "node",
                     "args": [
-                        "/Users/cxnpl/cxnpl/thesis/servers/slack/dist/index.js"
+                        "/Users/cxnpl/cxnpl/thesis/servers-mutated/slack-mutated/dist/index.js"
                     ],
-                    "port": 8000
+                    "port": 8900
                 }
             ]
         },
