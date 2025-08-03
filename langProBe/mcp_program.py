@@ -185,6 +185,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         '''
         Forward pass for the MCP program. EVERYTHING IS BEING DONE IN HERE!!!
         '''
+
         unique_id = kwargs.get('id')
         question = kwargs.get('question')
         gt = kwargs.get('answer')
@@ -199,12 +200,12 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
         self.run_logger.info(f"ID: {manager.id}, Starting forward pass for question: {question}")
 
-
-        # Use config passed to the instance
+        # The config is passed to the program instance by the EvaluateBench constructor.
+        # We should use self.config instead of a global import.
         mcps = self.config['mcp_pool']
-
-
+        
         messages = build_init_messages(self.system_prompt, mcps, question)
+        system_prompt = messages[0][constants.CONTENT]
         self.run_logger.debug(f"ID: {manager.id}, Build initial messages: {messages}")
         steps = 0
         all_completion_tokens = 0
@@ -212,9 +213,8 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         start_time = time.time()
         tools_called = []
 
-        # Iterative processing loop until the last message is an assistant message or the maximum number of steps is reached
         while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
-            response, completion_tokens, prompt_tokens= call_lm(messages, manager, self.run_logger)
+            response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger, system_prompt=system_prompt)
             self.run_logger.debug(f"ID: {manager.id}, Response from LLM: {response}")
 
             all_completion_tokens += completion_tokens
@@ -225,18 +225,14 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
                 for mcp_call in mcp_calls.mcps:
                     tools_called.append(mcp_call)
                     # print(f"Adding tool: {mcp_call}")
-            
+
             self.run_logger.debug(f"ID: {manager.id}, After response parsing: {mcp_calls}")
 
             new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
-
-            # self.run_logger.info(f"New messages from MCP calling: {new_messages}")
             messages = build_messages(messages, new_messages)
-            self.run_logger.info(f"Messages concatenated with new messages: {messages}")
             steps += 1
 
         end_time = time.time()
-        # print(f"Tools called: {tools_called}")
 
         # If the maximum number of steps is reached and there is still no answer
         if messages[-1][constants.ROLE] != constants.ASSISTANT:
@@ -250,11 +246,14 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         prediction = messages[-1].get(constants.CONTENT, "")
         self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {prediction[:50]}")
 
-        # IMPORTANT: This is where the evaluation is done !!!!!!
+        ## Everything till here is the same as the forward() in mcp_program.py
+
+        ## Evaluation is done here!!!
+
         success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, tools_required, tools_called, messages[-1][constants.CONTENT])
-        self.log_messages(messages, question, success, (end_time-start_time), all_prompt_tokens, all_completion_tokens)
+        self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
+                          all_completion_tokens)
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
-        # self.run_logger.info("==" * 50)
 
         return dspy.Prediction(
             success=success,

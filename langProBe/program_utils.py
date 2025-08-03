@@ -127,6 +127,7 @@ def call_lm(
     try:
         # Getting the correct model to use for the LLM call.
         prefix, model_name = manager.model.split('/')
+        print(f"Model: {manager.model}")
         if prefix == 'anthropic':
             if Anthropic is None:
                 raise ImportError("The 'anthropic' package is required for Claude API support. Please install it via 'pip install anthropic'.")
