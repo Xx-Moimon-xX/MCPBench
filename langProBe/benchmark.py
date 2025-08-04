@@ -15,6 +15,8 @@ import langProBe.optimizers as langprobe_optimizers
 from langProBe.dspy_program import LangProBeDSPyMetaProgram
 from langProBe.config_utils import read_json, read_jsonl
 from langProBe.program_utils import ProcessManager
+import json
+# from langProBe.utils import flatten_dict
 
 
 """

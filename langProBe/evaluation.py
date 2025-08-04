@@ -110,6 +110,7 @@ def save_predictions_to_csv(file_path, predictions):
     # First pass to collect all unique keys in order of appearance
     for pred in predictions:
         eval_dict = {}
+        print(f"predictions: {pred}")
         if isinstance(pred.evaluation_data, str):
             try:
                 eval_dict = json.loads(pred.evaluation_data)
@@ -150,6 +151,48 @@ def save_predictions_to_csv(file_path, predictions):
             
             full_row = base_row_data + eval_row_data
             writer.writerow(full_row)
+
+
+def append_prediction_to_csv(file_path, prediction, all_eval_keys=None):
+    """
+    Appends a single prediction to the evaluation_data.csv file.
+    If the file does not exist, writes the header first.
+    all_eval_keys: list of all possible evaluation_data keys (for consistent columns).
+    """
+    csv_file_path = os.path.join(file_path, "evaluation_data.csv")
+    eval_dict = {}
+    if isinstance(prediction.evaluation_data, str):
+        try:
+            eval_dict = json.loads(prediction.evaluation_data)
+        except (json.JSONDecodeError, TypeError):
+            pass
+    elif isinstance(prediction.evaluation_data, dict):
+        eval_dict = prediction.evaluation_data
+
+    flat_eval_dict = flatten_dict(eval_dict)
+    if all_eval_keys is None:
+        all_eval_keys = list(flat_eval_dict.keys())
+
+    base_headers = ["serial_number", "question", "ground_truth", "answer", "tool_calling_success", "success"]
+    full_headers = base_headers + all_eval_keys
+
+    # If file doesn't exist, write header
+    write_header = not os.path.exists(csv_file_path)
+    with open(csv_file_path, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        if write_header:
+            writer.writerow(full_headers)
+        base_row_data = [
+            getattr(prediction, "serial_number", ""),
+            prediction.question,
+            prediction.ground_truth,
+            prediction.answer,
+            prediction.tool_calling_success,
+            prediction.success
+        ]
+        eval_row_data = [flat_eval_dict.get(header, "") for header in all_eval_keys]
+        full_row = base_row_data + eval_row_data
+        writer.writerow(full_row)
 
 
 def generate_evaluation_records(file_path):
@@ -305,10 +348,9 @@ def evaluate(
                 lm=lm,
                 benchmark_name=benchmark_meta.name,
                 num_threads=num_threads,
-                api_key=api_key if api_key else os.getenv("AWS_ACCESS_KEY_ID", ""),
+                api_key=api_key,
                 api_base=api_base if api_base else "",
                 config=config,
-                # dataset=dataset_name,
                 file_path=file_path,
                 eval_lm=eval_lm,
             )

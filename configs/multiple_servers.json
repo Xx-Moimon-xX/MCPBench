@@ -134,10 +134,6 @@
         {
             "name": "LLMText",
             "url": "https://mcp.llmtxt.dev/sse"
-        },
-        {
-            "name": "Coingecko",
-            "url": "https://mcp.api.coingecko.com/sse"
         }
     ]
 } 

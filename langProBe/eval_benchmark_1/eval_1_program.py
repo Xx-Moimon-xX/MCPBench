@@ -182,7 +182,7 @@ def evaluate_final_answer_eval1(
 
         # Success is defined as final_score >= 6 (based on eval_prompt_1_metric docstring)
         is_success = int(final_score) >= 6 and tool_calling_success
-        
+        print(f"Scores data being returned: {scores_data}")
         return is_success, json.dumps(scores_data), tool_calling_success
 
     except json.JSONDecodeError:
@@ -301,11 +301,13 @@ class Eval1Predict(MCPPredict):
         ## Evaluation is done here!!!
 
         success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, tools_required, tools_called, messages[-1][constants.CONTENT])
+        
         self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
                           all_completion_tokens)
         self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
 
-        return dspy.Prediction(
+        print(f"evaluation_data: {evaluation_data}")
+        prediction = dspy.Prediction(
             success=success,
             question=question,
             ground_truth=gt,
@@ -315,3 +317,11 @@ class Eval1Predict(MCPPredict):
             evaluation_data=evaluation_data,
             tool_calling_success=tool_calling_success
         )
+
+        # Write to CSV immediately after prediction is created
+        from langProBe.evaluation import append_prediction_to_csv
+        serial_number = kwargs.get('id', '')
+        setattr(prediction, "serial_number", serial_number)
+        append_prediction_to_csv(self.log_path, prediction)
+
+        return prediction

@@ -127,7 +127,7 @@ def call_lm(
     try:
         # Getting the correct model to use for the LLM call.
         prefix, model_name = manager.model.split('/')
-        print(f"Model: {manager.model}")
+        # print(f"Model: {manager.model}")
         if prefix == 'anthropic':
             if Anthropic is None:
                 raise ImportError("The 'anthropic' package is required for Claude API support. Please install it via 'pip install anthropic'.")
@@ -658,7 +658,7 @@ def mcp_calling(
         ## Tool call responses are truncated to 5000 characters!!!!
         messages.append({
             constants.ROLE: constants.TOOL,
-            constants.CONTENT: result_str[:5000],
+            constants.CONTENT: result_str,
         })
         logger.debug(f"ID:{manager.id}, Final messages prepared: {messages}")
         logger.info(f"ID:{manager.id}, mcp_calling completed successfully.")
