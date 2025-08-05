@@ -422,14 +422,13 @@ def build_system_content(base_system: str,
 
 
 def build_init_messages(
-        base_system: str,
-        mcps: List,
+        system_content: str,
         user_question: str,
        ) -> List[Dict]:
     '''
     Build the initial messages for the conversation, i.e. the system prompt and the user question.
     '''
-    system_content = build_system_content(base_system, mcps)
+    # system_content = build_system_content(base_system, mcps)
     messages = [
         {
             constants.ROLE: constants.SYSTEM,

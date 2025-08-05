@@ -10,6 +10,106 @@ import csv
 import json
 
 import dspy
+# import dspy.utils.parallelizer
+
+# # --- Monkey patch to ensure threads are properly cleaned up ---
+# # Patch ParallelExecutor to always wait for threads to finish
+# _orig_execute_parallel = dspy.utils.parallelizer.ParallelExecutor._execute_parallel
+
+# def _patched_execute_parallel(self, function, data):
+#     import concurrent.futures
+#     import threading
+#     import time
+#     import tqdm
+#     import sys
+#     import contextlib
+#     import copy
+#     results = [None] * len(data)
+#     job_cancelled = "cancelled"
+#     start_time_map = {}
+#     start_time_lock = threading.Lock()
+#     resubmitted = set()
+#     def worker(parent_overrides, submission_id, index, item):
+#         if self.cancel_jobs.is_set():
+#             return index, job_cancelled
+#         with start_time_lock:
+#             start_time_map[submission_id] = time.time()
+#         from dspy.dsp.utils.settings import thread_local_overrides
+#         original = thread_local_overrides.overrides
+#         thread_local_overrides.overrides = parent_overrides.copy()
+#         if parent_overrides.get("usage_tracker"):
+#             thread_local_overrides.overrides["usage_tracker"] = copy.deepcopy(parent_overrides["usage_tracker"])
+#         try:
+#             return index, function(item)
+#         finally:
+#             thread_local_overrides.overrides = original
+#     @contextlib.contextmanager
+#     def interrupt_manager():
+#         if threading.current_thread() is threading.main_thread():
+#             import signal
+#             orig_handler = signal.getsignal(signal.SIGINT)
+#             def handler(sig, frame):
+#                 self.cancel_jobs.set()
+#                 orig_handler(sig, frame)
+#             signal.signal(signal.SIGINT, handler)
+#             try:
+#                 yield
+#             finally:
+#                 signal.signal(signal.SIGINT, orig_handler)
+#         else:
+#             yield
+#     executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.num_threads)
+#     try:
+#         with interrupt_manager():
+#             from dspy.dsp.utils.settings import thread_local_overrides
+#             parent_overrides = thread_local_overrides.overrides.copy()
+#             futures_map = {}
+#             futures_set = set()
+#             submission_counter = 0
+#             for idx, item in enumerate(data):
+#                 f = executor.submit(worker, parent_overrides, submission_counter, idx, item)
+#                 futures_map[f] = (submission_counter, idx, item)
+#                 futures_set.add(f)
+#                 submission_counter += 1
+#             pbar = tqdm.tqdm(
+#                 total=len(data),
+#                 dynamic_ncols=True,
+#                 disable=self.disable_progress_bar,
+#                 file=sys.stdout,
+#             )
+#             def all_done():
+#                 return all(r is not None for r in results)
+#             while futures_set and not self.cancel_jobs.is_set():
+#                 if all_done():
+#                     break
+#                 done, not_done = concurrent.futures.wait(futures_set, timeout=1, return_when=concurrent.futures.FIRST_COMPLETED)
+#                 for f in done:
+#                     futures_set.remove(f)
+#                     try:
+#                         index, outcome = f.result()
+#                     except Exception:
+#                         pass
+#                     else:
+#                         if outcome != job_cancelled and results[index] is None:
+#                             results[index] = outcome
+#                         if self.compare_results:
+#                             vals = [r[-1] for r in results if r is not None]
+#                             self._update_progress(pbar, sum(vals), len(vals))
+#                         else:
+#                             self._update_progress(
+#                                 pbar,
+#                                 len([r for r in results if r is not None]),
+#                                 len(data),
+#                             )
+#                 if all_done():
+#                     break
+#             pbar.close()
+#     finally:
+#         executor.shutdown(wait=True)  # <--- THIS IS THE KEY CHANGE
+#     return results
+
+# dspy.utils.parallelizer.ParallelExecutor._execute_parallel = _patched_execute_parallel
+# # --- End monkey patch ---
 
 from langProBe.analysis import read_evaluation_results
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench, EvaluationResult
@@ -268,6 +368,7 @@ def evaluate(
     benchmark_meta: BenchmarkMeta,
     lm,
     file_path,
+    config,
     num_threads=8,
     suppress_dspy_output=True,
     dataset_mode=None,
@@ -275,7 +376,6 @@ def evaluate(
     missing_mode_file="",
     api_key=None,
     api_base=None,
-    config=None,
     eval_lm=None,
 ):
     """
@@ -378,6 +478,7 @@ def evaluate_all(
     benchmarks,
     lm,
     file_path,
+    config,
     num_threads=8,
     suppress_dspy_output=False,
     dataset_mode=None,
@@ -385,26 +486,25 @@ def evaluate_all(
     missing_mode_file="",
     api_key=None,
     api_base=None,
-    config=None,
     eval_lm=None,
 ):
     # Only register when benchmarks is a list of strings
     if benchmarks and isinstance(benchmarks[0], str):
-        benchmarks = register_all_benchmarks(benchmarks)
+        benchmarks = register_all_benchmarks(benchmarks, config=config)
 
     for benchmark_meta in benchmarks:
         evaluate(
             benchmark_meta,
             lm,
             file_path,
-            num_threads,
-            suppress_dspy_output,
-            dataset_mode,
-            dataset_path,
-            missing_mode_file,
+            config,  # Pass config as the 4th positional argument
+            num_threads=num_threads,
+            suppress_dspy_output=suppress_dspy_output,
+            dataset_mode=dataset_mode,
+            dataset_path=dataset_path,
+            missing_mode_file=missing_mode_file,
             api_key=api_key,
             api_base=api_base,
-            config=config,
             eval_lm=eval_lm,
         )
 
@@ -477,10 +577,7 @@ def main():
     
     # Register all benchmarks
     # Basically just importing the websearch/DB/GAIA python modules
-    register_all_benchmarks([benchmark_path])
-
-    
-    benchmarks = [benchmark for benchmark in registered_benchmarks]
+    benchmarks = register_all_benchmarks([benchmark_path], config=config)
     if not benchmarks:
         print(f"No benchmark registered with name {args.benchmark}\n")
         sys.exit(1)

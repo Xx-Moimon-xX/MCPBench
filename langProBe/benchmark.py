@@ -14,7 +14,7 @@ from dspy.evaluate import Evaluate
 import langProBe.optimizers as langprobe_optimizers
 from langProBe.dspy_program import LangProBeDSPyMetaProgram
 from langProBe.config_utils import read_json, read_jsonl
-from langProBe.program_utils import ProcessManager
+from langProBe.program_utils import ProcessManager, build_system_content
 import json
 # from langProBe.utils import flatten_dict
 
@@ -254,11 +254,11 @@ class EvaluateBench(ABC):
         program: dspy.Module,
         metric: Callable,
         lm: str,
+        config,
         benchmark_name: str = None,
         num_threads: int = 1,
         api_key: str = None,
         api_base: str = None,
-        config=None,
         file_path=None,
         eval_lm=None,
     ):

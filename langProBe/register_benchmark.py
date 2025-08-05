@@ -36,10 +36,36 @@ def register_benchmark(benchmark: str):
     return benchmark_metas.benchmark
 
 
-def register_all_benchmarks(benchmarks):
+def register_all_benchmarks(benchmarks, config=None):
     '''
-    Just calling register_benchmark for each benchmark in the list (all strings)
+    Registers all benchmarks in the list.
+    For each benchmark module, tries to call a getter function with config if available,
+    otherwise falls back to the 'benchmark' attribute.
     '''
+    import importlib
+    registered = []
+    getter_names = [
+        "get_eval_benchmark_1",
+        "get_eval_benchmark_2",
+        "get_eval_benchmark_3",
+        "get_mcp_sample_benchmark",  # generic
+        # Add more as needed
+    ]
     for benchmark in benchmarks:
-        register_benchmark(benchmark)
-    return registered_benchmarks
+        module = importlib.import_module(benchmark)
+        for getter in getter_names:
+            if hasattr(module, getter):
+                registered.extend(getattr(module, getter)(config))
+                break
+        else:
+            # Fallback: use the 'benchmark' attribute if present (as in register_benchmark)
+            if hasattr(module, "benchmark"):
+                bench = getattr(module, "benchmark")
+                # If it's a list, extend; if not, append
+                if isinstance(bench, list):
+                    registered.extend(bench)
+                else:
+                    registered.append(bench)
+            else:
+                raise AssertionError(f"{benchmark} does not have a recognized getter or 'benchmark' attribute")
+    return registered

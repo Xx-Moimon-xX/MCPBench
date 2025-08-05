@@ -12,8 +12,9 @@ A brief text description outlining the functionality of the tool.
 Detailed information about input parameters, where each parameter includes: parameter name, parameter type, whether it is mandatory, and the purpose or description of the parameter.
 """
 
-def get_eval_benchmark_1():
+def get_eval_benchmark_1(config):
     eval_benchmark_1_baseline = Eval1Predict(
+        config=config,
         max_steps=5,
         system_prompt=MCP_SAMPLE_SYSTEM_PROMPT,
         task_name="eval_benchmark_1")
@@ -29,6 +30,3 @@ def get_eval_benchmark_1():
             name="EVAL_BENCHMARK_1"
         )
     ]
-
-# Returns a BenchmarkMeta object
-benchmark = get_eval_benchmark_1()

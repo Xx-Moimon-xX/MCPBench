@@ -199,8 +199,8 @@ class Eval1Predict(MCPPredict):
     '''
     Program that is run to get responses. Called Eval1Predict and it is a child class of MCPPredict.
     '''
-    def __init__(self, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="eval1"):
-        super().__init__(max_steps, system_prompt, task_name)
+    def __init__(self, config, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="eval1"):
+        super().__init__(config, max_steps, system_prompt, task_name)
 
     
     def evaluate_prediction(self, question: str, ground_truth: str, tools_required: List[str], tools_called: List[MCPCall], prediction: str) -> Tuple[bool, Optional[str]]:
@@ -267,9 +267,9 @@ class Eval1Predict(MCPPredict):
         print(f"[PROFILE] init_manager took {timings['init_manager']:.4f}s")
         # --- END PROFILING ADDITIONS ---
 
-        mcps = self.config['mcp_pool']
+        # mcps = self.config['mcp_pool']
         
-        messages = build_init_messages(self.system_prompt, mcps, question)
+        messages = build_init_messages(self.system_content, question)
         system_prompt = messages[0][constants.CONTENT]
 
         # --- PROFILING ADDITIONS ---

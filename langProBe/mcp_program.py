@@ -8,7 +8,8 @@ from langProBe.program_utils import (
     mcp_calling,
     ProcessManager,
     MCPCall,
-    MCPCallList
+    MCPCallList, 
+    build_system_content
 )
 import time
 from langProBe.evaluation_utils import evaluate_final_answer
@@ -76,7 +77,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
     '''
     This is the program/system that is run to get responses. Called MCPPredict.
     '''
-    def __init__(self, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="mcp_sample", config=None):
+    def __init__(self, config, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="mcp_sample"):
         super().__init__()
         self.system_prompt = system_prompt
         self.task_name = task_name
@@ -101,6 +102,8 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         os.makedirs('logs', exist_ok=True)
         # self.setup_loggers()
 
+        mcps = self.config["mcp_pool"]
+        self.system_content = build_system_content(self.system_prompt, mcps)
     # def set_dataset(self, dataset):
     #     self.dataset = dataset
         # self.setup_loggers()
