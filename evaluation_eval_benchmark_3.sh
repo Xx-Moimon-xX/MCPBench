@@ -31,6 +31,7 @@ python3 -m langProBe.evaluation \
   --dataset_path=langProBe/eval_benchmark_3/data/$dataset_name.jsonl \
   --file_path=runs/$DATE/eval_benchmark_3_run_${TIMESTAMP}_${dataset_name} \
   --lm=bedrock/apac.anthropic.claude-3-7-sonnet-20250219-v1:0 \
+  --eval_lm=anthropic/claude-3-5-sonnet-20241022 \
   --lm_api_key=$AWS_ACCESS_KEY_ID \
   --num_threads=1 \
   --config=$CONFIG_FILE

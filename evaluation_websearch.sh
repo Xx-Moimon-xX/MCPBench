@@ -32,16 +32,17 @@ DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
 DATE=$(date +%F)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-dataset_name=websearch_10_forslack
+dataset_name=websearch_600
 
 python3 -m langProBe.evaluation \
   --benchmark=WebSearch \
   --dataset_mode=tiny \
   --dataset_path=langProBe/WebSearch/data/$dataset_name.jsonl \
   --file_path=runs/$DATE/websearch_run_${TIMESTAMP}_${dataset_name} \
-  --lm=bedrock/apac.anthropic.claude-3-5-sonnet-20241022-v2:0 \
-  --lm_api_key=$AWS_ACCESS_KEY_ID \
-  --num_threads=1 \
+  --lm=anthropic/claude-sonnet-4-20250514 \
+  --eval_lm=anthropic/claude-3-5-sonnet-20241022 \
+  --lm_api_key=$ANTHROPIC_API_KEY \
+  --num_threads=3 \
   --config=$CONFIG_FILE
 
 # python -c "

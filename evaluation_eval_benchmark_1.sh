@@ -32,7 +32,7 @@ DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
 DATE=$(date +%F)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-dataset_name=slack_14_eval1
+dataset_name=slack_50_genprompt2
 
 python3 -m langProBe.evaluation \
   --benchmark=eval_benchmark_1 \
@@ -40,8 +40,9 @@ python3 -m langProBe.evaluation \
   --dataset_path=langProBe/eval_benchmark_1/data/$dataset_name.jsonl \
   --file_path=runs/$DATE/eval_benchmark_1_run_${TIMESTAMP}_${dataset_name} \
   --lm=anthropic/claude-3-7-sonnet-20250219 \
+  --eval_lm=anthropic/claude-3-5-sonnet-20241022 \
   --lm_api_key=$AWS_ACCESS_KEY_ID \
-  --num_threads=2 \
+  --num_threads=1 \
   --config=$CONFIG_FILE
 
 # apac.anthropic.claude-3-5-sonnet-20241022-v2:0

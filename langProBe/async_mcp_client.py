@@ -17,7 +17,7 @@ class AsyncMCPClient:
     async def connect_to_sse_server(self, server_url: str, headers=None):
         """Connect to an MCP server running with SSE transport"""
         # Store the context managers so they stay alive
-        self._streams_context = sse_client(url=server_url, headers=headers)
+        self._streams_context = sse_client(url=server_url, headers=headers, timeout=10)
         streams = await self._streams_context.__aenter__()
 
         self._session_context = ClientSession(*streams)
