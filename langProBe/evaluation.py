@@ -209,23 +209,28 @@ def save_predictions_to_csv(file_path, predictions):
     
     # First pass to collect all unique keys in order of appearance
     for pred in predictions:
-        eval_dict = {}
-        print(f"predictions: {pred}")
-        if isinstance(pred.evaluation_data, str):
-            try:
-                eval_dict = json.loads(pred.evaluation_data)
-            except (json.JSONDecodeError, TypeError):
-                pass
-        elif isinstance(pred.evaluation_data, dict):
-            eval_dict = pred.evaluation_data
-        
-        flat_eval_dict = flatten_dict(eval_dict)
-        parsed_eval_data_list.append(flat_eval_dict)
-        
-        for key in flat_eval_dict.keys():
-            if key not in seen_keys:
-                all_eval_keys.append(key)
-                seen_keys.add(key)
+        if hasattr(pred, "evaluation_data"):
+            eval_dict = {}
+            print(f"predictions: {pred}")
+            if isinstance(pred.evaluation_data, str):
+                try:
+                    eval_dict = json.loads(pred.evaluation_data)
+                except (json.JSONDecodeError, TypeError):
+                    print(f"Error loading evaluation data for prediction")
+                    pass
+            elif isinstance(pred.evaluation_data, dict):
+                eval_dict = pred.evaluation_data
+            
+            flat_eval_dict = flatten_dict(eval_dict)
+            parsed_eval_data_list.append(flat_eval_dict)
+            
+            for key in flat_eval_dict.keys():
+                if key not in seen_keys:
+                    all_eval_keys.append(key)
+                    seen_keys.add(key)
+        else: 
+            print(f"No evaluation data found for prediction: {pred}")
+            continue
 
     base_headers = ["serial_number","question", "ground_truth", "answer","tool_calling_success", "success"]
     eval_data_headers = all_eval_keys  # No longer sorting
