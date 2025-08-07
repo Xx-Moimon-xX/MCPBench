@@ -144,7 +144,15 @@ def call_lm(
                 elif m.get("role") == "tool":
                     claude_messages.append({"role": "user", "content": m["content"]})
             # Call Claude API
+
+
             if system_prompt:
+                messages_tokens = client.messages.count_tokens(
+                    model=model_name,
+                    messages=claude_messages,
+                    system=system_prompt
+                )
+                print(f"Total tokens being passed to the model with system prompt: {messages_tokens}")
                 completion = client.messages.create(
                     model=model_name,
                     max_tokens=1024,
@@ -153,6 +161,11 @@ def call_lm(
                     system=system_prompt
                 )
             else:   
+                messages_tokens = client.messages.count_tokens(
+                    model=model_name,
+                    messages=claude_messages
+                )
+                print(f"Total tokens being passed to the model: {messages_tokens}")
                 completion = client.messages.create(
                     model=model_name,
                     max_tokens=1024,
@@ -161,12 +174,12 @@ def call_lm(
                 )
             
             # Log the full response for debugging
-            logger.debug(f"ID: {manager.id}, Full Anthropic API response: {completion}")
+            logger.debug(f"ID: {manager.id} (in call_lm), Full Anthropic API response: {completion}")
             
             response_text = completion.content[0].text if completion.content else ""
             
             # Log extracted content
-            logger.debug(f"ID: {manager.id}, Extracted response_text: '{response_text}'")
+            logger.debug(f"ID: {manager.id} (in call_lm), Extracted response_text: '{response_text}'")
             # Anthropic does not return token usage in the same way
             if hasattr(completion, 'usage') and completion.usage is not None:
                 completion_tokens = getattr(completion.usage, 'output_tokens', 0)
@@ -232,7 +245,7 @@ def call_lm(
                 response = bedrock_client.converse(**request_params)
                 
                 # Log the full response for debugging
-                logger.debug(f"ID: {manager.id}, Full Bedrock API response: {json.dumps(response, indent=2, default=str)}")
+                logger.debug(f"ID: {manager.id} (in call_lm), Full Bedrock API response: {json.dumps(response, indent=2, default=str)}")
                 # print(f"Model used: {model_name}")
                 # Extract response content
                 output_message = response.get('output', {}).get('message', {})
@@ -246,7 +259,7 @@ def call_lm(
                             response_text += content['text']
                 
                 # Log extracted content
-                logger.debug(f"ID: {manager.id}, Extracted response_text: '{response_text}'")
+                logger.debug(f"ID: {manager.id} (in call_lm), Extracted response_text: '{response_text}'")
                 
                 # Extract token usage
                 usage = response.get('usage', {})
@@ -260,7 +273,7 @@ def call_lm(
                 return response_text, completion_tokens, prompt_tokens
                 
             except (ClientError, BotoCoreError) as e:
-                logger.error(f"ID: {manager.id}, AWS Bedrock error: {str(e)}")
+                logger.error(f"ID: {manager.id} (in call_lm), AWS Bedrock error: {str(e)}")
                 logger.error("Exiting program due to AWS Bedrock error.")
                 raise
                 # sys.exit(1)
@@ -268,7 +281,7 @@ def call_lm(
         else:
             # --- OpenAI logic as before ---
             # Creating the OpenAI client
-            print(f"ID: {manager.id}, Calling OpenAI API with model: {model_name}")
+            print(f"ID: {manager.id} (in call_lm), Calling OpenAI API with model: {model_name}")
             oai = OpenAI(
                 api_key=manager.lm_api_key,
                 base_url=manager.lm_api_base,
@@ -322,12 +335,12 @@ def call_lm(
                     model=model_name,
                 )
                 # Log the full response for debugging
-                logger.debug(f"ID: {manager.id}, Full OpenAI API response: {response}")
+                logger.debug(f"ID: {manager.id} (in call_lm), Full OpenAI API response: {response}")
                 
                 response_text = response.choices[0].message.content or ""
                 
                 # Log extracted content
-                logger.debug(f"ID: {manager.id}, Extracted response_text: '{response_text}'")
+                logger.debug(f"ID: {manager.id} (in call_lm), Extracted response_text: '{response_text}'")
                 
                 completion_tokens = response.usage.completion_tokens
                 prompt_tokens = response.usage.prompt_tokens
@@ -338,9 +351,9 @@ def call_lm(
             return response_text, completion_tokens, prompt_tokens
     
     except Exception as e:
-        logger.error(f"ID: {manager.id}, Error in call_lm: {str(e)}")
+        logger.error(f"ID: {manager.id} (in call_lm), Error in call_lm: {str(e)}")
         if response:
-            logger.error(f"ID: {manager.id}, Response: {response}")
+            logger.error(f"ID: {manager.id} (in call_lm), Response: {response}")
         raise
 
 def build_system_content(base_system: str,
@@ -521,7 +534,7 @@ def mcp_calling(
     Processes each tool call in the MCP call list, reusing SyncedMcpClient per server and ensuring cleanup.
     If client_cache is not provided, a new one is created and all clients are cleaned up at the end.
     '''
-    logger.debug(f"ID:{manager.id}, Entering mcp_calling with mcp_call_list: {mcp_call_list}")
+    logger.debug(f"ID: {manager.id} (in mcp_calling), Entering mcp_calling with mcp_call_list: {mcp_call_list}")
 
     created_cache = False
     if client_cache is None:
@@ -529,20 +542,20 @@ def mcp_calling(
         created_cache = True
 
     if mcp_call_list.shutdown:
-        logger.info(f"ID:{manager.id}, Shutdown flag is set. No more MCP calling.")
+        logger.info(f"ID: {manager.id} (in mcp_calling), Shutdown flag is set. No more MCP calling.")
         messages = [
             {
                 constants.ROLE: constants.ASSISTANT,
                 constants.CONTENT: mcp_call_list.raw_content if mcp_call_list.raw_content else '',
             }
         ]
-        logger.debug(f"ID:{manager.id}, Shutdown messages prepared: {messages}")
+        logger.debug(f"ID: {manager.id} (in mcp_calling), Shutdown messages prepared: {messages}")
         # Clean up if we created the cache
         if created_cache:
             cleanup_all_clients(client_cache)
         return messages
     else:
-        logger.info(f"ID:{manager.id}, Processing MCP call list with {len(mcp_call_list.mcps)} MCPs. mcp_call_list: {mcp_call_list}")
+        logger.info(f"ID: {manager.id} (in mcp_calling), Processing MCP call list with {len(mcp_call_list.mcps)} MCPs. mcp_call_list: {mcp_call_list}")
         mcp_list = mcp_call_list.mcps
         messages = [
             {
@@ -555,41 +568,41 @@ def mcp_calling(
 
         # Iterating over each MCP call in the MCP call list
         for idx, mcp in enumerate(mcp_list, start=1):
-            logger.debug(f"ID:{manager.id}, Processing MCP #{idx}: {mcp}")
+            logger.debug(f"ID: {manager.id} (in mcp_calling), Processing MCP #{idx}: {mcp}")
             mcp_server_name = mcp.mcp_server_name
             mcp_tool_name = mcp.mcp_tool_name
             mcp_args = mcp.mcp_args
 
             try:
                 # Use passed config parameter, fallback to global_config if needed
-                logger.debug(f"ID:{manager.id}, Received config parameter: {config}")
+                logger.debug(f"ID: {manager.id} (in mcp_calling), Received config parameter: {config}")
                 parsed_data = config
                 if parsed_data is None:
                     from langProBe.evaluation import global_config
-                    logger.debug(f"ID:{manager.id}, Fallback to global_config: {global_config}")
+                    logger.debug(f"ID: {manager.id} (in mcp_calling), Fallback to global_config: {global_config}")
                     parsed_data = global_config
                 
                 # Handle case where config is None
                 if parsed_data is None:
-                    logger.error(f"ID:{manager.id}, config is None, cannot initialize MCP client")
-                    logger.warning(f"ID:{manager.id}, Skipping tool call for '{mcp_tool_name}' due to missing configuration.")
+                    logger.error(f"ID: {manager.id} (in mcp_calling), config is None, cannot initialize MCP client")
+                    logger.warning(f"ID: {manager.id} (in mcp_calling), Skipping tool call for '{mcp_tool_name}' due to missing configuration.")
                     continue
 
                 # Additional safety check
                 if not isinstance(parsed_data, dict):
-                    logger.error(f"ID:{manager.id}, config is not a dict: {type(parsed_data)}")
-                    logger.warning(f"ID:{manager.id}, Skipping tool call for '{mcp_tool_name}' due to invalid configuration.")
+                    logger.error(f"ID: {manager.id} (in mcp_calling), config is not a dict: {type(parsed_data)}")
+                    logger.warning(f"ID: {manager.id} (in mcp_calling), Skipping tool call for '{mcp_tool_name}' due to invalid configuration.")
                     continue
 
                 target_name = mcp_server_name
                 port = None
                 url = None
-                logger.debug(f"ID:{manager.id}, Parsed config keys: {list(parsed_data.keys())}")
+                logger.debug(f"ID: {manager.id} (in mcp_calling), Parsed config keys: {list(parsed_data.keys())}")
                 mcp_pool = parsed_data.get("mcp_pool", [])
-                logger.debug(f"ID:{manager.id}, MCP pool: {mcp_pool}")
+                logger.debug(f"ID: {manager.id} (in mcp_calling), MCP pool: {mcp_pool}")
                 if not mcp_pool:
-                    logger.error(f"ID:{manager.id}, No MCP pool found in configuration")
-                    logger.warning(f"ID:{manager.id}, Skipping tool call for '{mcp_tool_name}' due to missing MCP pool.")
+                    logger.error(f"ID: {manager.id} (in mcp_calling), No MCP pool found in configuration")
+                    logger.warning(f"ID: {manager.id} (in mcp_calling), Skipping tool call for '{mcp_tool_name}' due to missing MCP pool.")
                     continue
 
                 for item in mcp_pool:
@@ -632,38 +645,38 @@ def mcp_calling(
                     else:
                         client = SyncedMcpClient(server_url=url, headers=headers)
                         client_cache[cache_key] = client
-                    logger.debug(f"ID:{manager.id}, Initialized SyncedMcpClient with URL: {url}")
+                    logger.debug(f"ID: {manager.id} (in mcp_calling), Initialized SyncedMcpClient with URL: {url}")
                     client.list_tools()
-                    logger.debug(f"ID:{manager.id}, Retrieved tool list from MCP Server '{target_name}'.")
+                    logger.debug(f"ID: {manager.id} (in mcp_calling), Retrieved tool list from MCP Server '{target_name}'.")
             except Exception as e:
-                logger.error(f"ID:{manager.id}, Failed to initialize SyncedMcpClient for server '{mcp_server_name}': {str(e)}")
+                logger.error(f"ID: {manager.id} (in mcp_calling), Failed to initialize SyncedMcpClient for server '{mcp_server_name}': {str(e)}")
                 client = None
 
             if client:
                 try:
-                    logger.debug(f"ID:{manager.id}, Calling tool '{mcp_tool_name}' with arguments: {mcp_args}")
+                    logger.debug(f"ID: {manager.id} (in mcp_calling), Calling tool '{mcp_tool_name}' with arguments: {mcp_args}")
                     result = client.call_tool(mcp_tool_name, mcp_args)
-                    logger.debug(f"ID:{manager.id}, Raw tool call response from '{mcp_tool_name}': {result}")
+                    logger.debug(f"ID: {manager.id} (in mcp_calling), Raw tool call response from '{mcp_tool_name}': {result}")
                     texts = [item.text for item in result.content]
 
                     result_str_segment = ''.join(texts)
-                    logger.debug(f"ID:{manager.id}, Cleaned tool call response from '{mcp_tool_name}': {result_str_segment}")
+                    logger.debug(f"ID: {manager.id} (in mcp_calling), Cleaned tool call response from '{mcp_tool_name}': {result_str_segment}")
 
-                    logger.info(f"ID:{manager.id}, MCP Server '{mcp_server_name}' returned: {result_str_segment[:5000]}")
+                    logger.info(f"ID: {manager.id} (in mcp_calling), MCP Server '{mcp_server_name}' returned: {result_str_segment[:5000]}")
 
                     result_str += result_str_segment
                 except Exception as e:
-                    logger.error(f"ID:{manager.id}, Error calling tool '{mcp_tool_name}' on MCP Server '{mcp_server_name}': {str(e)}")
+                    logger.error(f"ID: {manager.id} (in mcp_calling), Error calling tool '{mcp_tool_name}' on MCP Server '{mcp_server_name}': {str(e)}")
             else:
-                logger.warning(f"ID:{manager.id}, Skipping tool call for '{mcp_tool_name}' due to client initialization failure.")
+                logger.warning(f"ID: {manager.id} (in mcp_calling), Skipping tool call for '{mcp_tool_name}' due to client initialization failure.")
 
         ## Tool call responses are truncated to 5000 characters!!!!
         messages.append({
             constants.ROLE: constants.TOOL,
             constants.CONTENT: result_str,
         })
-        logger.debug(f"ID:{manager.id}, Final messages prepared: {messages}")
-        logger.info(f"ID:{manager.id}, mcp_calling completed successfully.")
+        logger.debug(f"ID: {manager.id} (in mcp_calling), Final messages prepared: {messages}")
+        logger.info(f"ID: {manager.id} (in mcp_calling), mcp_calling completed successfully.")
         # Clean up if we created the cache
         if created_cache:
             cleanup_all_clients(client_cache)
