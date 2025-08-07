@@ -252,7 +252,7 @@ class Eval1Predict(MCPPredict):
         # --- PROFILING ADDITIONS ---
         t1 = time.perf_counter()
         timings['init_vars'] = t1 - t0
-        print(f"[PROFILE] init_vars took {timings['init_vars']:.4f}s")
+        # print(f"[PROFILE] init_vars took {timings['init_vars']:.4f}s")
         # --- END PROFILING ADDITIONS ---
 
         manager = ProcessManager()
@@ -264,7 +264,7 @@ class Eval1Predict(MCPPredict):
         # --- PROFILING ADDITIONS ---
         t2 = time.perf_counter()
         timings['init_manager'] = t2 - t1
-        print(f"[PROFILE] init_manager took {timings['init_manager']:.4f}s")
+        # print(f"[PROFILE] init_manager took {timings['init_manager']:.4f}s")
         # --- END PROFILING ADDITIONS ---
 
         # mcps = self.config['mcp_pool']
@@ -276,7 +276,7 @@ class Eval1Predict(MCPPredict):
         t3 = time.perf_counter()
         timings['build_init_messages'] = t3 - t2
         data_sizes['init_messages'] = len(str(messages))
-        print(f"[PROFILE] build_init_messages took {timings['build_init_messages']:.4f}s")
+        # print(f"[PROFILE] build_init_messages took {timings['build_init_messages']:.4f}s")
         # --- END PROFILING ADDITIONS ---
 
         steps = 0
@@ -334,7 +334,7 @@ class Eval1Predict(MCPPredict):
         loop_end = time.perf_counter()
         timings['main_loop'] = loop_end - loop_start
         data_sizes['final_messages'] = len(str(messages))
-        print(f"[PROFILE] main loop took {timings['main_loop']:.4f}s")
+        # print(f"[PROFILE] main loop took {timings['main_loop']:.4f}s")
         # --- END PROFILING ADDITIONS ---
 
         end_time = time.time()
@@ -363,7 +363,7 @@ class Eval1Predict(MCPPredict):
         timings['evaluate_prediction'] = eval_end - eval_start
         if evaluation_data is not None:
             data_sizes['evaluation_data'] = len(str(evaluation_data))
-        print(f"[PROFILE] evaluate_prediction took {timings['evaluate_prediction']:.4f}s")
+        # print(f"[PROFILE] evaluate_prediction took {timings['evaluate_prediction']:.4f}s")
         # --- END PROFILING ADDITIONS ---
 
         self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
@@ -386,7 +386,11 @@ class Eval1Predict(MCPPredict):
         from langProBe.evaluation import append_prediction_to_csv
         serial_number = kwargs.get('id', '')
         setattr(prediction, "serial_number", serial_number)
-        append_prediction_to_csv(self.log_path, prediction)
+        try:
+            append_prediction_to_csv(self.log_path, prediction)
+        except Exception as e:
+            self.run_logger.error(f"Failed to write prediction to CSV for serial_number {serial_number}: {e}")
+            print(f"Failed to write prediction to CSV for serial_number {serial_number}: {e}")
 
         # --- PROFILING ADDITIONS ---
         print(f"[PROFILE] Timings: {timings}")

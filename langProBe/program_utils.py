@@ -515,11 +515,18 @@ def mcp_calling(
         manager: ProcessManager,
         logger: logging.Logger,
         config: dict,
+        client_cache: dict = None,  # New parameter for client reuse
 ) -> List[Dict]:
     '''
-    Processes each tool call in the MCP call list.
+    Processes each tool call in the MCP call list, reusing SyncedMcpClient per server and ensuring cleanup.
+    If client_cache is not provided, a new one is created and all clients are cleaned up at the end.
     '''
     logger.debug(f"ID:{manager.id}, Entering mcp_calling with mcp_call_list: {mcp_call_list}")
+
+    created_cache = False
+    if client_cache is None:
+        client_cache = {}
+        created_cache = True
 
     if mcp_call_list.shutdown:
         logger.info(f"ID:{manager.id}, Shutdown flag is set. No more MCP calling.")
@@ -530,6 +537,9 @@ def mcp_calling(
             }
         ]
         logger.debug(f"ID:{manager.id}, Shutdown messages prepared: {messages}")
+        # Clean up if we created the cache
+        if created_cache:
+            cleanup_all_clients(client_cache)
         return messages
     else:
         logger.info(f"ID:{manager.id}, Processing MCP call list with {len(mcp_call_list.mcps)} MCPs. mcp_call_list: {mcp_call_list}")
@@ -550,18 +560,6 @@ def mcp_calling(
             mcp_tool_name = mcp.mcp_tool_name
             mcp_args = mcp.mcp_args
 
-
-            tool_call = {
-                "type": "function",
-                "function": {
-                    "name": mcp_tool_name,
-                    "arguments": json.dumps(mcp_args, ensure_ascii=False)
-                }
-            }
-            messages[0][constants.TOOL_CALLS].append(tool_call)
-            logger.info(f"ID:{manager.id}, Calling MCP Server: {mcp_server_name}, Tool: {mcp_tool_name}, Arguments: {mcp_args}")
-
-            # Manage manager.mcp_rts and manager.mcp_retry_times
             try:
                 # Use passed config parameter, fallback to global_config if needed
                 logger.debug(f"ID:{manager.id}, Received config parameter: {config}")
@@ -570,7 +568,6 @@ def mcp_calling(
                     from langProBe.evaluation import global_config
                     logger.debug(f"ID:{manager.id}, Fallback to global_config: {global_config}")
                     parsed_data = global_config
-                
                 
                 # Handle case where config is None
                 if parsed_data is None:
@@ -627,8 +624,14 @@ def mcp_calling(
                             url = f"http://localhost:{port}/sse"
                         except:
                             raise Exception("No url found")
-                    
-                    client = SyncedMcpClient(server_url=url, headers=headers)
+
+                    # Use (url, str(headers)) as cache key for uniqueness
+                    cache_key = (url, str(headers))
+                    if cache_key in client_cache:
+                        client = client_cache[cache_key]
+                    else:
+                        client = SyncedMcpClient(server_url=url, headers=headers)
+                        client_cache[cache_key] = client
                     logger.debug(f"ID:{manager.id}, Initialized SyncedMcpClient with URL: {url}")
                     client.list_tools()
                     logger.debug(f"ID:{manager.id}, Retrieved tool list from MCP Server '{target_name}'.")
@@ -661,7 +664,18 @@ def mcp_calling(
         })
         logger.debug(f"ID:{manager.id}, Final messages prepared: {messages}")
         logger.info(f"ID:{manager.id}, mcp_calling completed successfully.")
+        # Clean up if we created the cache
+        if created_cache:
+            cleanup_all_clients(client_cache)
         return messages
+
+# Helper function to clean up all clients in the cache
+def cleanup_all_clients(client_cache: dict):
+    for client in client_cache.values():
+        try:
+            client.cleanup()
+        except Exception:
+            pass
 
 class DotDict(dict):
     def __getattr__(self, key):

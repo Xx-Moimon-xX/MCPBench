@@ -104,9 +104,12 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
         mcps = self.config["mcp_pool"]
         self.system_content = build_system_content(self.system_prompt, mcps)
-    # def set_dataset(self, dataset):
-    #     self.dataset = dataset
-        # self.setup_loggers()
+        # --- Persistent client cache for MCP tool calls ---
+        self.client_cache = None  # Will be set by EvaluateBench if available
+        # --------------------------------------------------
+
+    def set_client_cache(self, client_cache):
+        self.client_cache = client_cache
 
     def set_log_path(self, path):
         self.log_path = path
@@ -273,10 +276,12 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             # --- PROFILING ADDITIONS ---
             call_start = time.perf_counter()
             # --- END PROFILING ADDITIONS ---
-            new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
+            # --- Pass persistent client_cache to mcp_calling ---
+            new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config, client_cache=self.client_cache)
+            # ---------------------------------------------------
             # --- PROFILING ADDITIONS ---
             call_end = time.perf_counter()
-            print(f"[PROFILE] Step {steps}: mcp_calling took {call_end - call_start:.4f}s, returned {len(new_messages)} new messages")
+            print(f"[PROFILE] Step {steps}: mcp_calling took {call_end - call_start:.4f}s, returned {len(messages_new)} new messages")
             # --- END PROFILING ADDITIONS ---
 
             messages = build_messages(messages, new_messages)

@@ -243,7 +243,10 @@ def calculate_stats(manager: List[ProcessManager]) -> tuple[float, float, float]
     return 0, avg_input, avg_output
 
 
-
+"""
+This module now ensures that for MCP tool calls, only one SyncedMcpClient process per server is created and reused for the entire evaluation run.
+A persistent client_cache is created in EvaluateBench and passed to all tool calls (via mcp_calling), and all clients are cleaned up at the end.
+"""
 class EvaluateBench(ABC):
     '''
     Abstract base class for evaluating a program on a benchmark. Handles evaluation logic, result storage, and metric calculation.
@@ -265,7 +268,6 @@ class EvaluateBench(ABC):
         '''
         Initializes the evaluation with the given benchmark, program, metric, language model, and other configs.
         '''
-
         self.benchmark = benchmark
         # Pass config to the program if it accepts it
         if hasattr(program, 'config'):
@@ -281,18 +283,16 @@ class EvaluateBench(ABC):
         devset = benchmark.get_test_set()
         self.program.lm.eval_model = eval_lm
 
+        # --- Persistent client cache for MCP tool calls ---
+        # This ensures only one SyncedMcpClient process per server for the entire evaluation run.
+        from langProBe.program_utils import cleanup_all_clients
+        self.client_cache = {}
+        self._cleanup_all_clients = cleanup_all_clients
+        # Always set the cache on the program if supported
+        self.program.set_client_cache(self.client_cache)
+        # --------------------------------------------------
 
         # Everything is done inside here!!
-        # Devset is just the json file with given input and output. Example below::
-
-        # DEBUG: devset: [Example({'id': 676, 'question': 'What is the country of origin of the football coach with the first initial "P" for the Thailand national men\'s football team who coached 54 years after the country\'s name officially changed?', 'answer': 'German.'}) (input_keys={'question', 'config', 'answer', 'id'}), Example({'id': 537, 'question': 'I am thinking of a movie where Hans Zimmer won a Grammy Award for his work. He won the Grammy award the same year that he did his first musical score for film director Michael Bay. Can you please tell me the name of that movie?', 'answer': 'Crimson Tide'}) (input_keys={'question', 'config', 'answer', 'id'})]
-        
-        # Looks like the response generation and evaluation is all done together here..??
-        # Evaluate calls our program(**example.input) function i.e. the forward pass to geth the prediction.
-        # Response generation is done by your program/model (e.g., MCPPredict), not by the metric or the high-level evaluate function.
-        # The Evaluate class orchestrates the process: for each example, it calls your program to generate a response, then calls the metric to score it.
-        
-        # Black box, does it all for you, this is the DSPy Evaluate class, I understand how it works now.
         self.evaluate_prog = Evaluate(
             devset=devset,
             metric=self.metric,
@@ -334,17 +334,18 @@ class EvaluateBench(ABC):
         '''
         Evaluates the program on the benchmark using the baseline method and returns an EvaluationResult.
         '''
+        # Patch: inject client_cache into the program if it supports it
+        if hasattr(self.program, 'set_client_cache'):
+            self.program.set_client_cache(self.client_cache)
+        elif hasattr(self.program, 'client_cache'):
+            self.program.client_cache = self.client_cache
+        # else: for legacy programs, they must pass client_cache manually to mcp_calling
 
-        ## Everything is not done here, it's further in evaluate_prog(self.program)
-        with dspy.context(**dspy_config):
-            # Program is passed to Evaluate class here.
-            # info containe tuple: (example, prediction, score)
+        with dspy.context(**(dspy_config or {})):
             score, info = self.evaluate_prog(self.program)
-            # print(f"DEBUG: score: {score} info: {info}")
 
         result = self.get_empty_results()
         datasets, outputs, _ = zip(*info)
-        # print(f"DEBUG: datasets: {datasets} outputs: {outputs}")
         managers = [getattr(one, 'process_report', None) for one in outputs]
         managers = [m for m in managers if m is not None]
 
@@ -352,7 +353,10 @@ class EvaluateBench(ABC):
         result.outputs_raw_data = outputs
         result.cost, result.input_tokens, result.output_tokens = calculate_stats(managers)
 
-        # print(f"DEBUG: result: {result}")
+        # --- Clean up all MCP clients at the end ---
+        self._cleanup_all_clients(self.client_cache)
+        # ------------------------------------------
+
         return result
 
     def evaluate(self, dspy_config=None) -> EvaluationResult:

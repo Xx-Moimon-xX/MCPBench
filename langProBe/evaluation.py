@@ -429,6 +429,7 @@ def evaluate(
             f"dataset_name: {dataset_name}\n"
             f"eval_lm: {eval_lm}\n"
             f"num_threads: {num_threads}\n"
+            f"toolset : {config}\n"
         )
 
     
