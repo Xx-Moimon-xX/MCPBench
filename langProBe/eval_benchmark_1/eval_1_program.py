@@ -383,14 +383,14 @@ class Eval1Predict(MCPPredict):
         )
 
         # Write to CSV immediately after prediction is created
-        from langProBe.evaluation import append_prediction_to_csv
-        serial_number = kwargs.get('id', '')
-        setattr(prediction, "serial_number", serial_number)
-        try:
-            append_prediction_to_csv(self.log_path, prediction)
-        except Exception as e:
-            self.run_logger.error(f"Failed to write prediction to CSV for serial_number {serial_number}: {e}")
-            print(f"Failed to write prediction to CSV for serial_number {serial_number}: {e}")
+        # from langProBe.evaluation import append_prediction_to_csv
+        # # serial_number = kwargs.get('id', '')
+        # # setattr(prediction, "serial_number", serial_number)
+        # try:
+        #     append_prediction_to_csv(self.log_path, prediction)
+        # except Exception as e:
+        #     self.run_logger.error(f"Failed to write prediction to CSV for serial_number {unique_id}: {e}")
+        #     print(f"Failed to write prediction to CSV for serial_number {unique_id}: {e}")
 
         # --- PROFILING ADDITIONS ---
         print(f"[PROFILE] Timings: {timings}")
