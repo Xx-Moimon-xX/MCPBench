@@ -212,7 +212,7 @@ def save_predictions_to_csv(file_path, predictions):
     for pred in predictions:
         if hasattr(pred, "evaluation_data"):
             eval_dict = {}
-            print(f"{pred}")
+            # print(f"{pred}")
             if isinstance(pred.evaluation_data, str):
                 try:
                     eval_dict = json.loads(pred.evaluation_data)
@@ -236,10 +236,10 @@ def save_predictions_to_csv(file_path, predictions):
             print(f"No evaluation data found for prediction: {pred}")
             continue
     
-    print(f"parsed_data_list: {parsed_eval_data_list}\n")
+    # print(f"parsed_data_list: {parsed_eval_data_list}\n")
     # print(f"all_eval_keys: {all_eval_keys}\n")
     # print(f"seen_keys: {seen_keys}\n")
-    print(f"predictions_returned: {predictions_returned}\n")
+    # print(f"predictions_returned: {predictions_returned}\n")
 
     ## I think we're meant to use parsed data list and all eval keys
     base_headers = ["serial_number","question", "ground_truth", "answer","tool_calling_success", "success"]

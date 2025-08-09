@@ -12,6 +12,7 @@ import logging
 from .synced_mcp_client import SyncedMcpClient
 try:
     from anthropic import Anthropic
+    from anthropic import BadRequestError
 except ImportError:
     Anthropic = None
 
@@ -107,7 +108,7 @@ class MCPCallList(BaseModel):
     raw_content: Optional[str] = None
 
 @retry(
-    stop=stop_after_attempt(5),  
+    stop=stop_after_attempt(3),  
     wait=wait_exponential(multiplier=1, min=2, max=10),  
     reraise=True,
 )
@@ -145,33 +146,71 @@ def call_lm(
                     claude_messages.append({"role": "user", "content": m["content"]})
             # Call Claude API
 
-
-            if system_prompt:
-                messages_tokens = client.messages.count_tokens(
-                    model=model_name,
-                    messages=claude_messages,
-                    system=system_prompt
-                )
-                print(f"Total tokens being passed to the model with system prompt: {messages_tokens}")
-                completion = client.messages.create(
-                    model=model_name,
-                    max_tokens=1024,
-                    messages=claude_messages,
-                    temperature=temperature if temperature is not None else 0.7,
-                    system=system_prompt
-                )
-            else:   
-                messages_tokens = client.messages.count_tokens(
-                    model=model_name,
-                    messages=claude_messages
-                )
-                print(f"Total tokens being passed to the model: {messages_tokens}")
-                completion = client.messages.create(
-                    model=model_name,
-                    max_tokens=1024,
-                    messages=claude_messages,
-                    temperature=temperature if temperature is not None else 0.7,
-                )
+            max_tokens_limit = 200000
+            truncated = False
+            # Find the index of the user message (should only be one)
+            user_idx = next((i for i, m in enumerate(claude_messages) if m["role"] == "user"), None)
+            while True:
+                try:
+                    if system_prompt:
+                        messages_tokens = client.messages.count_tokens(
+                            model=model_name,
+                            messages=claude_messages,
+                            system=system_prompt
+                        )
+                        print(f"Total tokens being passed to the model with system prompt: {messages_tokens}")
+                        completion = client.messages.create(
+                            model=model_name,
+                            max_tokens=1024,
+                            messages=claude_messages,
+                            temperature=temperature if temperature is not None else 0.7,
+                            system=system_prompt
+                        )
+                    else:
+                        messages_tokens = client.messages.count_tokens(
+                            model=model_name,
+                            messages=claude_messages
+                        )
+                        print(f"Total tokens being passed to the model: {messages_tokens}")
+                        completion = client.messages.create(
+                            model=model_name,
+                            max_tokens=1024,
+                            messages=claude_messages,
+                            temperature=temperature if temperature is not None else 0.7,
+                        )
+                    break  # Success, exit loop
+                except Exception as e:
+                    err_msg = str(e)
+                    if "prompt is too long" in err_msg:
+                        # Always keep the user message and the last message
+                        if len(claude_messages) > 2 and user_idx is not None:
+                            # Remove the oldest message that is not the user message or the last message
+                            removable_indices = [i for i in range(len(claude_messages)) if i != user_idx and i != len(claude_messages)-1]
+                            if removable_indices:
+                                remove_idx = removable_indices[0]
+                                removed = claude_messages.pop(remove_idx)
+                                # If we removed a message before the user, update user_idx
+                                if remove_idx < user_idx:
+                                    user_idx -= 1
+                                logger.warning(f"ID: {manager.id} (in call_lm), Truncating message at index {remove_idx} to fit token limit. Messages length: {len(claude_messages)}")
+                                print(f"ID: {manager.id} (in call_lm), Truncated message at index {remove_idx} to fit token limit. Messages length: {len(claude_messages)}")
+                            else:
+                                logger.error(f"ID: {manager.id} (in call_lm), Unable to truncate further. Only user and last message left. Still over token limit. Token count: {messages_tokens if 'messages_tokens' in locals() else 'unknown'} \n Messages length: {len(claude_messages)}")
+                                logger.warning(f"Remaining messages: {claude_messages}")
+                                print(f"ID: {manager.id} (in call_lm), Unable to truncate further. Only user and last message left. Still over token limit. Token count: {messages_tokens if 'messages_tokens' in locals() else 'unknown'} \n Messages length: {len(claude_messages)}")
+                                print(f"claude_messages[-1]: {claude_messages[-1]}\n")
+                                print(f"Remaining messages: {claude_messages}")
+                                raise RuntimeError(f"Anthropic prompt is too long (>{max_tokens_limit} tokens) and cannot be truncated further. Please shorten your conversation or system prompt.") from e
+                        else:
+                            logger.error(f"ID: {manager.id} (in call_lm), Unable to truncate further. Only user and last message left. Still over token limit. Token count: {messages_tokens if 'messages_tokens' in locals() else 'unknown'} \n Messages length: {len(claude_messages)}")
+                            logger.warning(f"Remaining messages: {claude_messages}")
+                            print(f"ID: {manager.id} (in call_lm), Unable to truncate further. Only user and last message left. Still over token limit. Token count: {messages_tokens if 'messages_tokens' in locals() else 'unknown'} \n Messages length: {len(claude_messages)}")
+                            print(f"claude_messages[-1]: {claude_messages[-1]}")
+                            print(f"Remaining messages: {claude_messages}")
+                            raise RuntimeError(f"Anthropic prompt is too long (>{max_tokens_limit} tokens) and cannot be truncated further. Please shorten your conversation or system prompt.") from e
+                    else:
+                        raise e
+            # --- End token truncation logic ---
             
             # Log the full response for debugging
             logger.debug(f"ID: {manager.id} (in call_lm), Full Anthropic API response: {completion}")
