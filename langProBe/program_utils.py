@@ -321,9 +321,10 @@ def call_lm(
             # --- OpenAI logic as before ---
             # Creating the OpenAI client
             print(f"ID: {manager.id} (in call_lm), Calling OpenAI API with model: {model_name}")
+
+            openai_api_key = os.getenv("OPENAI_API_KEY")
             oai = OpenAI(
-                api_key=manager.lm_api_key,
-                base_url=manager.lm_api_base,
+                api_key=openai_api_key
             )
             assert prefix == 'openai'
 
