@@ -709,10 +709,10 @@ def mcp_calling(
             else:
                 logger.warning(f"ID: {manager.id} (in mcp_calling), Skipping tool call for '{mcp_tool_name}' due to client initialization failure.")
 
-        ## Tool call responses are truncated to 5000 characters!!!!
+        ## Tool call responses are truncated to 150000 characters!!!!
         messages.append({
             constants.ROLE: constants.TOOL,
-            constants.CONTENT: result_str,
+            constants.CONTENT: result_str[:150000],
         })
         logger.debug(f"ID: {manager.id} (in mcp_calling), Final messages prepared: {messages}")
         logger.info(f"ID: {manager.id} (in mcp_calling), mcp_calling completed successfully.")
