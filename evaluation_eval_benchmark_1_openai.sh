@@ -38,7 +38,7 @@ python3 -m langProBe.evaluation \
   --benchmark=eval_benchmark_1 \
   --dataset_mode=tiny \
   --dataset_path=langProBe/eval_benchmark_1/data/$dataset_name.jsonl \
-  --file_path=runs/$DATE/eval_benchmark_1_run_${TIMESTAMP}_${dataset_name} \
+  --file_path=runs/$DATE/eval_benchmark_1_openai_run_${TIMESTAMP}_${dataset_name} \
   --lm=openai/gpt-4 \
   --eval_lm=anthropic/claude-3-5-sonnet-20241022 \
   --lm_api_key=$AWS_ACCESS_KEY_ID \
