@@ -600,8 +600,7 @@ def mcp_calling(
         messages = [
             {
                 constants.ROLE: constants.ASSISTANT,
-                constants.CONTENT: mcp_call_list.raw_content if mcp_call_list.raw_content else '',
-                constants.TOOL_CALLS: []
+                constants.CONTENT: mcp_call_list.raw_content if mcp_call_list.raw_content else ''
             }
         ]
         result_str = ""
