@@ -281,7 +281,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             # ---------------------------------------------------
             # --- PROFILING ADDITIONS ---
             call_end = time.perf_counter()
-            print(f"[PROFILE] Step {steps}: mcp_calling took {call_end - call_start:.4f}s, returned {len(messages_new)} new messages")
+            print(f"[PROFILE] Step {steps}: mcp_calling took {call_end - call_start:.4f}s, returned {len(new_messages)} new messages")
             # --- END PROFILING ADDITIONS ---
 
             messages = build_messages(messages, new_messages)

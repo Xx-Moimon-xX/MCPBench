@@ -36,6 +36,10 @@ A brief text description outlining the functionality of the tool.
 Detailed information about input parameters, where each parameter includes: parameter name, parameter type, whether it is mandatory, and the purpose or description of the parameter.
 If you have obtained the final result. Please provide your final answer enclosed within <answer></answer> tags. Ensure that only the final answer is included, without any additional explanations or commentary.
 """
+## TO REPLACE THE LAST LINE IN THE SYSTEM PROMPT!!!
+# You must respond in a single step, immediately returning the relevant tool call if appropriate; do not engage in conversation, ask clarifying questions, or seek confirmation. This is a one-shot evaluation scenario, not a chat. Declare all tool calls required for the evaluation in your response, without further dialogue or explanations.
+# If you have obtained the final result, please provide your final answer enclosed within <answer></answer> tags. Ensure that only the final answer is included, without any additional explanations or commentary.
+
 
 EVAL_PROMPT_1 = """You are evaluating an LLM response against a prompt and expected answer. You have two evaluation tasks:
 

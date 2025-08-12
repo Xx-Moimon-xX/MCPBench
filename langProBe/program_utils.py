@@ -135,6 +135,7 @@ def call_lm(
             # Anthropic Claude API
             anthropic_api_key = manager.anthropic_api_key or os.getenv("ANTHROPIC_API_KEY")
             client = Anthropic(api_key=anthropic_api_key)
+            
             # Convert OpenAI-style messages to Anthropic format
             claude_messages = []
             for m in messages:
@@ -328,6 +329,24 @@ def call_lm(
             )
             assert prefix == 'openai'
 
+            # Convert tool role messages to user role to avoid OpenAI tool-calls schema requirements
+            # (OpenAI requires tool messages only in response to assistant.tool_calls with ids.)
+            oai_messages = []
+            for m in messages:
+                role = m.get("role")
+                if role == "system":
+                    oai_messages.append({"role": "system", "content": m["content"]})
+                elif role == "assistant":
+                    oai_messages.append({"role": "assistant", "content": m["content"]})
+                elif role == "user":
+                    oai_messages.append({"role": "user", "content": m["content"]})
+                elif role == "tool":
+                    oai_messages.append({"role": "user", "content": m["content"]})
+                else:
+                    # Drop empty tool_calls fields if present in assistant messages
+                    m_copy = {k: v for k, v in m.items() if not (k == "tool_calls" and isinstance(v, list) and len(v) == 0)}
+                    oai_messages.append(m_copy)
+
             if model_name in ['deepseek-r1', 'qwq-plus', 'qwq-32b']: # qwen reasoning models only support streaming output
                 reasoning_content = ""  # Define complete reasoning process
                 answer_content = ""     # Define complete response
@@ -335,7 +354,7 @@ def call_lm(
 
                 completion = oai.chat.completions.create(
                     model=model_name, 
-                    messages=messages,
+                    messages=oai_messages,
                     stream=True,
                     stream_options={
                         "include_usage": True
@@ -365,13 +384,13 @@ def call_lm(
 
             if temperature is not None:
                 response = oai.beta.chat.completions.parse(
-                    messages=messages,
+                    messages=oai_messages,
                     model=model_name,
                     temperature = temperature
                 )
             else:
                 response = oai.beta.chat.completions.parse(
-                    messages=messages,
+                    messages=oai_messages,
                     model=model_name,
                 )
                 # Log the full response for debugging
@@ -384,6 +403,7 @@ def call_lm(
                 
                 completion_tokens = response.usage.completion_tokens
                 prompt_tokens = response.usage.prompt_tokens
+            
             manager.lm_usages.append({
                     "completion_tokens": completion_tokens,
                     "prompt_tokens": prompt_tokens,

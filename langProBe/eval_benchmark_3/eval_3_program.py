@@ -325,7 +325,8 @@ class Eval3Predict(MCPPredict):
         mcps = self.config['mcp_pool']
 
         messages = build_init_messages(self.system_prompt, mcps, question)
-
+        system_prompt = messages[0][constants.CONTENT]
+        
         # --- PROFILING ADDITIONS ---
         t3 = time.perf_counter()
         timings['build_init_messages'] = t3 - t2
@@ -347,7 +348,7 @@ class Eval3Predict(MCPPredict):
             # --- PROFILING ADDITIONS ---
             step_start = time.perf_counter()
             # --- END PROFILING ADDITIONS ---
-            response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger)
+            response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger, system_prompt=system_prompt)
             # --- PROFILING ADDITIONS ---
             step_end = time.perf_counter()
             print(f"[PROFILE] Step {steps}: call_lm took {step_end - step_start:.4f}s, response size: {len(str(response))}")
