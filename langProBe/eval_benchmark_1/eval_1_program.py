@@ -6,6 +6,7 @@ import time
 import traceback
 from datetime import datetime
 from typing import List, Tuple, Optional
+import pdb
 # from langProBe.evaluation_utils import question_scorer, evaluate_final_answer_eval1
 
 from langProBe.mcp_program import MCPPredict, MCPCall
@@ -126,7 +127,7 @@ def evaluate_final_answer_eval1(
             question: str, 
             ground_truth: str, 
             tools_required: List[str],
-            tools_called: List[MCPCall],
+            tools_called: List[str],
             prediction: str, 
             manager: ProcessManager,
             logger: logging.Logger,
@@ -171,7 +172,7 @@ def evaluate_final_answer_eval1(
         tool_calling_success = True
         ## Checking if the required tools were called.
         if tools_called:
-            called_tool_names = [call.mcp_tool_name for call in tools_called]
+            called_tool_names = tools_called
             for tool in tools_required:
                 if tool not in called_tool_names:
                     # print(f"Tool {tool} was not called.")
@@ -239,166 +240,102 @@ class Eval1Predict(MCPPredict):
         '''
         This is the forward pass for the eval1 program.
         '''
-        # --- PROFILING ADDITIONS ---
-        import time
-        timings = {}
-        data_sizes = {}
-        # logger = self.run_logger  # REMOVE logger for profiling output
-        t0 = time.perf_counter()
-        # --- END PROFILING ADDITIONS ---
-
-        unique_id = kwargs.get('id')
-        question = kwargs.get('question')
-        gt = kwargs.get('answer')
-        tools_required = kwargs.get('tools_required')
-        # print(f"tools_required: {tools_required}")
-
-        # --- PROFILING ADDITIONS ---
-        t1 = time.perf_counter()
-        timings['init_vars'] = t1 - t0
-        # print(f"[PROFILE] init_vars took {timings['init_vars']:.4f}s")
-        # --- END PROFILING ADDITIONS ---
-
+        ## Making processManager
         manager = ProcessManager()
         manager.lm_api_key = self.lm.api_key
         manager.lm_api_base = self.lm.api_base
         manager.model = self.lm.model
-        manager.id = unique_id
-
-        # --- PROFILING ADDITIONS ---
-        t2 = time.perf_counter()
-        timings['init_manager'] = t2 - t1
-        # print(f"[PROFILE] init_manager took {timings['init_manager']:.4f}s")
-        # --- END PROFILING ADDITIONS ---
-
-        # mcps = self.config['mcp_pool']
         
-        messages = build_init_messages(self.system_content, question)
-        system_prompt = messages[0][constants.CONTENT]
 
-        # --- PROFILING ADDITIONS ---
-        t3 = time.perf_counter()
-        timings['build_init_messages'] = t3 - t2
-        data_sizes['init_messages'] = len(str(messages))
-        # print(f"[PROFILE] build_init_messages took {timings['build_init_messages']:.4f}s")
-        # --- END PROFILING ADDITIONS ---
+        ## Prediction object being returned...
+        if self.run_mode == 'generate_only':
+            print(f"In generate_only mode or combined mode")
+            unique_id = kwargs.get('id')
+            question = kwargs.get('question')
+            gt = kwargs.get('answer')
+            tools_required = kwargs.get('tools_required')
 
-        steps = 0
-        all_completion_tokens = 0
-        all_prompt_tokens = 0
-        start_time = time.time()
-        tools_called = []
+            # pdb.set_trace(header="in forward function")
+            breakpoint()
 
-        # --- PROFILING ADDITIONS ---
-        loop_start = time.perf_counter()
-        # --- END PROFILING ADDITIONS ---
+            manager.id = unique_id
+            
+            ## Building initial messages and system prompt
+            messages = build_init_messages(self.system_content, question)
+            system_prompt = messages[0][constants.CONTENT]
 
-        while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
-            # --- PROFILING ADDITIONS ---
-            step_start = time.perf_counter()
-            # --- END PROFILING ADDITIONS ---
-            response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger, system_prompt=system_prompt)
-            # --- PROFILING ADDITIONS ---
-            step_end = time.perf_counter()
-            print(f"[PROFILE] Step {steps}: call_lm took {step_end - step_start:.4f}s, response size: {len(str(response))}")
-            # --- END PROFILING ADDITIONS ---
+            steps = 0
+            all_completion_tokens = 0
+            all_prompt_tokens = 0
+            tools_called = []
 
-            all_completion_tokens += completion_tokens
-            all_prompt_tokens += prompt_tokens
-            mcp_calls = response_parsing(response)
-            # --- PROFILING ADDITIONS ---
-            if mcp_calls.mcps:
-                print(f"[PROFILE] Step {steps}: response_parsing returned {len(mcp_calls.mcps)} calls")
-            else:
-                print(f"[PROFILE] Step {steps}: response_parsing returned 0 calls")
-            # --- END PROFILING ADDITIONS ---
+            while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
+                response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger, system_prompt=system_prompt)
 
-            if not mcp_calls.shutdown:
-                for mcp_call in mcp_calls.mcps:
-                    tools_called.append(mcp_call)
-                    # print(f"Adding tool: {mcp_call}")
+                all_completion_tokens += completion_tokens
+                all_prompt_tokens += prompt_tokens
+                mcp_calls = response_parsing(response)
 
-            # --- PROFILING ADDITIONS ---
-            call_start = time.perf_counter()
-            # --- END PROFILING ADDITIONS ---
-            new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
-            # --- PROFILING ADDITIONS ---
-            call_end = time.perf_counter()
-            print(f"[PROFILE] Step {steps}: mcp_calling took {call_end - call_start:.4f}s, returned {len(new_messages)} new messages")
-            # --- END PROFILING ADDITIONS ---
+                if not mcp_calls.shutdown:
+                    for mcp_call in mcp_calls.mcps:
+                        tools_called.append(mcp_call)
+                        # print(f"Adding tool: {mcp_call}")
 
-            messages = build_messages(messages, new_messages)
-            # --- PROFILING ADDITIONS ---
-            print(f"[PROFILE] Step {steps}: build_messages, total messages: {len(messages)}")
-            # --- END PROFILING ADDITIONS ---
+                new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
+                messages = build_messages(messages, new_messages)
+                steps += 1
 
-            steps += 1
+            # If the maximum number of steps is reached and there is still no answer
+            if messages[-1][constants.ROLE] != constants.ASSISTANT:
+                self.run_logger.warning("Maximum steps reached without getting an answer")
+                messages.append({
+                    constants.ROLE: constants.ASSISTANT,
+                    constants.CONTENT: "Maximum step limit exceeded, this problem cannot be solved",
+                })
 
-        # --- PROFILING ADDITIONS ---
-        loop_end = time.perf_counter()
-        timings['main_loop'] = loop_end - loop_start
-        data_sizes['final_messages'] = len(str(messages))
-        # print(f"[PROFILE] main loop took {timings['main_loop']:.4f}s")
-        # --- END PROFILING ADDITIONS ---
+            self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
+            prediction = messages[-1].get(constants.CONTENT, "")
 
-        end_time = time.time()
+            # pdb.set_trace(header="returning prediction now.")
+            breakpoint()
 
-        # If the maximum number of steps is reached and there is still no answer
-        if messages[-1][constants.ROLE] != constants.ASSISTANT:
-            self.run_logger.warning("Maximum steps reached without getting an answer")
-            messages.append({
-                constants.ROLE: constants.ASSISTANT,
-                constants.CONTENT: "Maximum step limit exceeded, this problem cannot be solved",
-            })
+            return dspy.Prediction(
+                success="",
+                question=question,
+                ground_truth=gt,
+                answer=prediction,
+                trace=messages,
+                process_report=manager,
+                tools_called=tools_called,
+            )
+        
+        elif self.run_mode == 'score_only':
+            print(f"In score_only mode")
 
-        self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
-        prediction = messages[-1].get(constants.CONTENT, "")
-        self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {prediction[:50]}")
+            unique_id = kwargs.get('id')
+            question = kwargs.get('question')
+            gt = kwargs.get('ground_truth')
+            answer = kwargs.get('answer')
+            tools_required = kwargs.get('tools_required')
+            tools_called = kwargs.get('tools_called')
 
-        ## Everything till here is the same as the forward() in mcp_program.py
+            manager.id = unique_id
 
-        ## Evaluation is done here!!!
-        # --- PROFILING ADDITIONS ---
-        eval_start = time.perf_counter()
-        # --- END PROFILING ADDITIONS ---
-        success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, tools_required, tools_called, messages[-1][constants.CONTENT])
-        # --- PROFILING ADDITIONS ---
-        eval_end = time.perf_counter()
-        timings['evaluate_prediction'] = eval_end - eval_start
-        if evaluation_data is not None:
-            data_sizes['evaluation_data'] = len(str(evaluation_data))
-        # print(f"[PROFILE] evaluate_prediction took {timings['evaluate_prediction']:.4f}s")
-        # --- END PROFILING ADDITIONS ---
+            breakpoint()            
+            success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, tools_required, tools_called, answer)
+            self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
 
-        self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
-                          all_completion_tokens)
-        self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
+            print(f"evaluation_data: {evaluation_data}")
 
-        print(f"evaluation_data: {evaluation_data}")
-        prediction = dspy.Prediction(
-            success=success,
-            question=question,
-            ground_truth=gt,
-            answer=messages[-1][constants.CONTENT],
-            trace=messages,
-            process_report=manager,
-            evaluation_data=evaluation_data,
-            tool_calling_success=tool_calling_success
-        )
+            breakpoint()
 
-        # Write to CSV immediately after prediction is created
-        # from langProBe.evaluation import append_prediction_to_csv
-        # # serial_number = kwargs.get('id', '')
-        # # setattr(prediction, "serial_number", serial_number)
-        # try:
-        #     append_prediction_to_csv(self.log_path, prediction)
-        # except Exception as e:
-        #     self.run_logger.error(f"Failed to write prediction to CSV for serial_number {unique_id}: {e}")
-        #     print(f"Failed to write prediction to CSV for serial_number {unique_id}: {e}")
-
-        # --- PROFILING ADDITIONS ---
-        print(f"[PROFILE] Timings: {timings}")
-        print(f"[PROFILE] Data sizes: {data_sizes}")
-        # --- END PROFILING ADDITIONS ---
-
-        return prediction
+            prediction = dspy.Prediction(
+                success=success,
+                question=question,
+                ground_truth=gt,
+                answer=answer,
+                process_report=manager,
+                evaluation_data=evaluation_data,
+                tool_calling_success=tool_calling_success
+            )
+            return prediction

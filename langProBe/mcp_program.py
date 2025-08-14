@@ -17,7 +17,7 @@ import langProBe.constants as constants
 import logging
 import os
 from datetime import datetime
-import json
+import json, csv
 from typing import List, Dict, Optional, Tuple
 
 
@@ -63,11 +63,46 @@ class LangProBeMCPMetaProgram(dspy.Module):
     def __init__(self):
         super().__init__()
         self.lm = MCP_LM()
+        # Controls `forward` behavior
+        # Values: 'combined' (default), 'generate_only', 'score_only'
+        self.run_mode = 'combined'
+        # Root of the run directory for reading saved predictions
+        self.run_root_path = None
     def setup_lm(self, lm, api_key=None, api_base=None, eval_model=None):
         self.lm.model = lm
         self.lm.api_key = api_key
         self.lm.api_base = api_base
         self.lm.eval_model = eval_model
+
+    def set_run_mode(self, mode: str):
+        if mode not in ('combined', 'generate_only', 'score_only'):
+            raise ValueError("run_mode must be 'combined', 'generate_only', or 'score_only'")
+        self.run_mode = mode
+
+    # --- Helpers for score_only mode ---
+    def _responses_csv_path(self) -> str:
+        base = self.log_path or "."
+        return os.path.join(base, "response_data", "predictions.csv")
+
+    def _load_saved_predictions_map(self):
+        if hasattr(self, "_score_only_saved_map") and self._score_only_saved_map is not None:
+            return self._score_only_saved_map
+        path = self._responses_csv_path()
+        mapping = {}
+        if not os.path.exists(path):
+            self._score_only_saved_map = mapping
+            return mapping
+        with open(path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                mapping[row.get("id", "")] = row
+        self._score_only_saved_map = mapping
+        return mapping
+
+    def _get_saved_answer_for_id(self, unique_id: str) -> str:
+        mapping = self._load_saved_predictions_map()
+        row = mapping.get(str(unique_id))
+        return row.get("answer", "") if row else ""
 
     def program_type(self):
         return "mcp"
@@ -102,8 +137,9 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         os.makedirs('logs', exist_ok=True)
         # self.setup_loggers()
 
-        mcps = self.config["mcp_pool"]
-        self.system_content = build_system_content(self.system_prompt, mcps)
+        # Defer building system content to runtime (avoid MCP calls in score_only)
+        self._mcps = self.config["mcp_pool"]
+        self.system_content = None
         # --- Persistent client cache for MCP tool calls ---
         self.client_cache = None  # Will be set by EvaluateBench if available
         # --------------------------------------------------
@@ -113,6 +149,8 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
     def set_log_path(self, path):
         self.log_path = path
+        if self.run_root_path is None:
+            self.run_root_path = path
         self.setup_loggers()
 
     def setup_loggers(self):
@@ -132,10 +170,11 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         run_handler.setFormatter(run_formatter)
         self.run_logger.addHandler(run_handler)
 
-        # Set up message log
-        message_log_file = f'{log_dir}/{self.task_name}_messages_{timestamp}.jsonl'
-        message_handler = logging.FileHandler(message_log_file, encoding='utf-8')
-        self.message_logger.addHandler(message_handler)
+        # Set up message log (skip in score_only mode)
+        if getattr(self, 'run_mode', 'combined') != 'score_only':
+            message_log_file = f'{log_dir}/{self.task_name}_messages_{timestamp}.jsonl'
+            message_handler = logging.FileHandler(message_log_file, encoding='utf-8')
+            self.message_logger.addHandler(message_handler)
 
 
     def update_log_paths(self, new_log_dir):
@@ -155,10 +194,11 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         # Update message logger
         for handler in self.message_logger.handlers[:]:
             self.message_logger.removeHandler(handler)
-        
-        message_log_file = f'{new_log_dir}/{self.task_name}_messages_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jsonl'
-        message_handler = logging.FileHandler(message_log_file, encoding='utf-8')
-        self.message_logger.addHandler(message_handler)
+        # Skip creating messages file in score_only mode
+        if getattr(self, 'run_mode', 'combined') != 'score_only':
+            message_log_file = f'{new_log_dir}/{self.task_name}_messages_{datetime.now().strftime("%Y%m%d_%H%M%S")}.jsonl'
+            message_handler = logging.FileHandler(message_log_file, encoding='utf-8')
+            self.message_logger.addHandler(message_handler)
 
     def evaluate_prediction(self, question: str, ground_truth: str, tools_required: List[str], tools_called: List[MCPCall], prediction: str) -> Tuple[bool, Optional[str]]:
         '''
@@ -185,6 +225,10 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             "completion_tokens_cost": completion_tokens_cost
         }
         self.message_logger.info(json.dumps(log_entry, ensure_ascii=False))
+
+    def _ensure_system_content(self):
+        if self.system_content is None and getattr(self, 'run_mode', 'combined') != 'score_only':
+            self.system_content = build_system_content(self.system_prompt, self._mcps)
 
 
     def forward(self, **kwargs) -> dspy.Prediction:
@@ -228,6 +272,7 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         # We should use self.config instead of a global import.
         mcps = self.config['mcp_pool']
 
+        self._ensure_system_content()
         messages = build_init_messages(self.system_prompt, mcps, question)
         system_prompt = messages[0][constants.CONTENT]
 
@@ -311,6 +356,56 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
         self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
         prediction = messages[-1].get(constants.CONTENT, "")
         self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {prediction[:50]}")
+
+        # If we're only generating, skip evaluation and return a minimal prediction
+        if getattr(self, 'run_mode', 'combined') == 'generate_only':
+            self.log_messages(messages, question, None, (end_time - start_time), all_prompt_tokens,
+                              all_completion_tokens)
+            return dspy.Prediction(
+                success="",
+                question=question,
+                ground_truth=gt,
+                answer=messages[-1][constants.CONTENT],
+                trace=messages,
+                process_report=manager,
+                evaluation_data=None,
+                tool_calling_success="",
+            )
+
+        # If we're score-only, reuse saved answer and run just the evaluator
+        if getattr(self, 'run_mode', 'combined') == 'score_only':
+            saved_answer = self._get_saved_answer_for_id(unique_id)
+            if not saved_answer:
+                # If missing, fall back to a no-op minimal prediction
+                self.log_messages(messages, question, None, (end_time - start_time), all_prompt_tokens,
+                                  all_completion_tokens)
+                return dspy.Prediction(
+                    success="",
+                    question=question,
+                    ground_truth=gt,
+                    answer="",
+                    trace=messages,
+                    process_report=manager,
+                    evaluation_data=None,
+                    tool_calling_success="",
+                )
+            # Evaluate saved answer without regenerating messages
+            tools_called = []
+            success, evaluation_data, tool_calling_success = self.evaluate_prediction(
+                question, gt, tools_required, tools_called, saved_answer
+            )
+            self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
+                              all_completion_tokens)
+            return dspy.Prediction(
+                success=success,
+                question=question,
+                ground_truth=gt,
+                answer=saved_answer,
+                trace=messages,
+                process_report=manager,
+                evaluation_data=evaluation_data,
+                tool_calling_success=tool_calling_success,
+            )
 
         ## Everything till here is the same as the forward() in mcp_program.py
 

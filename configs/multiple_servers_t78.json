@@ -1,0 +1,62 @@
+{
+    "mcp_pool": [
+        {
+            "name": "slack",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers-mutated/slack-mutated/dist/index.js"
+                    ],
+                    "port": 8900
+                }
+            ]
+        },
+        {
+            "name": "brave-search",
+            "run_config": [
+                {
+                    "command": "/Users/cxnpl/.nvm/versions/node/v23.11.0/bin/node",
+                    "args": ["/Users/cxnpl/cxnpl/thesis/servers/brave-search/dist/index.js"],
+                    "port": 8100
+                }
+            ]
+        },
+        {
+            "name": "gitlab",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/mcp-gitlab/build/index.js"
+                    ],
+                    "port": 8006
+                }
+            ]
+        },
+        {
+            "name": "spotify-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/spotify-mock/dist/index.js"
+                    ],
+                    "port": 8400
+                }
+            ]
+        },
+        {
+            "name": "notion-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/notion-mock/dist/index.js"
+                    ],
+                    "port": 8401
+                }
+            ]
+        }
+    ]
+} 

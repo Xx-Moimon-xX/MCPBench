@@ -8,108 +8,9 @@ from contextlib import contextmanager
 from pathlib import Path
 import csv
 import json
+import pdb
 
 import dspy
-# import dspy.utils.parallelizer
-
-# # --- Monkey patch to ensure threads are properly cleaned up ---
-# # Patch ParallelExecutor to always wait for threads to finish
-# _orig_execute_parallel = dspy.utils.parallelizer.ParallelExecutor._execute_parallel
-
-# def _patched_execute_parallel(self, function, data):
-#     import concurrent.futures
-#     import threading
-#     import time
-#     import tqdm
-#     import sys
-#     import contextlib
-#     import copy
-#     results = [None] * len(data)
-#     job_cancelled = "cancelled"
-#     start_time_map = {}
-#     start_time_lock = threading.Lock()
-#     resubmitted = set()
-#     def worker(parent_overrides, submission_id, index, item):
-#         if self.cancel_jobs.is_set():
-#             return index, job_cancelled
-#         with start_time_lock:
-#             start_time_map[submission_id] = time.time()
-#         from dspy.dsp.utils.settings import thread_local_overrides
-#         original = thread_local_overrides.overrides
-#         thread_local_overrides.overrides = parent_overrides.copy()
-#         if parent_overrides.get("usage_tracker"):
-#             thread_local_overrides.overrides["usage_tracker"] = copy.deepcopy(parent_overrides["usage_tracker"])
-#         try:
-#             return index, function(item)
-#         finally:
-#             thread_local_overrides.overrides = original
-#     @contextlib.contextmanager
-#     def interrupt_manager():
-#         if threading.current_thread() is threading.main_thread():
-#             import signal
-#             orig_handler = signal.getsignal(signal.SIGINT)
-#             def handler(sig, frame):
-#                 self.cancel_jobs.set()
-#                 orig_handler(sig, frame)
-#             signal.signal(signal.SIGINT, handler)
-#             try:
-#                 yield
-#             finally:
-#                 signal.signal(signal.SIGINT, orig_handler)
-#         else:
-#             yield
-#     executor = concurrent.futures.ThreadPoolExecutor(max_workers=self.num_threads)
-#     try:
-#         with interrupt_manager():
-#             from dspy.dsp.utils.settings import thread_local_overrides
-#             parent_overrides = thread_local_overrides.overrides.copy()
-#             futures_map = {}
-#             futures_set = set()
-#             submission_counter = 0
-#             for idx, item in enumerate(data):
-#                 f = executor.submit(worker, parent_overrides, submission_counter, idx, item)
-#                 futures_map[f] = (submission_counter, idx, item)
-#                 futures_set.add(f)
-#                 submission_counter += 1
-#             pbar = tqdm.tqdm(
-#                 total=len(data),
-#                 dynamic_ncols=True,
-#                 disable=self.disable_progress_bar,
-#                 file=sys.stdout,
-#             )
-#             def all_done():
-#                 return all(r is not None for r in results)
-#             while futures_set and not self.cancel_jobs.is_set():
-#                 if all_done():
-#                     break
-#                 done, not_done = concurrent.futures.wait(futures_set, timeout=1, return_when=concurrent.futures.FIRST_COMPLETED)
-#                 for f in done:
-#                     futures_set.remove(f)
-#                     try:
-#                         index, outcome = f.result()
-#                     except Exception:
-#                         pass
-#                     else:
-#                         if outcome != job_cancelled and results[index] is None:
-#                             results[index] = outcome
-#                         if self.compare_results:
-#                             vals = [r[-1] for r in results if r is not None]
-#                             self._update_progress(pbar, sum(vals), len(vals))
-#                         else:
-#                             self._update_progress(
-#                                 pbar,
-#                                 len([r for r in results if r is not None]),
-#                                 len(data),
-#                             )
-#                 if all_done():
-#                     break
-#             pbar.close()
-#     finally:
-#         executor.shutdown(wait=True)  # <--- THIS IS THE KEY CHANGE
-#     return results
-
-# dspy.utils.parallelizer.ParallelExecutor._execute_parallel = _patched_execute_parallel
-# # --- End monkey patch ---
 
 from langProBe.analysis import read_evaluation_results
 from langProBe.benchmark import BenchmarkMeta, EvaluateBench, EvaluationResult
@@ -361,23 +262,10 @@ def add_to_evaluation_records(file_path, evaluation_results: list[EvaluationResu
 
 def read_evaluation_records(file_path):
     '''
-    Reads the evaluation records from the file path.
-    If the file does not exist, it creates an empty file with a header, otherwise it reads the file and returns each record as a tuple.
+    Deprecated: evaluation_records.csv is no longer used or created.
+    Always returns an empty list and does not touch the filesystem.
     '''
-    file_path = pathlib.Path(file_path)
-    records = []
-
-    # create the records file if it does not exist
-    if not (file_path / "evaluation_records.csv").exists():
-        # create empty records file without header
-        with open(f"{file_path}/evaluation_records.csv", "w") as f:
-            f.write("")
-    with open(f"{file_path}/evaluation_records.csv", "r") as f:
-        lines = f.readlines()
-        for line in lines[1:]:
-            records.append(tuple(line.strip().split(",")))
-
-    return records
+    return []
 
 
 def evaluate(
@@ -393,6 +281,7 @@ def evaluate(
     api_key=None,
     api_base=None,
     eval_lm=None,
+    run_mode: str = "combined",
 ):
     """
     benchmark_meta: BenchmarkMeta object to evaluate
@@ -409,17 +298,23 @@ def evaluate(
         dataset_name = None
 
     # If the missing mode file is provided, we use it to find the missing data
-    if missing_mode_file:
-        origin_data = read_jsonl(dataset_path)
-        runed_data = read_jsonl(missing_mode_file)
-        missing_data = find_missing_entries(origin_data, runed_data)
-        benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path, missing_data=missing_data)
-        replace_logger_filehandler(os.path.splitext(missing_mode_file)[0])
-    else:
-        benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path)
+    # if missing_mode_file:
+    #     origin_data = read_jsonl(dataset_path)
+    #     runed_data = read_jsonl(missing_mode_file)
+    #     missing_data = find_missing_entries(origin_data, runed_data)
+    #     benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path, missing_data=missing_data)
+    #     replace_logger_filehandler(os.path.splitext(missing_mode_file)[0])
+    # else:
+    
+    # Choose dataset source based on run_mode. For score_only, we expect predictions.jsonl shape.
+    bench_source = "predictions" if run_mode == "score_only" else "original"
+    benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path, source=bench_source)
 
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
     benchmark_name = benchmark_meta.name or benchmark.__class__.__name__
+
+    # pdb.set_trace(header="set benchmark done")
+    breakpoint()
 
     # If the number of threads is not provided, use the number of threads from the benchmark meta
     num_threads = benchmark_meta.num_threads or num_threads
@@ -432,8 +327,7 @@ def evaluate(
     # new_file_path = os.path.join(file_path, f"{benchmark_name}")
     # Path(new_file_path).mkdir(parents=True, exist_ok=True)
 
-    # Read the evaluation records from the file path or if no file creates a new one
-    evaluation_records = read_evaluation_records(file_path)
+    # evaluation_records.csv deprecated; no-op
 
     # create a stats file for each experiment and writes into it all the metadata for the experiment
     stats_file = os.path.join(file_path, f"{benchmark_name}.stat")
@@ -448,8 +342,9 @@ def evaluate(
             f"toolset : {config}\n"
         )
 
-    
-
+    # pdb.set_trace(header="have created the .stat file")
+    breakpoint()
+ 
     # For each program in the benchmark, we evaluate it
     for program in benchmark_meta.program:
         program_name = getattr(program, "_name", program.__class__.__name__)
@@ -471,24 +366,80 @@ def evaluate(
                 file_path=file_path,
                 eval_lm=eval_lm,
             )
-            evaluate_bench.evaluate()
+
+            # If score_only, redirect program logs/messages under evaluation_data/<benchmark_name>
+            if run_mode == "score_only":
+                eval_dir = os.path.join(file_path, "evaluation_data", benchmark_name)
+                Path(eval_dir).mkdir(parents=True, exist_ok=True)
+                if hasattr(evaluate_bench.program, "update_log_paths"):
+                    evaluate_bench.program.update_log_paths(eval_dir)
+                    
+            # pdb.set_trace(header="inside the program evaluate in evaluation.py")
+            breakpoint()
+
+            if run_mode == "generate_only":
+                csv_path = evaluate_bench.generate_and_save_responses()
+                print(f"Generated predictions saved to: {csv_path}")
+                # Do not compute scores or write .txt in generate-only mode
+                continue
+            elif run_mode == "score_only":
+                breakpoint()
+                evaluation_result = evaluate_bench.score_from_saved_responses()
+            else:
+                #  evaluation_result = evaluate_bench.evaluate()
+                # combined: run generate step first, then score from saved predictions
+                csv_path = evaluate_bench.generate_and_save_responses()
+                print(f"Generated predictions saved to: {csv_path}")
+
+                # Redirect logs/messages to evaluation_data/<benchmark_name>
+                eval_dir = os.path.join(file_path, "evaluation_data", benchmark_name)
+                Path(eval_dir).mkdir(parents=True, exist_ok=True)
+                if hasattr(evaluate_bench.program, "update_log_paths"):
+                    evaluate_bench.program.update_log_paths(eval_dir)
+
+                # Swap to predictions.jsonl devset for scoring (ensures ground_truth/answer in inputs)
+                preds_jsonl = os.path.join(file_path, "response_data", "predictions.jsonl")
+                if os.path.exists(preds_jsonl):
+                    preds = read_jsonl(preds_jsonl)
+                    new_devset = []
+                    for row in preds:
+                        ex = dspy.Example(
+                            id=row.get("id", ""),
+                            question=row.get("question", ""),
+                            ground_truth=row.get("ground_truth", ""),
+                            answer=row.get("answer", ""),
+                            tools_required=row.get("tools_required", []),
+                            tools_called=row.get("tools_called", []),
+                        ).with_inputs("id", "question", "ground_truth", "answer", "tools_required", "tools_called", "config")
+                        new_devset.append(ex)
+                    # Override devset used by the scorer
+                    evaluate_bench.devset = new_devset
+                    # Also update split evaluator to use new devset for consistent metric aggregation
+                    if hasattr(evaluate_bench, 'split_eval'):
+                        evaluate_bench.split_eval.devset = new_devset
+
+                evaluation_result = evaluate_bench.score_from_saved_responses()
 
         # if missing_mode:
         #     add_to_evaluation_records(file_path, evaluate_bench.results)
-        evaluation_result = evaluate_bench.results
-        # print(f"evaluation_result: {evaluation_result}")
 
-        if evaluation_result and evaluation_result.outputs_raw_data:
-            save_predictions_to_csv(file_path, evaluation_result.outputs_raw_data)
-
-        file_name = f"{evaluation_result.benchmark}_{evaluation_result.program}"
-        # TO DO: might want to change the output here for how we want it displayed.
-        with open(os.path.join(file_path, f"{file_name}.txt"), "w") as f:
-            f.write(f"score,cost,input_tokens,output_tokens\n")
-            f.write(
-                f"{evaluation_result.score},{evaluation_result.cost},{evaluation_result.input_tokens},"
-                f"{evaluation_result.output_tokens}\n"
-            )
+        # Basically saving to csv and writing the results only if in score mode or combined mode.
+        if run_mode in ("score_only", "combined"):
+            # In score-only or combined modes, we have evaluation_result
+            # evaluation_result already set above for both branches
+            if evaluation_result and evaluation_result.outputs_raw_data:
+                # Save evaluation CSV alongside logs/messages for both score_only and combined
+                eval_dir = os.path.join(file_path, "evaluation_data", benchmark_name)
+                Path(eval_dir).mkdir(parents=True, exist_ok=True)
+                save_predictions_to_csv(eval_dir, evaluation_result.outputs_raw_data)
+            
+            file_name = f"{evaluation_result.benchmark}_{evaluation_result.program}"
+            with open(os.path.join(file_path, f"{file_name}.txt"), "w") as f:
+                f.write(f"score,cost,input_tokens,output_tokens\n")
+                f.write(
+                    f"{evaluation_result.score},{evaluation_result.cost},{evaluation_result.input_tokens},"
+                    f"{evaluation_result.output_tokens}\n"
+                )
 
 
 def evaluate_all(
@@ -504,10 +455,14 @@ def evaluate_all(
     api_key=None,
     api_base=None,
     eval_lm=None,
+    run_mode: str = "combined",
 ):
     # Only register when benchmarks is a list of strings
     if benchmarks and isinstance(benchmarks[0], str):
         benchmarks = register_all_benchmarks(benchmarks, config=config)
+
+    # pdb.set_trace(header="before evaluate")
+    breakpoint()
 
     for benchmark_meta in benchmarks:
         evaluate(
@@ -523,6 +478,7 @@ def evaluate_all(
             api_key=api_key,
             api_base=api_base,
             eval_lm=eval_lm,
+            run_mode=run_mode,
         )
 
     # After all the evaluations are done, we read the evaluation results and save them to a csv file
@@ -530,8 +486,8 @@ def evaluate_all(
     df.to_csv(f"{file_path}/evaluation_results.csv", index=False)
     df["model"] = lm
 
-    # generate evaluation records 
-    generate_evaluation_records(file_path)
+    # pdb.set_trace(header="after evaluate")
+    breakpoint()
 
 
 def main():
@@ -578,6 +534,13 @@ def main():
         default='ddgo.json',
         help="Configuration file for the benchmark",
     )
+    parser.add_argument(
+        "--run_mode",
+        type=str,
+        choices=["combined", "generate_only", "score_only"],
+        default="combined",
+        help="Execution mode: combined (default), generate_only, or score_only",
+    )
 
     args = parser.parse_args()
 
@@ -599,6 +562,9 @@ def main():
         print(f"No benchmark registered with name {args.benchmark}\n")
         sys.exit(1)
 
+    # pdb.set_trace(header="in main() collecting clis")
+    breakpoint()
+
     evaluate_all(
         benchmarks,
         args.lm,
@@ -612,6 +578,7 @@ def main():
         api_base=args.lm_api_base,
         eval_lm=args.eval_lm,
         config=config,
+        run_mode=args.run_mode,
     )
 
 if __name__ == "__main__":

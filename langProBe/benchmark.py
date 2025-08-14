@@ -1,7 +1,7 @@
 """
 This module defines the core benchmarking framework for LangProBe. It provides abstract and concrete classes for handling datasets, running benchmarks, evaluating programs, and storing results/metadata. It also includes utility functions for language model setup and statistics calculation.
 """
-import random, os
+import random, os, csv, json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
@@ -17,6 +17,8 @@ from langProBe.config_utils import read_json, read_jsonl
 from langProBe.program_utils import ProcessManager, build_system_content
 import json
 # from langProBe.utils import flatten_dict
+from langProBe.split_evaluate import SplitEvaluate
+import pdb
 
 
 """
@@ -124,12 +126,14 @@ class MCPBench(Benchmark):
     '''
     Concrete benchmark for MCP tasks. Loads test data from a JSONL file or provided data, and creates dspy.Example objects.
     '''
-    def __init__(self, dataset_mode="lite", dataset_path=None, missing_data=[]):
+    def __init__(self, dataset_mode="lite", dataset_path=None, missing_data=[], source: str = "original"):
         '''
         Initializes MCPBench with a dataset mode, path, and optional missing data.
         '''
         self.dataset_path = dataset_path
         self.missing_data = missing_data
+        # source: 'original' for the native JSONL, 'predictions' for predictions.jsonl from generate_only
+        self.source = source
         super().__init__(dataset_mode=dataset_mode)
 
     def init_dataset(self):
@@ -138,20 +142,34 @@ class MCPBench(Benchmark):
         '''
         self.dataset = []
         self.test_set = []
-        if self.missing_data:
-            test_raw_data = self.missing_data
-        else:
+        if self.source == "predictions":
+            # predictions.jsonl format written by generate_only
             test_raw_data = read_jsonl(self.dataset_path)
-        
-        for test_data in test_raw_data:
-            self.test_set.append(
-                dspy.Example(
-                    id=test_data["unique_id"],
-                    question=test_data["Prompt"],
-                    answer=test_data["Answer"],
-                    tools_required=test_data["tools_required"],
-                ).with_inputs("id", "question", "answer", "tools_required", "config")
-            )
+            for row in test_raw_data:
+                self.test_set.append(
+                    dspy.Example(
+                        id=row.get("id", ""),
+                        question=row.get("question", ""),
+                        ground_truth=row.get("ground_truth", ""),
+                        answer=row.get("answer", ""),
+                        tools_required=row.get("tools_required", []),
+                        tools_called=row.get("tools_called", []),
+                    ).with_inputs("id", "question", "ground_truth", "answer", "tools_required", "tools_called", "config")
+                )
+        else:
+            if self.missing_data:
+                test_raw_data = self.missing_data
+            else:
+                test_raw_data = read_jsonl(self.dataset_path)
+            for test_data in test_raw_data:
+                self.test_set.append(
+                    dspy.Example(
+                        id=test_data["unique_id"],
+                        question=test_data["Prompt"],
+                        answer=test_data["Answer"],
+                        tools_required=test_data["tools_required"],
+                    ).with_inputs("id", "question", "answer", "tools_required", "config")
+                )
 
 # @dataclass is a Python decorator that automatically generates special methods like __init__, __repr__, and __eq__ for classes that are mainly used to store data.
 @dataclass
@@ -264,6 +282,7 @@ class EvaluateBench(ABC):
         api_base: str = None,
         file_path=None,
         eval_lm=None,
+        use_split: bool = False,
     ):
         '''
         Initializes the evaluation with the given benchmark, program, metric, language model, and other configs.
@@ -282,6 +301,8 @@ class EvaluateBench(ABC):
         self.num_threads = num_threads
         devset = benchmark.get_test_set()
         self.program.lm.eval_model = eval_lm
+        # Split evaluator is available; run mode is controlled by evaluation.py
+        self.file_path = file_path
 
         # --- Persistent client cache for MCP tool calls ---
         # This ensures only one SyncedMcpClient process per server for the entire evaluation run.
@@ -292,7 +313,7 @@ class EvaluateBench(ABC):
         self.program.set_client_cache(self.client_cache)
         # --------------------------------------------------
 
-        # Everything is done inside here!!
+        # Prepare both unified and split evaluators; choose at runtime via `use_split`.
         self.evaluate_prog = Evaluate(
             devset=devset,
             metric=self.metric,
@@ -302,6 +323,15 @@ class EvaluateBench(ABC):
             return_outputs=True,
             provide_traceback=True,
         )
+        self.split_eval = SplitEvaluate(
+            devset=devset,
+            metric=self.metric,
+            num_threads=self.num_threads,
+            max_errors=5000,
+            provide_traceback=True,
+        )
+        # Keep a handle to devset for split workflows (generate/score only)
+        self.devset = devset
         self.program_name = getattr(
             self.program, "_name", self.program.__class__.__name__
         )
@@ -359,6 +389,216 @@ class EvaluateBench(ABC):
 
         return result
 
+    def evaluate_baseline_split(self, dspy_config=None) -> EvaluationResult:
+        '''
+        Evaluates in two stages: generate first, then score.
+        '''
+        # Patch: inject client_cache into the program if it supports it
+        if hasattr(self.program, 'set_client_cache'):
+            self.program.set_client_cache(self.client_cache)
+        elif hasattr(self.program, 'client_cache'):
+            self.program.client_cache = self.client_cache
+
+        with dspy.context(**(dspy_config or {})):
+            # Ensure generate-only mode to bypass in-forward evaluation
+            if hasattr(self.program, 'set_run_mode'):
+                self.program.set_run_mode('generate_only')
+            predictions = self.split_eval.generate(program=self.program, display_progress=True)
+            if hasattr(self.program, 'set_run_mode'):
+                self.program.set_run_mode('combined')
+            score, detailed = self.split_eval.score(predictions)
+
+        result = self.get_empty_results()
+        # detailed is [(example, prediction, score_float)], we only need predictions for downstream CSV
+        outputs = [pred for (_, pred, _) in detailed]
+        managers = [getattr(pred, 'process_report', None) for pred in outputs]
+        managers = [m for m in managers if m is not None]
+
+        result.score = score
+        result.outputs_raw_data = outputs
+        result.cost, result.input_tokens, result.output_tokens = calculate_stats(managers)
+
+        # --- Clean up all MCP clients at the end ---
+        self._cleanup_all_clients(self.client_cache)
+        # ------------------------------------------
+
+        return result
+
+    # --- Standalone generate/score helpers ---
+    def _responses_dir(self) -> str:
+        base = self.file_path or "."
+        path = os.path.join(base, "response_data")
+        os.makedirs(path, exist_ok=True)
+        return path
+
+    def _responses_csv_path(self) -> str:
+        return os.path.join(self._responses_dir(), "predictions.csv")
+
+    def _responses_jsonl_path(self) -> str:
+        return os.path.join(self._responses_dir(), "predictions.jsonl")
+
+    def _save_responses_to_csv(self, predictions: list) -> str:
+        """Save (example, prediction) pairs into response_data/predictions.csv.
+        Stores evaluation_data as JSON string for fidelity.
+        """
+        csv_path = self._responses_csv_path()
+        headers = [
+            "id",
+            "question",
+            "ground_truth",
+            "answer",
+            "tools_required", 
+            "tools_called"
+        ]
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(headers)
+            for example, pred in zip(self.devset, predictions):
+                # Extract fields robustly
+                q = getattr(example, "question", "")
+                gt = getattr(example, "answer", getattr(example, "ground_truth", ""))
+                ans = getattr(pred, "answer", "")
+                tools_required = getattr(example, "tools_required", "")
+                tools_called = getattr(pred, "tools_called", "")
+                # tcs = getattr(pred, "tool_calling_success", "")
+                # suc = getattr(pred, "success", "")
+                # ed = getattr(pred, "evaluation_data", None)
+
+                breakpoint()
+
+                writer.writerow([
+                    getattr(example, "id", ""),
+                    q,
+                    gt,
+                    ans,
+                    tools_required,
+                    tools_called,
+                ])
+        return csv_path
+
+    def _serialize_list(self, value):
+        if value is None:
+            return []
+        if isinstance(value, list):
+            return value
+        return [value]
+
+    def _serialize_tools_called(self, tools_called):
+        if not tools_called:
+            return []
+        if isinstance(tools_called, list):
+            serialized = []
+            for call in tools_called:
+                name = getattr(call, 'mcp_tool_name', None)
+                serialized.append(name if name is not None else str(call))
+            return serialized
+        return [str(tools_called)]
+
+    def _save_responses_to_jsonl(self, predictions: list) -> str:
+        """Save (example, prediction) pairs into response_data/predictions.jsonl."""
+        jsonl_path = self._responses_jsonl_path()
+        with open(jsonl_path, "w", encoding="utf-8") as f:
+            for example, pred in zip(self.devset, predictions):
+                record = {
+                    "id": getattr(example, "id", ""),
+                    "question": getattr(example, "question", ""),
+                    "ground_truth": getattr(example, "answer", getattr(example, "ground_truth", "")),
+                    "answer": getattr(pred, "answer", ""),
+                    "tools_required": self._serialize_list(getattr(example, "tools_required", [])),
+                    "tools_called": self._serialize_tools_called(getattr(pred, "tools_called", [])),
+                }
+                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+        return jsonl_path
+
+    def generate_and_save_responses(self, dspy_config=None) -> str:
+        """Generate predictions only and save to CSV. Returns the CSV path."""
+        if hasattr(self.program, 'set_client_cache'):
+            self.program.set_client_cache(self.client_cache)
+        elif hasattr(self.program, 'client_cache'):
+            self.program.client_cache = self.client_cache
+        
+        print(f"In generate and save responses\n")
+        # pdb.set_trace(header="in generate and save responses")
+        breakpoint()
+
+        with dspy.context(**(dspy_config or {})):
+            # Force generate-only mode so program.forward skips internal evaluation
+            if hasattr(self.program, 'set_run_mode'):
+                self.program.set_run_mode('generate_only')
+            # pdb.set_trace(header="before generating with split_eval")
+            breakpoint()
+
+            predictions = self.split_eval.generate(program=self.program, display_progress=True)
+
+            # pdb.set_trace(header="after generating with split_eval")
+            breakpoint()
+
+            if hasattr(self.program, 'set_run_mode'):
+                self.program.set_run_mode('combined')
+
+        csv_path = self._save_responses_to_csv(predictions)
+        self._save_responses_to_jsonl(predictions)
+        # Clean up clients
+        self._cleanup_all_clients(self.client_cache)
+        return csv_path
+
+    def _load_responses_from_csv(self) -> list:
+        """Load predictions from CSV and align to devset order using example id."""
+        csv_path = self._responses_csv_path()
+        by_id = {}
+        if not os.path.exists(csv_path):
+            raise FileNotFoundError(f"Responses file not found: {csv_path}")
+        with open(csv_path, "r", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                pred = dspy.Prediction()
+                pred.question = row.get("question", "")
+                pred.ground_truth = row.get("ground_truth", "")
+                pred.answer = row.get("answer", "")
+
+
+                # pred.tool_calling_success = row.get("tool_calling_success", "")
+                # pred.success = row.get("success", "")
+                # ed_json = row.get("evaluation_data_json", "")
+                try:
+                    pred.evaluation_data = json.loads(ed_json) if ed_json else None
+                except json.JSONDecodeError:
+                    pred.evaluation_data = None
+                by_id[row.get("id", "")] = pred
+
+        aligned = []
+        for example in self.devset:
+            key = getattr(example, "id", "")
+            aligned.append(by_id.get(key, dspy.Prediction()))
+        return aligned
+
+    def score_from_saved_responses(self, dspy_config=None) -> EvaluationResult:
+        """Score previously generated predictions loaded from CSV."""
+        # Prefer program-native score_only path so per-example evaluators are used
+        if hasattr(self.program, 'set_run_mode'):
+            self.program.set_run_mode('score_only')
+
+        breakpoint()
+        preds = []
+        with dspy.context(**(dspy_config or {})):
+            # Run the DSPy loop to call program.forward for each example, which will
+            # read saved answers and only evaluate.
+
+            for ex in self.devset:
+                breakpoint()
+                preds.append(self.program(**ex.inputs()))
+        if hasattr(self.program, 'set_run_mode'):
+            self.program.set_run_mode('combined')
+
+        # Compute aggregate score using the metric for compatibility with existing outputs
+        breakpoint()
+        score, detailed = self.split_eval.score(preds)
+        result = self.get_empty_results()
+        result.score = score
+        result.outputs_raw_data = [p for p in preds]
+        result.cost, result.input_tokens, result.output_tokens = (0, 0, 0)
+        return result
+
     def evaluate(self, dspy_config=None) -> EvaluationResult:
         '''
         Evaluates the program on the benchmark (optionally with config) and returns an EvaluationResult.
@@ -366,6 +606,9 @@ class EvaluateBench(ABC):
         if dspy_config is None:
             dspy_config = {}
 
-        result = self.evaluate_baseline(dspy_config)
+        if self.use_split:
+            result = self.evaluate_baseline_split(dspy_config)
+        else:
+            result = self.evaluate_baseline(dspy_config)
         self.results = result
         return result
