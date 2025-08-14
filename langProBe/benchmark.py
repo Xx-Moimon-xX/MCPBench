@@ -578,24 +578,46 @@ class EvaluateBench(ABC):
         if hasattr(self.program, 'set_run_mode'):
             self.program.set_run_mode('score_only')
 
-        breakpoint()
-        preds = []
-        with dspy.context(**(dspy_config or {})):
-            # Run the DSPy loop to call program.forward for each example, which will
-            # read saved answers and only evaluate.
+        from dspy.utils.parallelizer import ParallelExecutor
 
-            for ex in self.devset:
-                breakpoint()
-                preds.append(self.program(**ex.inputs()))
+        preds = []
+        scores = []
+        with dspy.context(**(dspy_config or {})):
+            # Show live average via compare_results=True
+            executor = ParallelExecutor(
+                num_threads=self.num_threads,
+                disable_progress_bar=False,
+                max_errors=5000,
+                provide_traceback=True,
+                compare_results=True,
+            )
+
+            def process_item(example):
+                prediction = self.program(**example.inputs())
+                score_val = self.metric(example, prediction)
+                return prediction, float(score_val)
+
+            results = executor.execute(process_item, self.devset)
+
         if hasattr(self.program, 'set_run_mode'):
             self.program.set_run_mode('combined')
 
-        # Compute aggregate score using the metric for compatibility with existing outputs
-        breakpoint()
-        score, detailed = self.split_eval.score(preds)
+        # Aggregate
+        total = 0.0
+        count = 0
+        for item in results:
+            if item is None:
+                preds.append(dspy.Prediction())
+                continue
+            prediction, score_val = item
+            preds.append(prediction)
+            total += score_val
+            count += 1
+
+        avg_percent = round(100.0 * total / count, 2) if count else 0.0
         result = self.get_empty_results()
-        result.score = score
-        result.outputs_raw_data = [p for p in preds]
+        result.score = avg_percent
+        result.outputs_raw_data = preds
         result.cost, result.input_tokens, result.output_tokens = (0, 0, 0)
         return result
 

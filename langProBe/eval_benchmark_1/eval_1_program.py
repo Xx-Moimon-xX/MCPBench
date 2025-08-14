@@ -258,32 +258,65 @@ class Eval1Predict(MCPPredict):
             # pdb.set_trace(header="in forward function")
             breakpoint()
 
+            # Profiling init
+            timings = {}
+            data_sizes = {}
+
             manager.id = unique_id
             
+            ## Ensure system content is built (skips in score_only)
+            if hasattr(self, "_ensure_system_content"):
+                self._ensure_system_content()
+                
             ## Building initial messages and system prompt
+            t0 = time.perf_counter()
             messages = build_init_messages(self.system_content, question)
             system_prompt = messages[0][constants.CONTENT]
+            t1 = time.perf_counter()
+            timings['build_init_messages'] = t1 - t0
+            data_sizes['init_messages'] = len(str(messages))
 
             steps = 0
             all_completion_tokens = 0
             all_prompt_tokens = 0
             tools_called = []
+            start_time = time.time()
+            loop_start = time.perf_counter()
 
             while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
+                step_start = time.perf_counter()
                 response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger, system_prompt=system_prompt)
+                step_end = time.perf_counter()
+                print(f"[PROFILE] Step {steps}: call_lm took {step_end - step_start:.4f}s, response size: {len(str(response))}")
 
                 all_completion_tokens += completion_tokens
                 all_prompt_tokens += prompt_tokens
                 mcp_calls = response_parsing(response)
 
+                if hasattr(mcp_calls, 'mcps') and mcp_calls.mcps:
+                    print(f"[PROFILE] Step {steps}: response_parsing returned {len(mcp_calls.mcps)} calls")
+                else:
+                    print(f"[PROFILE] Step {steps}: response_parsing returned 0 calls")
+
                 if not mcp_calls.shutdown:
                     for mcp_call in mcp_calls.mcps:
                         tools_called.append(mcp_call)
-                        # print(f"Adding tool: {mcp_call}")
 
+                call_start = time.perf_counter()
                 new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
+                call_end = time.perf_counter()
+                print(f"[PROFILE] Step {steps}: mcp_calling took {call_end - call_start:.4f}s, returned {len(new_messages)} new messages")
+
                 messages = build_messages(messages, new_messages)
+                print(f"[PROFILE] Step {steps}: build_messages, total messages: {len(messages)}")
+                
                 steps += 1
+
+            loop_end = time.perf_counter()
+            timings['main_loop'] = loop_end - loop_start
+            data_sizes['final_messages'] = len(str(messages))
+
+            end_time = time.time()
 
             # If the maximum number of steps is reached and there is still no answer
             if messages[-1][constants.ROLE] != constants.ASSISTANT:
@@ -295,6 +328,15 @@ class Eval1Predict(MCPPredict):
 
             self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
             prediction = messages[-1].get(constants.CONTENT, "")
+
+            # Write messages log entry for generate phase
+            try:
+                self.log_messages(messages, question, None, (end_time - start_time), all_prompt_tokens, all_completion_tokens)
+            except Exception:
+                pass
+
+            print(f"[PROFILE] Timings (generate_only): {timings}")
+            print(f"[PROFILE] Data sizes (generate_only): {data_sizes}")
 
             # pdb.set_trace(header="returning prediction now.")
             breakpoint()
@@ -321,11 +363,15 @@ class Eval1Predict(MCPPredict):
 
             manager.id = unique_id
 
-            breakpoint()            
+            breakpoint()
+            eval_start = time.perf_counter()
             success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, tools_required, tools_called, answer)
+            eval_end = time.perf_counter()
+            timings = {'evaluate_prediction': eval_end - eval_start}
             self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
 
             print(f"evaluation_data: {evaluation_data}")
+            print(f"[PROFILE] Timings (score_only): {timings}")
 
             breakpoint()
 

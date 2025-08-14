@@ -481,10 +481,12 @@ def evaluate_all(
             run_mode=run_mode,
         )
 
+    
     # After all the evaluations are done, we read the evaluation results and save them to a csv file
-    df = read_evaluation_results(file_path)
-    df.to_csv(f"{file_path}/evaluation_results.csv", index=False)
-    df["model"] = lm
+    if run_mode != "generate_only":
+        df = read_evaluation_results(file_path)
+        df.to_csv(f"{file_path}/evaluation_results.csv", index=False)
+        df["model"] = lm
 
     # pdb.set_trace(header="after evaluate")
     breakpoint()
