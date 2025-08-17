@@ -1,0 +1,195 @@
+{
+    "mcp_pool": [
+        {
+            "name": "slack",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers-mutated/slack-mutated/dist/index.js"
+                    ],
+                    "port": 8900
+                }
+            ]
+        },
+        {
+            "name": "brave-search",
+            "run_config": [
+                {
+                    "command": "/Users/cxnpl/.nvm/versions/node/v23.11.0/bin/node",
+                    "args": ["/Users/cxnpl/cxnpl/thesis/servers/brave-search/dist/index.js"],
+                    "port": 8100
+                }
+            ]
+        },
+        {
+            "name": "gitlab",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/mcp-gitlab/build/index.js"
+                    ],
+                    "port": 8006
+                }
+            ]
+        },
+        {
+            "name": "Neon",
+            "url": "https://mcp.neon.tech/sse"
+        },
+        {
+            "name": "spotify-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/spotify-mock/dist/index.js"
+                    ],
+                    "port": 8400
+                }
+            ]
+        },
+        {
+            "name": "notion-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/notion-mock/dist/index.js"
+                    ],
+                    "port": 8401
+                }
+            ]
+        },
+        {
+            "name": "memory",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["-y", "@modelcontextprotocol/server-memory"],
+                    "port": 8303
+                }
+            ]
+        },
+        {
+            "name": "react-native-debugger-mcp",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["-y", "@twodoorsdev/react-native-debugger-mcp"],
+                    "port": 8308
+                }
+            ]
+        },
+        {
+            "name": "npm-sentinel",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["-y", "@nekzus/mcp-server@latest"],
+                    "port": 8301
+                }
+            ]
+        },
+        {
+            "name": "excel",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["--yes", "@negokaz/excel-mcp-server"],
+                    "port": 8307,
+                    "env": {
+                        "EXCEL_MCP_PAGING_CELLS_LIMIT": "4000"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "playwright",
+            "run_config": [
+                {
+                    "command": "npx",
+                    "args": ["@playwright/mcp@latest"],
+                    "port": 8200
+                }
+            ]
+        },
+        {
+            "name": "Apify",
+            "url": "https://mcp.apify.com/sse"
+        },
+        {
+            "name": "DeepWiki",
+            "url": "https://mcp.deepwiki.com/sse"
+        },
+        {
+            "name": "GitMCP",
+            "url": "https://gitmcp.io/docs"
+        },
+        {
+            "name": "LLMText",
+            "url": "https://mcp.llmtxt.dev/sse"
+        },
+        {
+            "name": "youtube-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/youtube-mock/dist/index.js"
+                    ],
+                    "port": 8402
+                }
+            ]
+        },
+        {
+            "name": "atlassian-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/atlassian-mock/dist/index.js"
+                    ],
+                    "port": 8403
+                }
+            ]
+        },
+        {
+            "name": "reddit-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/reddit-mock/dist/index.js"
+                    ],
+                    "port": 8404
+                }
+            ]
+        },
+        {
+            "name": "wikipedia-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/wikipedia-mock/dist/index.js"
+                    ],
+                    "port": 8405
+                }
+            ]
+        },
+        {
+            "name": "stackoverflow-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/stackoverflow-mock/dist/index.js"
+                    ],
+                    "port": 8406
+                }
+            ]
+        }
+    ]
+} 

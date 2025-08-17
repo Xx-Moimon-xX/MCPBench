@@ -1,0 +1,18 @@
+{
+    "mcp_pool": [
+        {
+            "name": "atlassian-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/atlassian-mock/dist/index.js"
+                    ],
+                    "port": 8403
+                }
+            ]
+        }
+    ]
+}
+
+

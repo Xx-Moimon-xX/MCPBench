@@ -1,0 +1,16 @@
+{
+    "mcp_pool": [
+        {
+            "name": "wikipedia-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/wikipedia-mock/dist/index.js"
+                    ],
+                    "port": 8405
+                }
+            ]
+        }
+    ]
+}

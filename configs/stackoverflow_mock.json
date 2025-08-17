@@ -1,0 +1,16 @@
+{
+    "mcp_pool": [
+        {
+            "name": "stackoverflow-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/stackoverflow-mock/dist/index.js"
+                    ],
+                    "port": 8406
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,18 @@
+{
+    "mcp_pool": [
+        {
+            "name": "youtube-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/youtube-mock/dist/index.js"
+                    ],
+                    "port": 8402
+                }
+            ]
+        }
+    ]
+}
+
+

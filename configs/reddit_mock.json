@@ -1,0 +1,16 @@
+{
+    "mcp_pool": [
+        {
+            "name": "reddit-mock",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers/reddit-mock/dist/index.js"
+                    ],
+                    "port": 8404
+                }
+            ]
+        }
+    ]
+}
