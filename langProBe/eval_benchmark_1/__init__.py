@@ -13,11 +13,13 @@ Detailed information about input parameters, where each parameter includes: para
 """
 
 def get_eval_benchmark_1(config):
+    tools_format = config.get('tools_format', 'formatted')
     eval_benchmark_1_baseline = Eval1Predict(
         config=config,
         max_steps=5,
         system_prompt=MCP_SAMPLE_SYSTEM_PROMPT,
-        task_name="eval_benchmark_1")
+        task_name="eval_benchmark_1",
+        tools_format=tools_format)
 
     # It's giving a different program object, but I think it should be the benchmark object that's changed not the program object.
     # Because the program object is a constant (i.e. how the system generates responses), and the benchmark is what should change.

@@ -112,13 +112,14 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
     '''
     This is the program/system that is run to get responses. Called MCPPredict.
     '''
-    def __init__(self, config, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="mcp_sample"):
+    def __init__(self, config, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="mcp_sample", tools_format="formatted"):
         super().__init__()
         self.system_prompt = system_prompt
         self.task_name = task_name
         self.max_steps = max_steps
         self.max_length = 30000
         self.config = config
+        self.tools_format = tools_format
         # self.mcps = config.get("mcp_pool")
         # self.mcpserver = self.config["mcp_pool"][0].get("name")
 
@@ -228,7 +229,9 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
 
     def _ensure_system_content(self):
         if self.system_content is None and getattr(self, 'run_mode', 'combined') != 'score_only':
-            self.system_content = build_system_content(self.system_prompt, self._mcps)
+            # tools_fmt = getattr(self, 'tools_format', "formatted")
+            self.system_content = build_system_content(self.system_prompt, self._mcps, self.tools_format)
+            print(f"[BUILD_SYSTEM] System content: {self.system_content}")
 
 
     def forward(self, **kwargs) -> dspy.Prediction:

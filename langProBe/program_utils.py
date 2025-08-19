@@ -418,18 +418,21 @@ def call_lm(
 
 def build_system_content(base_system: str,
                         mcps: List,
+                        tools_format: str,
                         ) -> str:
     '''
     Build the system content for the conversation, i.e. the system prompt and the available tools.
     '''
     tools_section = "## Available Tools\n"
     for mcp in mcps:
-        tools_section += f"### Server '{mcp['name']}' include following tools\n"
         if mcp['name'] in ['wuying-agentbay-mcp-server', 'Playwright']:
             tools_section += f"When using this server to perform search tasks, please use https://www.baidu.com as the initial website for searching."
         
         # Connecting the the MCP server to get the tools!!!!
         url = mcp.get("url")
+        print(f"MCP: {mcp}")
+        print(f"[DEBUG BUILD_SYSTEM] Building system content for server: {mcp['name']}")
+        # print(f"URL: {url}")
         headers = None
         if url:
             headers = mcp.get("headers")
@@ -457,37 +460,89 @@ def build_system_content(base_system: str,
                 url = f"http://localhost:{port}/sse"
             except:
                 raise Exception("No url found")
+        print(f"[DEBUG BUILD_SYSTEM] Creating client for {mcp['name']} at URL: {url}")
+
         client = SyncedMcpClient(server_url=url, headers=headers)
         try:
+            print(f"[DEBUG BUILD_SYSTEM] About to list tools for {mcp['name']}")
             result = client.list_tools()
             tools = result.tools
+            print(f"[DEBUG BUILD_SYSTEM] Successfully got {len(tools)} tools from {mcp['name']}")
             # print(f"Tools directly from MCP server: {tools}")
             # logger.debug(f"Tools directly from MCP server: {tools}")
         except Exception as e:
+            print(f"[DEBUG BUILD_SYSTEM ERROR] Failed to access server {mcp['name']}: {e}")
             raise Exception(f"Fail access to server: {mcp['name']}, error: {e}")
 
         # Formatting tools section to send in prompt
-        for t in tools:
-            tools_section += f"- {t.name}: {t.description}\n"
-            input_schema = t.inputSchema
-            required_params = input_schema.get("required", [])
-            params_desc = []
+        if tools_format == "raw_mcp":
+            # Format each tool on a separate line for better readability, keeping exact Tool( format
+            tools_section += "Tools raw: \n"
+            for i, tool in enumerate(tools):
+                if i == 0:
+                    tools_section += f"[{repr(tool)},\n"
+                elif i == len(tools) - 1:
+                    tools_section += f"{repr(tool)}]\n\n"
+                else:
+                    tools_section += f"{repr(tool)},\n"
+        elif tools_format == "json":
+            # Format tools as JSON structure
+            server_tools = []
+            for tool in tools:
+                tool_dict = {
+                    "name": tool.name,
+                    "title": tool.title,
+                    "description": tool.description,
+                    "inputSchema": tool.inputSchema,
+                    "outputSchema": tool.outputSchema,
+                    "annotations": tool.annotations,
+                    "meta": tool.meta
+                }
+                server_tools.append(tool_dict)
+            
+            # Store server data for later JSON construction
+            if not hasattr(build_system_content, 'all_servers'):
+                build_system_content.all_servers = []
+            
+            server_data = {
+                "server": mcp['name'],
+                "tools": server_tools
+            }
+            build_system_content.all_servers.append(server_data)
+        else:
+            # Default to formatted or handle formatted explicitly
+            tools_section += f"### Server '{mcp['name']}' include following tools\n"
+            for t in tools:
+                tools_section += f"- {t.name}: {t.description}\n"
+                input_schema = t.inputSchema
+                required_params = input_schema.get("required", [])
+                params_desc = []
 
-            if "properties" in input_schema:
-                for param_name, param_info in input_schema["properties"].items():
-                    is_required = param_name in required_params
-                    param_type = param_info.get("type", "")
-                    param_desc = param_info.get("description", "")
+                if "properties" in input_schema:
+                    for param_name, param_info in input_schema["properties"].items():
+                        is_required = param_name in required_params
+                        param_type = param_info.get("type", "")
+                        param_desc = param_info.get("description", "")
 
-                    req_tag = "required" if is_required else "optional"
-                    params_desc.append(
-                        f"- {param_name} ({param_type}, {req_tag}): {param_desc}"
-                    )
+                        req_tag = "required" if is_required else "optional"
+                        params_desc.append(
+                            f"- {param_name} ({param_type}, {req_tag}): {param_desc}"
+                        )
 
-            # 使用更丰富的描述
-            # Use a more detailed description
-            params_text = "\n".join(params_desc) if params_desc else "No parameters"
-            tools_section += f"  Parameters:\n{params_text}\n\n"
+                # 使用更丰富的描述
+                # Use a more detailed description
+                params_text = "\n".join(params_desc) if params_desc else "No parameters"
+                tools_section += f"  Parameters:\n{params_text}\n\n"
+
+    # If using JSON format, construct the combined JSON structure
+    if tools_format == "json" and hasattr(build_system_content, 'all_servers'):
+        import json
+        combined_json = {
+            "servers": build_system_content.all_servers
+        }
+        tools_section += f"\n{json.dumps(combined_json, indent=2)}\n\n"
+        # Clear the stored servers for next use
+        build_system_content.all_servers = []
 
     prompt = base_system + f"""{tools_section}""" + TOOL_PROMPT
 
@@ -628,6 +683,7 @@ def mcp_calling(
         # Iterating over each MCP call in the MCP call list
         for idx, mcp in enumerate(mcp_list, start=1):
             logger.debug(f"ID: {manager.id} (in mcp_calling), Processing MCP #{idx}: {mcp}")
+            print(f"[DEBUG MCP] ID: {manager.id}, Processing MCP #{idx}/{len(mcp_list)}: server={mcp.mcp_server_name}, tool={mcp.mcp_tool_name}")
             mcp_server_name = mcp.mcp_server_name
             mcp_tool_name = mcp.mcp_tool_name
             mcp_args = mcp.mcp_args
@@ -701,11 +757,16 @@ def mcp_calling(
                     cache_key = (url, str(headers))
                     if cache_key in client_cache:
                         client = client_cache[cache_key]
+                        print(f"[DEBUG MCP] ID: {manager.id}, Using cached client for {target_name} at {url}")
                     else:
+                        print(f"[DEBUG MCP] ID: {manager.id}, Creating new client for {target_name} at {url}")
                         client = SyncedMcpClient(server_url=url, headers=headers)
                         client_cache[cache_key] = client
+                        print(f"[DEBUG MCP] ID: {manager.id}, Created new client for {target_name}")
                     logger.debug(f"ID: {manager.id} (in mcp_calling), Initialized SyncedMcpClient with URL: {url}")
+                    print(f"[DEBUG MCP] ID: {manager.id}, About to call list_tools() on {target_name}")
                     client.list_tools()
+                    print(f"[DEBUG MCP] ID: {manager.id}, Successfully called list_tools() on {target_name}")
                     logger.debug(f"ID: {manager.id} (in mcp_calling), Retrieved tool list from MCP Server '{target_name}'.")
             except Exception as e:
                 logger.error(f"ID: {manager.id} (in mcp_calling), Failed to initialize SyncedMcpClient for server '{mcp_server_name}': {str(e)}")
@@ -713,8 +774,10 @@ def mcp_calling(
 
             if client:
                 try:
+                    print(f"[DEBUG MCP] ID: {manager.id}, About to call tool '{mcp_tool_name}' on server '{mcp_server_name}' with args: {mcp_args}")
                     logger.debug(f"ID: {manager.id} (in mcp_calling), Calling tool '{mcp_tool_name}' with arguments: {mcp_args}")
                     result = client.call_tool(mcp_tool_name, mcp_args)
+                    print(f"[DEBUG MCP] ID: {manager.id}, Successfully called tool '{mcp_tool_name}' on server '{mcp_server_name}'")
                     logger.debug(f"ID: {manager.id} (in mcp_calling), Raw tool call response from '{mcp_tool_name}': {result}")
                     texts = [item.text for item in result.content]
 
@@ -722,11 +785,14 @@ def mcp_calling(
                     logger.debug(f"ID: {manager.id} (in mcp_calling), Cleaned tool call response from '{mcp_tool_name}': {result_str_segment}")
 
                     logger.info(f"ID: {manager.id} (in mcp_calling), MCP Server '{mcp_server_name}' returned: {result_str_segment[:5000]}")
+                    print(f"[DEBUG MCP] ID: {manager.id}, Tool '{mcp_tool_name}' on server '{mcp_server_name}' returned {len(result_str_segment)} characters")
 
                     result_str += result_str_segment
                 except Exception as e:
+                    print(f"[DEBUG MCP ERROR] ID: {manager.id}, FAILED calling tool '{mcp_tool_name}' on server '{mcp_server_name}': {str(e)}")
                     logger.error(f"ID: {manager.id} (in mcp_calling), Error calling tool '{mcp_tool_name}' on MCP Server '{mcp_server_name}': {str(e)}")
             else:
+                print(f"[DEBUG MCP ERROR] ID: {manager.id}, No client available for tool '{mcp_tool_name}' on server '{mcp_server_name}'")
                 logger.warning(f"ID: {manager.id} (in mcp_calling), Skipping tool call for '{mcp_tool_name}' due to client initialization failure.")
 
         ## Tool call responses are truncated to 150000 characters!!!!

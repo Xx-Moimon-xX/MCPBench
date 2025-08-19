@@ -340,6 +340,7 @@ def evaluate(
             f"eval_lm: {eval_lm}\n"
             f"num_threads: {num_threads}\n"
             f"toolset : {config}\n"
+            f"tools_format: {config['tools_format']}\n"
         )
 
     # pdb.set_trace(header="have created the .stat file")
@@ -543,10 +544,20 @@ def main():
         default="combined",
         help="Execution mode: combined (default), generate_only, or score_only",
     )
+    parser.add_argument(
+        "--tools_format",
+        type=str,
+        choices=["formatted", "raw_mcp", "json"],
+        default="formatted",
+        help="Tools format: formatted (default), raw_mcp, or json",
+    )
 
     args = parser.parse_args()
 
     config = read_json(args.config)
+    
+    # Add tools_format from command line to config
+    config['tools_format'] = args.tools_format
     
     # Set global config for use by other modules
     global global_config

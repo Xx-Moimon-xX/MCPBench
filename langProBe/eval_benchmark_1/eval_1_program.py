@@ -204,8 +204,8 @@ class Eval1Predict(MCPPredict):
     '''
     Program that is run to get responses. Called Eval1Predict and it is a child class of MCPPredict.
     '''
-    def __init__(self, config, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="eval1"):
-        super().__init__(config, max_steps, system_prompt, task_name)
+    def __init__(self, config, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="eval1", tools_format="formatted"):
+        super().__init__(config, max_steps, system_prompt, task_name, tools_format)
 
     
     def evaluate_prediction(self, question: str, ground_truth: str, tools_required: List[str], tools_called: List[MCPCall], prediction: str) -> Tuple[bool, Optional[str]]:

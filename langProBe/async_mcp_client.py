@@ -16,22 +16,32 @@ class AsyncMCPClient:
 
     async def connect_to_sse_server(self, server_url: str, headers=None):
         """Connect to an MCP server running with SSE transport"""
+        print(f"[DEBUG SSE] Attempting to connect to SSE server: {server_url}")
         # Store the context managers so they stay alive
-        self._streams_context = sse_client(url=server_url, headers=headers, timeout=10)
-        streams = await self._streams_context.__aenter__()
+        try:
+            self._streams_context = sse_client(url=server_url, headers=headers, timeout=10)
+            print(f"[DEBUG SSE] Created SSE client context for {server_url}")
+            streams = await self._streams_context.__aenter__()
+            print(f"[DEBUG SSE] Entered streams context for {server_url}")
 
-        self._session_context = ClientSession(*streams)
-        self.session: ClientSession = await self._session_context.__aenter__()
+            self._session_context = ClientSession(*streams)
+            self.session: ClientSession = await self._session_context.__aenter__()
+            print(f"[DEBUG SSE] Created and entered session context for {server_url}")
 
-        # Initialize
-        await self.session.initialize()
+            # Initialize
+            await self.session.initialize()
+            print(f"[DEBUG SSE] Initialized session for {server_url}")
 
-        # List available tools to verify connection
-        # print("Initialized SSE client...")
-        # print("Listing tools...")
-        response = await self.session.list_tools()
-        tools = response.tools
-        # print("\nConnected to server with tools:", [tool.name for tool in tools])
+            # List available tools to verify connection
+            # print("Initialized SSE client...")
+            # print("Listing tools...")
+            response = await self.session.list_tools()
+            tools = response.tools
+            print(f"[DEBUG SSE] Successfully connected to {server_url} with {len(tools)} tools")
+            # print("\nConnected to server with tools:", [tool.name for tool in tools])
+        except Exception as e:
+            print(f"[DEBUG SSE ERROR] Failed to connect to {server_url}: {str(e)}")
+            raise
 
     async def cleanup(self):
         """Properly clean up the session and streams"""
@@ -42,13 +52,25 @@ class AsyncMCPClient:
 
     async def call_tool(self, tool_name: str, tool_args: dict) -> dict:
         """Call a tool with the given arguments"""
-        result = await self.session.call_tool(tool_name, tool_args)
-        return result
+        print(f"[DEBUG ASYNC] About to call tool: {tool_name} with args: {tool_args}")
+        try:
+            result = await self.session.call_tool(tool_name, tool_args)
+            print(f"[DEBUG ASYNC] Successfully called tool: {tool_name}")
+            return result
+        except Exception as e:
+            print(f"[DEBUG ASYNC ERROR] Failed to call tool {tool_name}: {str(e)}")
+            raise
 
     async def list_tools(self):
         """List available tools"""
-        response = await self.session.list_tools()
-        return response
+        print(f"[DEBUG ASYNC] About to list tools")
+        try:
+            response = await self.session.list_tools()
+            print(f"[DEBUG ASYNC] Successfully listed {len(response.tools)} tools")
+            return response
+        except Exception as e:
+            print(f"[DEBUG ASYNC ERROR] Failed to list tools: {str(e)}")
+            raise
 
     async def get_prompt(self, *args, **kwargs):
         response = await self.session.get_prompt(*args, **kwargs)
