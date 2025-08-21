@@ -13,11 +13,13 @@ Detailed information about input parameters, where each parameter includes: para
 """
 
 def get_mcp_sample_benchmark(config):
+    tools_format = config.get('tools_format', 'formatted')
     mcp_sample_baseline = MCPPredict(
         config=config,
         max_steps=5,
         system_prompt=MCP_SAMPLE_SYSTEM_PROMPT,
-        task_name="websearch")
+        task_name="websearch",
+        tools_format=tools_format)
 
     return [
         BenchmarkMeta(

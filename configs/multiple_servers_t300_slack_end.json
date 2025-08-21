@@ -1,18 +1,6 @@
 {
     "mcp_pool": [
         {
-            "name": "slack",
-            "run_config": [
-                {
-                    "command": "node",
-                    "args": [
-                        "/Users/cxnpl/cxnpl/thesis/servers-mutated/slack-mutated/dist/index.js"
-                    ],
-                    "port": 8900
-                }
-            ]
-        },
-        {
             "name": "brave-search",
             "run_config": [
                 {
@@ -178,6 +166,18 @@
                         "/Users/cxnpl/cxnpl/thesis/servers/stackoverflow-mock/dist/index.js"
                     ],
                     "port": 8406
+                }
+            ]
+        },
+        {
+            "name": "slack",
+            "run_config": [
+                {
+                    "command": "node",
+                    "args": [
+                        "/Users/cxnpl/cxnpl/thesis/servers-mutated/slack-mutated/dist/index.js"
+                    ],
+                    "port": 8900
                 }
             ]
         }

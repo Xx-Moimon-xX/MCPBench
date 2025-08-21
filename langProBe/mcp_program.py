@@ -9,7 +9,8 @@ from langProBe.program_utils import (
     ProcessManager,
     MCPCall,
     MCPCallList, 
-    build_system_content
+    build_system_content,
+    build_system_content_filler_context
 )
 import time
 from langProBe.evaluation_utils import evaluate_final_answer
@@ -230,7 +231,12 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
     def _ensure_system_content(self):
         if self.system_content is None and getattr(self, 'run_mode', 'combined') != 'score_only':
             # tools_fmt = getattr(self, 'tools_format', "formatted")
-            self.system_content = build_system_content(self.system_prompt, self._mcps, self.tools_format)
+            
+            #Normal!!
+            # self.system_content = build_system_content(self.system_prompt, self._mcps, self.tools_format)
+            
+            # Context filler with 24k tokens and pg essays in between the slack_mutated.json
+            self.system_content = build_system_content_filler_context(self.system_prompt)
             print(f"[BUILD_SYSTEM] System content: {self.system_content}")
 
 

@@ -106,26 +106,16 @@
             ]
         },
         {
-            "name": "playwright",
-            "run_config": [
-                {
-                    "command": "npx",
-                    "args": ["@playwright/mcp@latest"],
-                    "port": 8200
-                }
-            ]
-        },
-        {
             "name": "Apify",
             "url": "https://mcp.apify.com/sse"
         },
         {
-            "name": "DeepWiki",
-            "url": "https://mcp.deepwiki.com/sse"
-        },
-        {
             "name": "Semgrep",
             "url": "https://mcp.semgrep.ai/sse"
+        },
+        {
+            "name": "DeepWiki",
+            "url": "https://mcp.deepwiki.com/sse"
         },
         {
             "name": "GitMCP",

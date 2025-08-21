@@ -10,6 +10,8 @@ import sys
 import langProBe.constants as constants
 import logging
 from .synced_mcp_client import SyncedMcpClient
+import json
+
 try:
     from anthropic import Anthropic
     from anthropic import BadRequestError
@@ -416,6 +418,28 @@ def call_lm(
             logger.error(f"ID: {manager.id} (in call_lm), Response: {response}")
         raise
 
+def build_system_content_filler_context(base_system: str) -> str:
+    """
+    Return the pre-built system content with filler context from the 24k tokens file.
+    """
+    import os
+    from pathlib import Path
+    
+    # Path to the filler context file
+    current_dir = Path(__file__).parent
+    filler_file_path = current_dir.parent / "context filler system prompts" / "after slack tools 24k tokens.txt"
+    
+    try:
+        with open(filler_file_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        print(f"Warning: Filler context file not found at {filler_file_path}")
+        return base_system
+    except Exception as e:
+        print(f"Error reading filler context file: {e}")
+        return base_system
+
+
 def build_system_content(base_system: str,
                         mcps: List,
                         tools_format: str,
@@ -424,6 +448,8 @@ def build_system_content(base_system: str,
     Build the system content for the conversation, i.e. the system prompt and the available tools.
     '''
     tools_section = "## Available Tools\n"
+    all_servers = []  # Move this outside the loop!
+    
     for mcp in mcps:
         if mcp['name'] in ['wuying-agentbay-mcp-server', 'Playwright']:
             tools_section += f"When using this server to perform search tasks, please use https://www.baidu.com as the initial website for searching."
@@ -433,6 +459,7 @@ def build_system_content(base_system: str,
         print(f"MCP: {mcp}")
         print(f"[DEBUG BUILD_SYSTEM] Building system content for server: {mcp['name']}")
         # print(f"URL: {url}")
+
         headers = None
         if url:
             headers = mcp.get("headers")
@@ -489,26 +516,54 @@ def build_system_content(base_system: str,
             # Format tools as JSON structure
             server_tools = []
             for tool in tools:
+                # Convert ToolAnnotations to serializable format
+                annotations = tool.annotations
+                if annotations is not None:
+                    if hasattr(annotations, 'model_dump'):
+                        # Pydantic v2
+                        annotations = annotations.model_dump()
+                    elif hasattr(annotations, 'dict'):
+                        # Pydantic v1
+                        annotations = annotations.dict()
+                    elif hasattr(annotations, '__dict__'):
+                        # Regular object
+                        annotations = annotations.__dict__
+                    else:
+                        # Fallback to string
+                        annotations = str(annotations)
+                
+                # Convert meta to serializable format
+                meta = tool.meta
+                if meta is not None:
+                    if hasattr(meta, 'model_dump'):
+                        meta = meta.model_dump()
+                    elif hasattr(meta, 'dict'):
+                        meta = meta.dict()
+                    elif hasattr(meta, '__dict__'):
+                        meta = meta.__dict__
+                    else:
+                        meta = str(meta)
+                
                 tool_dict = {
                     "name": tool.name,
                     "title": tool.title,
                     "description": tool.description,
                     "inputSchema": tool.inputSchema,
                     "outputSchema": tool.outputSchema,
-                    "annotations": tool.annotations,
-                    "meta": tool.meta
+                    "annotations": annotations,
+                    "meta": meta
                 }
                 server_tools.append(tool_dict)
             
             # Store server data for later JSON construction
-            if not hasattr(build_system_content, 'all_servers'):
-                build_system_content.all_servers = []
+            # if not hasattr(build_system_content, 'all_servers'):
+            #     build_system_content.all_servers = []
             
             server_data = {
                 "server": mcp['name'],
                 "tools": server_tools
             }
-            build_system_content.all_servers.append(server_data)
+            all_servers.append(server_data)
         else:
             # Default to formatted or handle formatted explicitly
             tools_section += f"### Server '{mcp['name']}' include following tools\n"
@@ -535,14 +590,22 @@ def build_system_content(base_system: str,
                 tools_section += f"  Parameters:\n{params_text}\n\n"
 
     # If using JSON format, construct the combined JSON structure
-    if tools_format == "json" and hasattr(build_system_content, 'all_servers'):
-        import json
-        combined_json = {
-            "servers": build_system_content.all_servers
-        }
-        tools_section += f"\n{json.dumps(combined_json, indent=2)}\n\n"
+    if tools_format == "json" and all_servers:
+        try:
+            combined_json = {
+                "servers": all_servers
+            }
+            tools_section += f"\n{json.dumps(combined_json, indent=2)}\n\n"
+        except TypeError as e:
+            print(f"[WARNING] JSON serialization failed: {e}")
+            print("[WARNING] Falling back to text format for tools")
+            # Fall back to adding tools in text format
+            for server_data in all_servers:
+                tools_section += f"\n### Server: {server_data['server']}\n"
+                for tool in server_data['tools']:
+                    tools_section += f"- {tool.get('name', 'Unknown')}: {tool.get('description', 'No description')}\n"
         # Clear the stored servers for next use
-        build_system_content.all_servers = []
+        # build_system_content.all_servers = []
 
     prompt = base_system + f"""{tools_section}""" + TOOL_PROMPT
 
