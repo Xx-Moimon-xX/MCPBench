@@ -1,0 +1,13 @@
+I am giving you a configuration file that lists servers which can be connected to. Using this as background, generate very long, coherent filler text (approximately 30,000 tokens in length) that discusses the kinds of applications that typically run on application servers specifically talking about the ones in the config file.
+
+Guidelines for the text:
+
+Discuss applications in broad and descriptive terms (e.g., business applications, web platforms, enterprise systems, e-commerce backends, university information systems, social networking platforms, etc.).
+
+Focus on their general roles, importance, and how they are usually deployed on servers, but without mentioning or describing any of the specific tools, commands, or functionalities in the configuration file.
+
+Expand at length: cover history, architecture, design trade-offs, industry use cases, performance considerations, scaling challenges, and comparisons between different categories of applications.
+
+The purpose is to create distractor content: text that is coherent, meaningful, and strongly related to servers and applications, but which does not contain any actionable instructions for tool usage.
+
+Please ensure the output is extremely detailed and extended to about 30,000 tokens in total length.
