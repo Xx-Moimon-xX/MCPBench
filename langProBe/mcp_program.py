@@ -236,9 +236,18 @@ class MCPPredict(LangProBeMCPMetaProgram, dspy.Module):
             # self.system_content = build_system_content(self.system_prompt, self._mcps, self.tools_format)
             
             # Context filler with 24k tokens and pg essays in between the slack_mutated.json
-            self.system_content = build_system_content_filler_context(self.system_prompt)
-            print(f"[BUILD_SYSTEM] System content: {self.system_content}")
+            # self.system_content = build_system_content_filler_context(self.system_prompt, "pg_after_tools")
 
+            # Before tools PG
+            # self.system_content = build_system_content_filler_context(self.system_prompt, "pg_before_tools")   
+
+            # Generated content after tools
+            # self.system_content = build_system_content_filler_context(self.system_prompt, "related_content_after_tools")
+
+            # Generated content before tools
+            self.system_content = build_system_content_filler_context(self.system_prompt, "related_content_before_tools")
+
+            print(f"[BUILD_SYSTEM] System content: {self.system_content}")
 
     def forward(self, **kwargs) -> dspy.Prediction:
         '''

@@ -418,7 +418,7 @@ def call_lm(
             logger.error(f"ID: {manager.id} (in call_lm), Response: {response}")
         raise
 
-def build_system_content_filler_context(base_system: str) -> str:
+def build_system_content_filler_context(base_system: str, context_format:str) -> str:
     """
     Return the pre-built system content with filler context from the 24k tokens file.
     """
@@ -427,8 +427,15 @@ def build_system_content_filler_context(base_system: str) -> str:
     
     # Path to the filler context file
     current_dir = Path(__file__).parent
-    filler_file_path = current_dir.parent / "context filler system prompts" / "after slack tools 24k tokens.txt"
-    
+    if context_format=="pg_after_tools":
+        filler_file_path = current_dir.parent / "context filler system prompts" / "after slack tools 24k tokens.txt"
+    elif context_format=="pg_before_tools":
+        filler_file_path = current_dir.parent / "context filler system prompts" / "300 tools system prompt essays before tools 24k.txt"
+    elif context_format=="related_content_after_tools":
+        filler_file_path = current_dir.parent / "context filler system prompts" / "300 tools system prompt with generated content.txt"
+    elif context_format=="related_content_before_tools":
+        filler_file_path = current_dir.parent / "context filler system prompts" / "300 tools system prompt with generated content before tools.txt"
+
     try:
         with open(filler_file_path, 'r', encoding='utf-8') as f:
             return f.read()

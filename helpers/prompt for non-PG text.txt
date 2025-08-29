@@ -11,3 +11,20 @@ Expand at length: cover history, architecture, design trade-offs, industry use c
 The purpose is to create distractor content: text that is coherent, meaningful, and strongly related to servers and applications, but which does not contain any actionable instructions for tool usage.
 
 Please ensure the output is extremely detailed and extended to about 30,000 tokens in total length.
+
+
+
+------------------------------------- The below one ---------
+
+I am giving you a configuration file that lists servers which can be connected to. Using this as background, generate very long, coherent filler text 
+(about 30,000 tokens) that talks specifically about the servers listed in the configuration file.
+
+Guidelines for the text:
+- Explicitly mention the servers from the config file by name throughout the text.
+- For each server, describe the kinds of applications that might typically run on it (e.g., business systems, web platforms, enterprise apps, e-commerce sites, 
+analytics systems, social platforms, etc.).
+- Focus only on the applications and the servers themselves — do not mention or describe any tools, commands, ports, or functionalities from the config file.
+- Make the text very detailed, repetitive if necessary, and extremely extended in length (~30k tokens), so that it reads as a long descriptive narrative purely 
+about those servers and the types of applications they support.
+
+The purpose is to create distractor filler text: it should only talk about the servers and the applications they might host, and nothing else

@@ -16,23 +16,35 @@ if [ -f local.env ]; then
 fi
 # Check if the config file path parameter is provided
 if [ -z "$1" ]; then
-  echo "Usage: $0 <config_file_path>"
+  echo "Usage: $0 <config_file_path> [tools_format]"
+  echo "  config_file_path: Path to the configuration file"
+  echo "  tools_format: Optional. Either 'formatted' (default), 'raw_mcp', or 'json'"
   exit 1
 fi
 
 # Construct the full path
 CONFIG_FILE="$1"
+
+# Get tools_format parameter (default to 'formatted' if not provided)
+TOOLS_FORMAT="${2:-formatted}"
+if [[ "$TOOLS_FORMAT" != "formatted" && "$TOOLS_FORMAT" != "raw_mcp" && "$TOOLS_FORMAT" != "json" ]]; then
+  echo "Error: tools_format must be either 'formatted', 'raw_mcp', or 'json'"
+  exit 1
+fi
+
 if [[ ! "$CONFIG_FILE" == /* ]]; then
   CONFIG_FILE="configs/$CONFIG_FILE"
   echo "Using config file: $CONFIG_FILE"
 fi
+
+echo "Using tools format: $TOOLS_FORMAT"
 
 # Start the evaluation program using a more direct method to ensure proper multiprocess initialization
 DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
 DATE=$(date +%F)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-dataset_name=eval_benchmark_1_10_testing
+dataset_name=slack_50_genprompt2
 
 # Model to use (no spaces around '=')
 LM_IN_USE="anthropic/claude-sonnet-4-20250514"
@@ -49,6 +61,8 @@ if [ -z "$TOTAL_TOOLS" ]; then TOTAL_TOOLS="unknown"; fi
 
 FILE_PATH="runs/$DATE/run_${TIMESTAMP}_${LM_SLUG}_t${TOTAL_TOOLS}_${CONFIG_STEM}_${dataset_name}"
 
+export PYTHONBREAKPOINT=0
+
 python3 -m langProBe.evaluation \
   --benchmark=eval_benchmark_1 \
   --dataset_mode=tiny \
@@ -57,9 +71,10 @@ python3 -m langProBe.evaluation \
   --lm="$LM_IN_USE" \
   --eval_lm=anthropic/claude-3-5-sonnet-20241022 \
   --lm_api_key=$AWS_ACCESS_KEY_ID \
-  --num_threads=10 \
+  --num_threads=15 \
   --config=$CONFIG_FILE \
-  --run_mode=generate_only
+  --run_mode=generate_only \
+  --tools_format="$TOOLS_FORMAT"
 
 # apac.anthropic.claude-3-5-sonnet-20241022-v2:0
 # apac.anthropic.claude-sonnet-4-20250514-v1:0

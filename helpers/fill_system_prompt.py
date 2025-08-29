@@ -136,8 +136,9 @@ def fill_system_prompt():
     print(f"Target reached: {final_tokens >= target_tokens}")
     
     # Write the filled prompt to a new file
-    output_file = "300 tools system prompt restructured.txt"
+    output_file = "generated system prompt/300 tools system prompt restructured.txt"
     try:
+        os.makedirs("generated system prompt", exist_ok=True)
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(filled_prompt)
         print(f"\nRestructured prompt written to: {output_file}")
@@ -240,8 +241,9 @@ def fill_system_prompt_before_tools():
     print(f"Target reached: {final_tokens >= target_tokens}")
     
     # Write the filled prompt to a new file
-    output_file = "300 tools system prompt essays before tools.txt"
+    output_file = "generated system prompt/300 tools system prompt essays before tools.txt"
     try:
+        os.makedirs("generated system prompt", exist_ok=True)
         with open(output_file, 'w', encoding='utf-8') as f:
             f.write(filled_prompt)
         print(f"\nEssays-before-tools prompt written to: {output_file}")
@@ -250,8 +252,171 @@ def fill_system_prompt_before_tools():
     
     return filled_prompt
 
+def fill_system_prompt_with_generated_content():
+    """
+    Function to fill the system prompt with generated relevant content
+    AFTER the tools section but BEFORE the tool calling rules.
+    """
+    
+    # Read the original system prompt
+    prompt_file = "300 tools system prompt.txt"
+    original_prompt = read_file_content(prompt_file)
+    
+    if not original_prompt:
+        print("Could not read original system prompt")
+        return
+    
+    # The original prompt is all on one line with \n characters
+    # Split it properly and find the sections
+    prompt_parts = original_prompt.split('\\n')
+    
+    # Find the boundaries
+    intro_start = 0
+    tools_start = 0
+    tool_rules_start = 0
+    
+    for i, part in enumerate(prompt_parts):
+        if "## Available Tools" in part:
+            tools_start = i
+        elif "## Tool Calling Rules" in part:
+            tool_rules_start = i
+            break
+    
+    # Extract the three parts
+    intro = '\\n'.join(prompt_parts[:tools_start])
+    tools_section = '\\n'.join(prompt_parts[tools_start:tool_rules_start])
+    tool_calling_rules = '\\n'.join(prompt_parts[tool_rules_start:])
+    
+    print(f"Intro section: {count_tokens_approximate(intro)} tokens")
+    print(f"Tools section: {count_tokens_approximate(tools_section)} tokens")
+    print(f"Tool calling rules: {count_tokens_approximate(tool_calling_rules)} tokens")
+    
+    # Calculate current token count and target
+    current_tokens = count_tokens_approximate(intro + tools_section)
+    target_tokens = 26000
+    needed_tokens = target_tokens - current_tokens
+    
+    print(f"Current intro + tools tokens: {current_tokens}")
+    print(f"Target tokens: {target_tokens}")
+    print(f"Needed tokens: {needed_tokens}")
+    
+    # Read the generated relevant content
+    content_file = "relevant content context/generated_relevant_content.txt"
+    generated_content = read_file_content(content_file)
+    
+    if generated_content:
+        content_tokens = count_tokens_approximate(generated_content)
+        print(f"Generated content tokens: {content_tokens}")
+        
+        # Create the filled prompt with generated content after tools
+        filled_prompt = intro + tools_section + '\n\n' + generated_content + '\n\n' + tool_calling_rules
+        
+        # Final token count
+        final_tokens = count_tokens_approximate(filled_prompt)
+        print(f"\nFinal prompt tokens: {final_tokens}")
+        print(f"Target reached: {final_tokens >= target_tokens}")
+        
+        # Write the filled prompt to a new file
+        output_file = "generated system prompt/300 tools system prompt with generated content.txt"
+        try:
+            os.makedirs("generated system prompt", exist_ok=True)
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(filled_prompt)
+            print(f"\nGenerated content prompt written to: {output_file}")
+        except Exception as e:
+            print(f"Error writing output file: {e}")
+        
+        return filled_prompt
+    else:
+        print("Could not read generated content file")
+        return None
+
+def fill_system_prompt_with_generated_content_before_tools():
+    """
+    Function to fill the system prompt with generated relevant content
+    BEFORE the Slack server tools but AFTER the "## Available Tools" heading.
+    """
+    
+    # Read the original system prompt
+    prompt_file = "300 tools system prompt.txt"
+    original_prompt = read_file_content(prompt_file)
+    
+    if not original_prompt:
+        print("Could not read original system prompt")
+        return
+    
+    # The original prompt is all on one line with \n characters
+    # Split it properly and find the sections
+    prompt_parts = original_prompt.split('\\n')
+    
+    # Find the boundaries
+    intro_start = 0
+    tools_start = 0
+    slack_server_start = 0
+    tool_rules_start = 0
+    
+    for i, part in enumerate(prompt_parts):
+        if "## Available Tools" in part:
+            tools_start = i
+        elif "### Server 'slack'" in part:
+            slack_server_start = i
+        elif "## Tool Calling Rules" in part:
+            tool_rules_start = i
+            break
+    
+    # Extract the four parts
+    intro = '\\n'.join(prompt_parts[:tools_start])
+    tools_heading = '\\n'.join(prompt_parts[tools_start:slack_server_start])
+    slack_tools_section = '\\n'.join(prompt_parts[slack_server_start:tool_rules_start])
+    tool_calling_rules = '\\n'.join(prompt_parts[tool_rules_start:])
+    
+    print(f"Intro section: {count_tokens_approximate(intro)} tokens")
+    print(f"Tools heading: {count_tokens_approximate(tools_heading)} tokens")
+    print(f"Slack tools section: {count_tokens_approximate(slack_tools_section)} tokens")
+    print(f"Tool calling rules: {count_tokens_approximate(tool_calling_rules)} tokens")
+    
+    # Calculate current token count and target
+    current_tokens = count_tokens_approximate(intro + tools_heading + slack_tools_section)
+    target_tokens = 26000
+    needed_tokens = target_tokens - current_tokens
+    
+    print(f"Current total tokens: {current_tokens}")
+    print(f"Target tokens: {target_tokens}")
+    print(f"Needed tokens: {needed_tokens}")
+    
+    # Read the generated relevant content
+    content_file = "relevant content context/generated_relevant_content.txt"
+    generated_content = read_file_content(content_file)
+    
+    if generated_content:
+        content_tokens = count_tokens_approximate(generated_content)
+        print(f"Generated content tokens: {content_tokens}")
+        
+        # Create the filled prompt with generated content before Slack tools
+        filled_prompt = intro + tools_heading + '\n\n' + generated_content + '\n\n' + slack_tools_section + '\n\n' + tool_calling_rules
+        
+        # Final token count
+        final_tokens = count_tokens_approximate(filled_prompt)
+        print(f"\nFinal prompt tokens: {final_tokens}")
+        print(f"Target reached: {final_tokens >= target_tokens}")
+        
+        # Write the filled prompt to a new file
+        output_file = "generated system prompt/300 tools system prompt generated content before tools.txt"
+        try:
+            os.makedirs("generated system prompt", exist_ok=True)
+            with open(output_file, 'w', encoding='utf-8') as f:
+                f.write(filled_prompt)
+            print(f"\nGenerated content before tools prompt written to: {output_file}")
+        except Exception as e:
+            print(f"Error writing output file: {e}")
+        
+        return filled_prompt
+    else:
+        print("Could not read generated content file")
+        return None
+
 if __name__ == "__main__":
-    # Run both methods
+    # Run all methods
     print("=== Running original method (essays after tools) ===")
     fill_system_prompt()
     
@@ -259,3 +424,13 @@ if __name__ == "__main__":
     
     print("=== Running alternative method (essays before tools) ===")
     fill_system_prompt_before_tools()
+    
+    print("\n" + "="*60 + "\n")
+    
+    print("=== Running generated content method (after tools) ===")
+    fill_system_prompt_with_generated_content()
+    
+    print("\n" + "="*60 + "\n")
+    
+    print("=== Running generated content method (before tools) ===")
+    fill_system_prompt_with_generated_content_before_tools()

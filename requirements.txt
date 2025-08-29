@@ -8,3 +8,4 @@ boto3
 pandas
 pyyaml
 line_profiler
+debugpy

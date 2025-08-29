@@ -46,6 +46,8 @@ fi
 # Start the evaluation program using a more direct method to ensure proper multiprocess initialization
 DSPY_CACHEDIR=evaluation_mcp/.dspy_cache \
 
+export PYTHONBREAKPOINT=0
+
 python3 -m langProBe.evaluation \
   --benchmark=eval_benchmark_1 \
   --dataset_mode=tiny \
