@@ -297,17 +297,12 @@ def evaluate(
     else:
         dataset_name = None
 
-    # If the missing mode file is provided, we use it to find the missing data
-    # if missing_mode_file:
-    #     origin_data = read_jsonl(dataset_path)
-    #     runed_data = read_jsonl(missing_mode_file)
-    #     missing_data = find_missing_entries(origin_data, runed_data)
-    #     benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path, missing_data=missing_data)
-    #     replace_logger_filehandler(os.path.splitext(missing_mode_file)[0])
-    # else:
     
     # Choose dataset source based on run_mode. For score_only, we expect predictions.jsonl shape.
     bench_source = "predictions" if run_mode == "score_only" else "original"
+    print(f"dataset_path: {dataset_path}")
+    print(f"bench_source: {bench_source}")
+    print(f"source: {bench_source}")
     benchmark = benchmark_meta.benchmark(dataset_mode=dataset_mode, dataset_path=dataset_path, source=bench_source)
 
     # Canonicalize optimizers to (optimizer, compile_kwargs) tuples
@@ -563,6 +558,8 @@ def main():
     global global_config
     global_config = config
 
+    breakpoint()
+
     # Process benchmark parameter
     benchmark_path = args.benchmark
     if not benchmark_path.startswith("langProBe."):
@@ -571,6 +568,7 @@ def main():
     # Register all benchmarks
     # Basically just importing the websearch/DB/GAIA python modules
     benchmarks = register_all_benchmarks([benchmark_path], config=config)
+
     if not benchmarks:
         print(f"No benchmark registered with name {args.benchmark}\n")
         sys.exit(1)

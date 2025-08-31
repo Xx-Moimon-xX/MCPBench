@@ -25,7 +25,8 @@ from langProBe.program_utils import (
     build_messages,
     response_parsing,
     mcp_calling,
-    ProcessManager
+    ProcessManager,
+    build_system_content
 )
 
 MCP_SAMPLE_SYSTEM_PROMPT = """
@@ -71,6 +72,10 @@ Return as a JSON object with the following structure, with no additional text or
 """
 
 def generate_evaluation_prompt(prompt, response, expected_response, rubric_data):
+    if not rubric_data:
+        print(f"rubric_data is None")
+        exit(1)
+    
     criteria_definitions = []
     criterion_json_fields = []
     
@@ -88,7 +93,7 @@ Evaluation Scale:"""
         # Build JSON field
         field_name = criterion['criterion'].lower().replace(' ', '_')
         json_field = f'''"{field_name}": {{
-            "score": <1-5>,
+            "score": <1-3>,
             "reasoning": "<brief explanation>",
             "weight": {criterion['weight']}
         }}'''
@@ -111,12 +116,14 @@ class MCPBench3(Benchmark):
     '''
     Concrete benchmark for MCP tasks. Loads test data from a JSONL file or provided data, and creates dspy.Example objects.
     '''
-    def __init__(self, dataset_mode="lite", dataset_path=None, missing_data=[]):
+    def __init__(self, dataset_mode="lite", dataset_path=None, missing_data=[], source: str = "original"):
         '''
         Initializes MCPBench with a dataset mode, path, and optional missing data.
         '''
         self.dataset_path = dataset_path
         self.missing_data = missing_data
+        # source: 'original' for the native JSONL, 'predictions' for predictions.jsonl from generate_only
+        self.source = source
         super().__init__(dataset_mode=dataset_mode)
 
     def init_dataset(self):
@@ -125,21 +132,37 @@ class MCPBench3(Benchmark):
         '''
         self.dataset = []
         self.test_set = []
-        if self.missing_data:
-            test_raw_data = self.missing_data
-        else:
+        if self.source == "predictions":
+            # predictions.jsonl format written by generate_only
             test_raw_data = read_jsonl(self.dataset_path)
-        
-        for test_data in test_raw_data:
-            self.test_set.append(
-                dspy.Example(
-                    id=test_data["unique_id"],
-                    question=test_data["Prompt"],
-                    answer=test_data["Answer"],
-                    rubric_data=test_data["Rubrics"],
-                    tools_required=test_data["tools_required"]
-                ).with_inputs("id", "question", "answer", "rubric_data", "tools_required", "config")
-            )
+            for row in test_raw_data:
+                self.test_set.append(
+                    dspy.Example(
+                        id=row.get("id", ""),
+                        question=row.get("question", ""),
+                        ground_truth=row.get("ground_truth", ""),
+                        answer=row.get("answer", ""),
+                        tools_required=row.get("tools_required", []),
+                        tools_called=row.get("tools_called", []),
+                        rubric_data=row.get("rubric_data", []),
+                    ).with_inputs("id", "question", "ground_truth", "answer", "tools_required", "tools_called", "rubric_data", "config")
+                )
+        else:
+            if self.missing_data:
+                test_raw_data = self.missing_data
+            else:
+                test_raw_data = read_jsonl(self.dataset_path)
+            
+            for test_data in test_raw_data:
+                self.test_set.append(
+                    dspy.Example(
+                        id=test_data["unique_id"],
+                        question=test_data["Prompt"],
+                        answer=test_data["Answer"],
+                        rubric_data=test_data["Rubrics"],
+                        tools_required=test_data["tools_required"]
+                    ).with_inputs("id", "question", "answer", "rubric_data", "tools_required", "config")
+                )
 
 def evaluate_final_answer_eval3(
             question: str, 
@@ -186,7 +209,7 @@ def evaluate_final_answer_eval3(
         
         criterion_scores = scores_data.get("criterion_scores", {})
         final_weighted_score = 0
-        max_possible_score = 5 * len(rubric_data)
+        max_possible_score = 10
         
         for criterion in criterion_scores.values():
             score = criterion["score"]
@@ -194,7 +217,7 @@ def evaluate_final_answer_eval3(
             reasoning = criterion["reasoning"]
             
             if score is not None and weight is not None:
-                final_weighted_score += score * weight
+                final_weighted_score += score/3 * weight
             
             # Find the max score for this criterion from rubric_data
             # for rubric_item in rubric_data:
@@ -204,7 +227,7 @@ def evaluate_final_answer_eval3(
             #         break
         
         if max_possible_score > 0:
-            final_score = final_weighted_score / max_possible_score
+            final_score = final_weighted_score / max_possible_score * 100
         else:
             final_score = 0
 
@@ -219,10 +242,10 @@ def evaluate_final_answer_eval3(
         tool_calling_success = True
         ## Checking if the required tools were called.
         if tools_called:
-            called_tool_names = [call.mcp_tool_name for call in tools_called]
+            called_tool_names = tools_called      
             for tool in tools_required:
                 if tool not in called_tool_names:
-                    print(f"Tool {tool} was not called.")
+                    # print(f"Tool {tool} was not called.")
                     tool_calling_success = False
                     # return False, None, False
         else:
@@ -231,7 +254,7 @@ def evaluate_final_answer_eval3(
         # For now, let's consider a success if the final score is above a certain threshold, e.g., 0.5
         # and all required tools were called.
         # You might want to adjust this logic based on your specific needs.
-        is_success = (final_score >= 0.5) and tool_calling_success
+        is_success = (final_score >= 5) and tool_calling_success
         
         return is_success, json.dumps(scores_data), tool_calling_success
 
@@ -249,8 +272,8 @@ class Eval3Predict(MCPPredict):
     '''
     Program that is run to get responses. Called Eval3Predict and it is a child class of MCPPredict.
     '''
-    def __init__(self, config, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="eval3"):
-        super().__init__(config, max_steps, system_prompt, task_name)
+    def __init__(self, config, max_steps=5, system_prompt=MCP_SAMPLE_SYSTEM_PROMPT, task_name="eval3", tools_format="formatted"):
+        super().__init__(config, max_steps, system_prompt, task_name, tools_format)
 
     
     def evaluate_prediction(self, question: str, ground_truth: str, rubric_data: dict, tools_required: List[str], tools_called: List[MCPCall], prediction: str) -> Tuple[bool, Optional[str]]:
@@ -284,7 +307,7 @@ class Eval3Predict(MCPPredict):
 
     def forward(self, **kwargs) -> dspy.Prediction:
         '''
-        This is the forward pass for the eval1 program.
+        This is the forward pass for the eval3 program.
         '''
         # --- PROFILING ADDITIONS ---
         import time
@@ -320,124 +343,167 @@ class Eval3Predict(MCPPredict):
 
         self.run_logger.info(f"ID: {manager.id}, Starting forward pass for question: {question}")
 
-        # The config is passed to the program instance by the EvaluateBench constructor.
-        # We should use self.config instead of a global import.
-        mcps = self.config['mcp_pool']
+        ## Prediction object being returned...
+        if self.run_mode == 'generate_only':
+            print(f"In generate_only mode or combined mode")
+            
+            # The config is passed to the program instance by the EvaluateBench constructor.
+            # We should use self.config instead of a global import.
+            mcps = self.config['mcp_pool']
 
-        messages = build_init_messages(self.system_prompt, mcps, question)
-        system_prompt = messages[0][constants.CONTENT]
+            # Build the system content with MCP tools
+            self.system_content = build_system_content(self.system_prompt, mcps, self.tools_format)
+            messages = build_init_messages(self.system_content, question)
+            system_prompt = messages[0][constants.CONTENT]
+            
+            # --- PROFILING ADDITIONS ---
+            t3 = time.perf_counter()
+            timings['build_init_messages'] = t3 - t2
+            data_sizes['init_messages'] = len(str(messages))
+            print(f"[PROFILE] build_init_messages took {timings['build_init_messages']:.4f}s")
+            # --- END PROFILING ADDITIONS ---
+
+            steps = 0
+            all_completion_tokens = 0
+            all_prompt_tokens = 0
+            start_time = time.time()
+            tools_called = []
+
+            # --- PROFILING ADDITIONS ---
+            loop_start = time.perf_counter()
+            # --- END PROFILING ADDITIONS ---
+
+            while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
+                # --- PROFILING ADDITIONS ---
+                step_start = time.perf_counter()
+                # --- END PROFILING ADDITIONS ---
+                response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger, system_prompt=system_prompt)
+                # --- PROFILING ADDITIONS ---
+                step_end = time.perf_counter()
+                print(f"[PROFILE] Step {steps}: call_lm took {step_end - step_start:.4f}s, response size: {len(str(response))}")
+                # --- END PROFILING ADDITIONS ---
+
+                all_completion_tokens += completion_tokens
+                all_prompt_tokens += prompt_tokens
+                mcp_calls = response_parsing(response)
+                # --- PROFILING ADDITIONS ---
+                if hasattr(mcp_calls, 'mcps') and mcp_calls.mcps:
+                    print(f"[PROFILE] Step {steps}: response_parsing returned {len(mcp_calls.mcps)} calls")
+                else:
+                    print(f"[PROFILE] Step {steps}: response_parsing returned 0 calls")
+                # --- END PROFILING ADDITIONS ---
+
+                if not mcp_calls.shutdown:
+                    for mcp_call in mcp_calls.mcps:
+                        tools_called.append(mcp_call)
+                        print(f"Adding tool: {mcp_call}")
+
+                # --- PROFILING ADDITIONS ---
+                call_start = time.perf_counter()
+                # --- END PROFILING ADDITIONS ---
+                new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
+                # --- PROFILING ADDITIONS ---
+                call_end = time.perf_counter()
+                print(f"[PROFILE] Step {steps}: mcp_calling took {call_end - call_start:.4f}s, returned {len(new_messages)} new messages")
+                # --- END PROFILING ADDITIONS ---
+
+                messages = build_messages(messages, new_messages)
+                # --- PROFILING ADDITIONS ---
+                print(f"[PROFILE] Step {steps}: build_messages, total messages: {len(messages)}")
+                # --- END PROFILING ADDITIONS ---
+                
+                steps += 1
+
+            # --- PROFILING ADDITIONS ---
+            loop_end = time.perf_counter()
+            timings['main_loop'] = loop_end - loop_start
+            data_sizes['final_messages'] = len(str(messages))
+            print(f"[PROFILE] main loop took {timings['main_loop']:.4f}s")
+            # --- END PROFILING ADDITIONS ---
+
+            end_time = time.time()
+            print(f"Tools called: {tools_called}")
+
+            # If the maximum number of steps is reached and there is still no answer
+            if messages[-1][constants.ROLE] != constants.ASSISTANT:
+                self.run_logger.warning("Maximum steps reached without getting an answer")
+                messages.append({
+                    constants.ROLE: constants.ASSISTANT,
+                    constants.CONTENT: "Maximum step limit exceeded, this problem cannot be solved",
+                })
+
+            self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
+            prediction = messages[-1].get(constants.CONTENT, "")
+            self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {prediction[:50]}")
+
+            ## Everything till here is the same as the forward() in mcp_program.py
+            ## Evaluation is done here!!!
+            # --- PROFILING ADDITIONS ---
+            eval_start = time.perf_counter()
+            # --- END PROFILING ADDITIONS ---
+            success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, rubric_data, tools_required, tools_called, messages[-1][constants.CONTENT])
+            # --- PROFILING ADDITIONS ---
+            eval_end = time.perf_counter()
+            timings['evaluate_prediction'] = eval_end - eval_start
+            if evaluation_data is not None:
+                data_sizes['evaluation_data'] = len(str(evaluation_data))
+            print(f"[PROFILE] evaluate_prediction took {timings['evaluate_prediction']:.4f}s")
+            # --- END PROFILING ADDITIONS ---
+
+            self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
+                              all_completion_tokens)
+
+            self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
+
+            # --- PROFILING ADDITIONS ---
+            print(f"[PROFILE] Timings: {timings}")
+            print(f"[PROFILE] Data sizes: {data_sizes}")
+            # --- END PROFILING ADDITIONS ---
+
+            return dspy.Prediction(
+                success=success,
+                question=question,
+                ground_truth=gt,
+                answer=messages[-1][constants.CONTENT],
+                trace=messages,
+                process_report=manager,
+                evaluation_data=evaluation_data, 
+                tool_calling_success=tool_calling_success
+            )
         
-        # --- PROFILING ADDITIONS ---
-        t3 = time.perf_counter()
-        timings['build_init_messages'] = t3 - t2
-        data_sizes['init_messages'] = len(str(messages))
-        print(f"[PROFILE] build_init_messages took {timings['build_init_messages']:.4f}s")
-        # --- END PROFILING ADDITIONS ---
+        elif self.run_mode == 'score_only':
+            print(f"In score_only mode")
 
-        steps = 0
-        all_completion_tokens = 0
-        all_prompt_tokens = 0
-        start_time = time.time()
-        tools_called = []
+            unique_id = kwargs.get('id')
+            question = kwargs.get('question')
+            gt = kwargs.get('ground_truth')
+            answer = kwargs.get('answer')
+            tools_required = kwargs.get('tools_required')
+            tools_called = kwargs.get('tools_called')
+            rubric_data = kwargs.get('rubric_data')
 
-        # --- PROFILING ADDITIONS ---
-        loop_start = time.perf_counter()
-        # --- END PROFILING ADDITIONS ---
+            manager.id = unique_id
 
-        while not messages[-1][constants.ROLE] == constants.ASSISTANT and steps < self.max_steps:
-            # --- PROFILING ADDITIONS ---
-            step_start = time.perf_counter()
-            # --- END PROFILING ADDITIONS ---
-            response, completion_tokens, prompt_tokens = call_lm(messages, manager, self.run_logger, system_prompt=system_prompt)
-            # --- PROFILING ADDITIONS ---
-            step_end = time.perf_counter()
-            print(f"[PROFILE] Step {steps}: call_lm took {step_end - step_start:.4f}s, response size: {len(str(response))}")
-            # --- END PROFILING ADDITIONS ---
+            eval_start = time.perf_counter()
+            success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, rubric_data, tools_required, tools_called, answer)
+            eval_end = time.perf_counter()
+            timings = {'evaluate_prediction': eval_end - eval_start}
+            self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
 
-            all_completion_tokens += completion_tokens
-            all_prompt_tokens += prompt_tokens
-            mcp_calls = response_parsing(response)
-            # --- PROFILING ADDITIONS ---
-            if hasattr(mcp_calls, 'mcps') and mcp_calls.mcps:
-                print(f"[PROFILE] Step {steps}: response_parsing returned {len(mcp_calls.mcps)} calls")
-            else:
-                print(f"[PROFILE] Step {steps}: response_parsing returned 0 calls")
-            # --- END PROFILING ADDITIONS ---
+            print(f"evaluation_data: {evaluation_data}")
+            print(f"[PROFILE] Timings (score_only): {timings}")
 
-            if not mcp_calls.shutdown:
-                for mcp_call in mcp_calls.mcps:
-                    tools_called.append(mcp_call)
-                    print(f"Adding tool: {mcp_call}")
-
-            # --- PROFILING ADDITIONS ---
-            call_start = time.perf_counter()
-            # --- END PROFILING ADDITIONS ---
-            new_messages = mcp_calling(mcp_calls, manager, self.run_logger, self.config)
-            # --- PROFILING ADDITIONS ---
-            call_end = time.perf_counter()
-            print(f"[PROFILE] Step {steps}: mcp_calling took {call_end - call_start:.4f}s, returned {len(new_messages)} new messages")
-            # --- END PROFILING ADDITIONS ---
-
-            messages = build_messages(messages, new_messages)
-            # --- PROFILING ADDITIONS ---
-            print(f"[PROFILE] Step {steps}: build_messages, total messages: {len(messages)}")
-            # --- END PROFILING ADDITIONS ---
-
-            steps += 1
-
-        # --- PROFILING ADDITIONS ---
-        loop_end = time.perf_counter()
-        timings['main_loop'] = loop_end - loop_start
-        data_sizes['final_messages'] = len(str(messages))
-        print(f"[PROFILE] main loop took {timings['main_loop']:.4f}s")
-        # --- END PROFILING ADDITIONS ---
-
-        end_time = time.time()
-        print(f"Tools called: {tools_called}")
-
-        # If the maximum number of steps is reached and there is still no answer
-        if messages[-1][constants.ROLE] != constants.ASSISTANT:
-            self.run_logger.warning("Maximum steps reached without getting an answer")
-            messages.append({
-                constants.ROLE: constants.ASSISTANT,
-                constants.CONTENT: "Maximum step limit exceeded, this problem cannot be solved",
-            })
-
-        self.run_logger.info(f"ID: {manager.id}, Forward pass completed successfully")
-        prediction = messages[-1].get(constants.CONTENT, "")
-        self.run_logger.info(f"ID: {manager.id}, prediction being passed to evaluation: {prediction[:50]}")
-
-        ## Everything till here is the same as the forward() in mcp_program.py
-        ## Evaluation is done here!!!
-        # --- PROFILING ADDITIONS ---
-        eval_start = time.perf_counter()
-        # --- END PROFILING ADDITIONS ---
-        success, evaluation_data, tool_calling_success = self.evaluate_prediction(question, gt, rubric_data, tools_required, tools_called, messages[-1][constants.CONTENT])
-        # --- PROFILING ADDITIONS ---
-        eval_end = time.perf_counter()
-        timings['evaluate_prediction'] = eval_end - eval_start
-        if evaluation_data is not None:
-            data_sizes['evaluation_data'] = len(str(evaluation_data))
-        print(f"[PROFILE] evaluate_prediction took {timings['evaluate_prediction']:.4f}s")
-        # --- END PROFILING ADDITIONS ---
-
-        self.log_messages(messages, question, success, (end_time - start_time), all_prompt_tokens,
-                          all_completion_tokens)
-
-        self.run_logger.info(f"ID: {manager.id}, Evaluation completed successfully")
-
-        # --- PROFILING ADDITIONS ---
-        print(f"[PROFILE] Timings: {timings}")
-        print(f"[PROFILE] Data sizes: {data_sizes}")
-        # --- END PROFILING ADDITIONS ---
-
-        return dspy.Prediction(
-            success=success,
-            question=question,
-            ground_truth=gt,
-            answer=messages[-1][constants.CONTENT],
-            trace=messages,
-            process_report=manager,
-            evaluation_data=evaluation_data, 
-            tool_calling_success=tool_calling_success
-        )
+            prediction = dspy.Prediction(
+                success=success,
+                question=question,
+                ground_truth=gt,
+                answer=answer,
+                process_report=manager,
+                evaluation_data=evaluation_data,
+                tool_calling_success=tool_calling_success
+            )
+            return prediction
+        
+        else:
+            # Default case - should not happen
+            raise ValueError(f"Unknown run_mode: {self.run_mode}. Expected 'generate_only' or 'score_only'")

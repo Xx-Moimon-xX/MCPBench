@@ -68,4 +68,5 @@ def register_all_benchmarks(benchmarks, config=None):
                     registered.append(bench)
             else:
                 raise AssertionError(f"{benchmark} does not have a recognized getter or 'benchmark' attribute")
+    breakpoint()
     return registered
